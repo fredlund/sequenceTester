@@ -2,8 +2,10 @@
  * A simple counter which implements methods for
  * - setting the value of the counter (set)
  * - decrementing the counter (dec)
- * - returning the value of the counter when it is positive (whenEven)
+ * - returning the value of the counter when it is positive (assert)
  * AND blocking until the value becomes positive.
+ * - wait returns when the value of the counter becomes equal
+ * to the argument.
  */
 package counter;
 
@@ -23,6 +25,7 @@ public class Counter {
     
     while (returnValue % 2 != 0) {
       synchronized (counter) {
+        // if (counter % 2 == 0)
         if (counter % 2 == 0)
           returnValue = counter;
       }
@@ -35,6 +38,23 @@ public class Counter {
       }
     }
     return returnValue;
+  }
+
+  public void wait(int value) {
+    boolean equal = false;
+    
+    do {
+      synchronized (counter) {
+        equal = counter == value;
+        if (!equal) {
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException exc) {
+            throw new RuntimeException();
+          }
+        }
+      }
+    } while (!equal);
   }
 }
 
