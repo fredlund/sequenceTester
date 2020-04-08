@@ -4,7 +4,7 @@
  * - decrementing the counter (dec)
  * - returning the value of the counter when it is positive (assert)
  * AND blocking until the value becomes positive.
- * - wait returns when the value of the counter becomes equal
+ * - await returns when the value of the counter becomes equal
  * to the argument.
  */
 package counter;
@@ -43,7 +43,7 @@ public class Counter {
     return returnValue;
   }
 
-  public void wait(int value) {
+  public void await(int value) {
     boolean equal = false;
     
     do {

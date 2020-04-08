@@ -13,7 +13,7 @@ class Tests {
        configurationDescription(),
        new Counter(),
        TestCall.unblocks(new Set(3)),
-       TestCall.blocks(Call.returns("wait",new Wait(4))),
+       TestCall.blocks(Call.returns("await",new Await(4))),
        TestCall.unblocks(Call.returns(new Dec(),2))).run();
   }
 

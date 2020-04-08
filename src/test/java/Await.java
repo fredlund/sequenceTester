@@ -3,20 +3,20 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Wait extends CounterCall implements GetValue {
+public class Await extends CounterCall implements GetValue {
   private int waitingFor;
 
 
-  Wait(int waitingFor) {
+  Await(int waitingFor) {
     // Name of thread executing command
-    setUser("wait");
+    setUser("await");
   }
 
   public void toTry() {
-    controller.wait(waitingFor);
+    controller.await(waitingFor);
   }
 
   public String toString() {
-    return "whenEven("+waitingFor+")";
+    return "await("+waitingFor+")";
   }
 }
