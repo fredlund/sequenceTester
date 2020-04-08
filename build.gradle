@@ -7,11 +7,16 @@ compileJava {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 javadoc {
   options.memberLevel = JavadocMemberLevel.PUBLIC
   options.overview = "overview.html"
   options.encoding = 'UTF-8'
+}
+
+dependencies {
+  implementation 'com.github.aherranz:cclib:master'
 }
 
