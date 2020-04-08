@@ -4,18 +4,19 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class Wait extends CounterCall implements GetValue {
-  private Object returnValue;
+  private int waitingFor;
 
-  Wait() {
+
+  Wait(int waitingFor) {
     // Name of thread executing command
     setUser("wait");
   }
 
   public void toTry() {
-    controller.whenEven();
+    controller.wait(waitingFor);
   }
 
   public String toString() {
-    return "whenEven()";
+    return "whenEven("+waitingFor+")";
   }
 }
