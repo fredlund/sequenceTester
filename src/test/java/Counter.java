@@ -26,7 +26,7 @@ public class Counter {
     while (returnValue % 2 != 0) {
       System.out.println("in while");
 
-      synchronized (counter) {
+      synchronized (this) {
         System.out.println("counter="+counter);
         if (counter % 2 == 0)
           returnValue = counter;
@@ -47,14 +47,16 @@ public class Counter {
     boolean equal = false;
     
     do {
-      synchronized (counter) {
+
+      synchronized (this) {
         equal = counter == value;
-        if (!equal) {
-          try {
-            Thread.sleep(100);
-          } catch (InterruptedException exc) {
-            throw new RuntimeException();
-          }
+      }
+
+      if (!equal) {
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException exc) {
+          throw new RuntimeException();
         }
       }
     } while (!equal);
