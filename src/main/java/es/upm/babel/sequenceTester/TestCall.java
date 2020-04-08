@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import es.upm.babel.cclib.Tryer;
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TestCall {

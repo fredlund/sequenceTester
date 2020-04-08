@@ -5,8 +5,6 @@ import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class UnitTest {
     TestStmt stmt;
@@ -55,8 +53,11 @@ public class UnitTest {
 
 	System.out.println("\nTesting test "+name);
 
-	if (name.equals("desarollo"))
-	    fail("El sistema de entrega todavia esta en desarollo.");
+	if (name.equals("desarollo")) {
+          System.out.println
+            ("\n*** Error: el sistema de entrega todavia esta en desarollo.");
+          throw new RuntimeException();
+        }
 
 	stmt.execute
 	    (allCalls,

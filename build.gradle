@@ -18,6 +18,5 @@ javadoc {
 
 dependencies {
   implementation 'com.github.aherranz:cclib:master'
-  implementation 'org.junit.jupiter:junit-jupiter:5.6.1'
 }
 
