@@ -1,11 +1,13 @@
 /**
  * A simple counter which implements methods for
- * - setting the value of the counter (set)
- * - decrementing the counter (dec)
- * - returning the value of the counter when it is positive (assert)
- * AND blocking until the value becomes positive.
- * - await returns when the value of the counter becomes equal
+ * - set(int value) sets the value of the counter
+ * - dec() decrements the counter by 1
+ * - whenEven() returning the value of the counter when it becomes positive
+ * - await(int value) returns when the value of the counter becomes equal
  * to the argument.
+ * - assertIsEqual(int value) returns if the counter has the value
+ * value and otherwise raises an RuntimeException.
+ * 
  */
 package counter;
 
@@ -18,6 +20,10 @@ public class Counter {
 
   public synchronized int dec() {
     return --counter;
+  }
+
+  public synchronized void assertIsEqual(int value) {
+    if (counter != value) throw new RuntimeException();
   }
 
   public int whenEven() {
