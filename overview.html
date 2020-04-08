@@ -1,0 +1,146 @@
+<html>
+<body>
+<p>
+  The sequenceTester library is a Java library
+  used for writing and testing unit tests
+  for a possibly non-sequential APIs, i.e.,
+  were calls may block. The library has been used to test
+  exercises in the undergraduate
+course "Concurrencia" at the Escuela Tecnica Superior
+  de Ingenieros Informaticos at the Un
+  iversidad Politecnica de Madrid, Spain.
+</p>
+
+<h1>Unit Tests</h1>
+<p>
+A unit test is an instance of the class
+{@link es.upm.babel.sequenceTester.TestStmt}. A test statement is either:
+<dl>
+  <dt>{@link es.upm.babel.sequenceTester.Nil}</dt>
+  <dd>A test statement which always succeeds.</dd>
+
+  <dt>{@link es.upm.babel.sequenceTester.Prefix}(TestCall call, TestStatement stmt)</dt>
+  <dd>A test statement
+  which first executes the TestCall call, and if that succeeds, then
+  continues with succeeding TestStatement stmt.</dd>
+  <dt>{@link es.upm.babel.sequenceTester.Branches}(Call[] calls, Alternative... alternatives)</dt>
+  <dd>
+  A branch statement can handle nondeterminism in the tested
+  program. First the calls are executed in parallel then
+  the alternatives are checked to see if any of them can explain the
+  result of executing the parallel calls. 
+  An alternative is an array describing which parallel calls
+  were unblocked. That is for an alternative to match
+  all unblocked parallel calls must be
+  mentioned in the alternative unblock array),
+  and a continuation statement which is used to continue the test.
+  </dd>
+</dl>
+</p>
+<h1>Call</h1>
+<p>
+  An instance of the {@link es.upm.babel.sequenceTester.Call} class is a recipe for making
+  a call, and an oracle which decides if the invocation of
+  the call returned the correct result. A call may be given
+  a symbolic name, which is useful to specify that it is later
+  (during the execution of another call) unblocked.
+</p>
+<h1>TestCall</h1>
+<p>
+  An instance of the {@link es.upm.babel.sequenceTester.TestCall} class
+  executes a set of calls in parallel, and checks that
+  the correct calls are blocked and unblocked.
+  The TestCall has a constructor
+  <pre>
+    {@code
+TestCall(Call[] calls,
+         int[] mustUnblock,
+         Result[] mustUnblockResults,
+         int[] mayUnblock,
+         Result[] mayUnblockResults)
+   }
+</pre>
+  The calls are executed in parallel,
+  mustUnblock specifies the calls that <em>must</em> have been unblocked
+  (including potentially earlier calls),
+  mayUnblock specifies the calls that <em>may</em> have been unblocked
+  (including potentially earlier calls),
+  and the Result arrays codes the oracles for deciding if
+  the unblocked calls returned correct values (or raised the
+  correct exceptions).
+
+  <h1>An Example</h1>
+<p>
+  Suppose we have an API with three method: set(int),
+  dec(), and whenZero() such that set(int) sets the value of a counter
+  to the argument and always unblocks immediately,
+  dec() decrements the value of the
+  counter by 1 and always unblocks immediately, whereas
+  a call to whenZero() unblocks when the value of the counter becomes 0.
+</p>
+<p>An example unit test for this API may then be:
+  <pre>
+{@code
+Prefix
+(TestCall.unblocks(new Set(3)),
+ Prefix
+ (TestCall.unblocks(new Dec()),
+  Prefix
+  (TestCall.blocks("whenZero",new WhenZero()),
+   Prefix
+   (TestCall.unblocks(new Dec()),
+    Prefix
+    (TestCall.unblocks(new Dec(), "whenZero"),
+     Nil)))))
+}
+  </pre>
+  Given constructors Set(int), Dec() and WhenZero() which creates
+  instances of a Call (sub)class,
+  the test expresses that if we first set the counter to 3
+  (a call which immediately returns, i.e., "unblocks"),
+  and then decrement the counter
+  (a call which immediately returns),
+  and if we next call whenZero() that call blocks (does not return);
+  note that we give the call to whenZero() the symbolic name "whenZero".
+  If next we decrement the counter again that call immediately
+  returns. Finally if we again call dec() again
+  then both that call returned immediately, <b>and</b>
+  also the earlier call to whenZero() returned ("unblocked").
+</p>
+<p>Using the library API we can write this unit more compactly as a sequence:
+<pre>
+{@code
+TestCall.unblocks(new Set(3)),
+TestCall.unblocks(new Dec()),
+TestCall.blocks("whenZero",new WhenZero()),
+TestCall.unblocks(new Dec()),
+TestCall.unblocks(new Dec(), "whenZero")
+}
+</pre>
+</p>  
+<p>
+  Suppose next we modify the dec() method to return the value
+  of the counter after the decrement operation,
+  and that we wish to check that value in the unit test,
+  i.e., defining oracles. This can be done using the code:
+<pre>
+{@code
+TestCall.unblocks(new Set(3)),
+TestCall.unblocks(Call.returns(new Dec(),2)),
+TestCall.blocks("whenZero",new WhenZero()),
+TestCall.unblocks(Call.returns(new Dec(),1),
+TestCall.unblocks(Call.returns(new Dec(),0), "whenZero")
+}
+</pre>
+Note that we have embedded the call specification new Dec()
+inside a call to return, e.g., Call.return(new Dec(),2),
+which indicates that the call should return the value 2.
+<p>
+  Note that using the library API
+  for blocking calls we can either specify
+  the return value at the time of making the call, or
+  when the call is unblocked.
+  </p>
+</p>
+</body>
+</html>
