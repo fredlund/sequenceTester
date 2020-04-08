@@ -5,7 +5,8 @@ import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UnitTest {
     TestStmt stmt;
