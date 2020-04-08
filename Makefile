@@ -12,3 +12,7 @@ javadoc:
 	sh ./gradlew javadoc
 
 
+# For running the example test
+
+test:
+	sh ./gradlew test

@@ -18,7 +18,7 @@ public class Call {
     /**
      * Constructors a call. A call consists of a recipe for making a call,
      * and an oracle that decides if an invocation of the call returned the
-     * correct resul.
+     * correct result.
      *
      * @param bc an object which can execute the call.
      * @param r an oracle which decides if the call returned the correct value.

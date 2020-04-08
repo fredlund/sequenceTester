@@ -18,5 +18,17 @@ javadoc {
 
 dependencies {
   implementation 'com.github.aherranz:cclib:master'
+  implementation 'org.junit.jupiter:junit-jupiter:5.6.1'
+  testImplementation('org.junit.jupiter:junit-jupiter:5.6.1')
 }
+
+test {
+	useJUnitPlatform()
+        testLogging {        
+                events "failed"
+		exceptionFormat "full"
+                // showStandardStreams = true
+        }
+}
+
 
