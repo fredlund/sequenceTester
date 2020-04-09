@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Tests {
 
+
   @Test
   public void test_01() {
     new UnitTest
@@ -42,7 +43,12 @@ class Tests {
 
   @BeforeEach
   public void setup() throws Exception {
+    // We can install a custom test case checker here...
     // UnitTest.installChecker(new RoboFabTestChecker());
+    
+    // This creates a new map for the symbolic variables.
+    // Probably this should be done under the hood, but for now the call
+    // to Call.reset is mandatory.
     Call.reset();
   }
 }
