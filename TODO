@@ -6,3 +6,12 @@ TOOD list
 - We should be able to refer to return values with the symbolic names
 of calls, and use them as arguments. In this way we can probably remove
 the controller, and let the monitor (or CSP) creation be a normal event.
+
+Maybe the syntax value(symbolic_var). This has the problem that
+we cannot check such references statically, instead they will result
+in a runtime error.
+
+   TestCall.unblock(Call.returns("counter",new Counter()));
+   TestCall.unblocks(new Set(value("counter"),3)),
+   TestCall.blocks(Call.returns("await",new Await(value("counter"),4))),
+   TestCall.unblocks(Call.returns(new Dec(value("counter"),2))).run();
