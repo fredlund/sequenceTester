@@ -8,8 +8,6 @@ public class Set extends CounterCall implements GetValue {
 
   Set(int value) {
     this.value = value;
-
-    // Name of thread executing command
     setUser("set");
   }
 

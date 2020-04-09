@@ -10,6 +10,10 @@ import java.io.PrintWriter;
 import es.upm.babel.cclib.Tryer;
 
 
+/**
+ * A unit test statement that executes a set of calls.
+ * Checks a specification of which calls were blocked and unblocked.
+ */
 public class TestCall {
     private Call[] calls;
     private Set<Integer> callIds;

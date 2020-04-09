@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * Represents a unit test statement branch in an unit test.
+ */
 public class Branches implements TestStmt {
     private Call[] calls;
     private Alternative[] alternatives;

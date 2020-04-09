@@ -9,6 +9,9 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+/**
+ * Represents a unit test which embedding a unit test statement.
+ */
 public class UnitTest {
   TestStmt stmt;
   String trace="\nCall trace:\n";
@@ -21,7 +24,7 @@ public class UnitTest {
   Map<Integer,Call> blockedCalls=null;
   
   /**
-   * Constructs a call sequence.
+   * Constructs a call sequence
    * 
    * @param name the name of the call sequence.
    * @param controller an object that is communicated to every call using the method

@@ -1,5 +1,10 @@
 package es.upm.babel.sequenceTester;
 
+
+/**
+ * Class for defining oracles (methods which decide if the execution
+ * of a call was successfull.
+ */
 public class Return implements Result {
     boolean hasReturnCheck = false;
     boolean shouldReturn = true;

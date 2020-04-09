@@ -3,6 +3,10 @@ package es.upm.babel.sequenceTester;
 import java.util.Map;
 
 
+/**
+ * Represents a unit test statement composed by a test call followed by
+ * a unit test statement.
+ */
 public class Prefix implements TestStmt {
     private TestCall testCall;
     private TestStmt testStmt;

@@ -1,9 +1,12 @@
 package es.upm.babel.sequenceTester;
 
+/**
+ * The type of oracles.
+ */
 public interface Result {
 
     /**
-     * Does the call provide an oracle which checks the return value?
+     * Does the oracle implement a return value check?
      *
      * @return a boolean corresponding to whether the call specified a return value oracle.
      */

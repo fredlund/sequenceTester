@@ -1,5 +1,8 @@
 package es.upm.babel.sequenceTester;
 
+/**
+ * Represents an alternative in a branching statement of an unit test.
+ */
 public class Alternative {
     int[] unblocks;
     TestStmt continuation;

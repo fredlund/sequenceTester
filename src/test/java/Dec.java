@@ -7,7 +7,6 @@ public class Dec extends CounterCall implements GetValue {
   private Object returnValue;
 
   Dec() {
-    // Name of thread executing command
     setUser("dec");
   }
 

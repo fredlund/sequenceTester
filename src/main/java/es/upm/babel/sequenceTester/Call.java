@@ -4,6 +4,10 @@ import java.util.Map;
 import java.util.HashMap;
 
 
+/**
+ * Represents a BasicCall together with an oracle for deciding if the call
+ * executed correctly.
+ */
 public class Call {
     private static int counter = 1;
     private static Map<String,Call> symbolic_vars = null;

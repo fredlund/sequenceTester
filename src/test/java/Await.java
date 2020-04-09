@@ -8,7 +8,6 @@ public class Await extends CounterCall implements GetValue {
 
 
   Await(int waitingFor) {
-    // Name of thread executing command
     setUser("await");
   }
 

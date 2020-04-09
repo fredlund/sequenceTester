@@ -4,6 +4,11 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashSet;
 
+
+/**
+ * Various support methods, e.g., for defining
+ * traces of calls.
+ */
 public class Util {
 
     public static Set<Call> newUnblocked(Call[] calls, Map<Integer,Call> blockedCalls)

@@ -8,8 +8,6 @@ public class AssertIsEqual extends CounterCall implements GetValue {
 
   AssertIsEqual(int value) {
     this.value = value;
-
-    // Name of thread executing command
     setUser("assertIsEqual");
   }
 
