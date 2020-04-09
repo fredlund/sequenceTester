@@ -22,11 +22,16 @@ public class Call {
      *
      * @param bc an object which can execute the call.
      * @param r an oracle which decides if the call returned the correct value.
+     * @param symbolicName a symbolic name for the call. The symbolic variable
+     * may be used in a continuation (in the TestStmt where the call resides)
+     * to specify that this call was unblocked by a later call.
      */
-    public Call(BasicCall bc) {
-	this.name = 0;
+    public Call(String symbolicName, BasicCall bc, Result r) {
+	this.name = new_call_counter();
+	this.symbolicName = symbolicName;
 	this.bc = bc;
-	this.r = Return.shouldReturn(true);
+	this.r = r;
+	add_symbolic_var(this.symbolicName,this);
     }
 
     public Call(BasicCall bc, Result r) {
@@ -35,12 +40,10 @@ public class Call {
 	this.r = r;
     }
 
-    public Call(String symbolicName, BasicCall bc, Result r) {
-	this.name = new_call_counter();
-	this.symbolicName = symbolicName;
+    public Call(BasicCall bc) {
+	this.name = 0;
 	this.bc = bc;
-	this.r = r;
-	add_symbolic_var(this.symbolicName,this);
+	this.r = Return.shouldReturn(true);
     }
 
     public BasicCall bc() {
