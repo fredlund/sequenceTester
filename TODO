@@ -2,3 +2,7 @@ TOOD list
 =========
 
 - Check that UnitTest tests have unique names.
+
+- We should be able to refer to return values with the symbolic names
+of calls, and use them as arguments. In this way we can probably remove
+the controller, and let the monitor (or CSP) creation be a normal event.
