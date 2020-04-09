@@ -20,7 +20,7 @@ class Tests {
   @Test
   public void test_02() {
     new UnitTest
-      ("test_01",
+      ("test_02",
        "",
        new Counter(),
        TestCall.unblocks(new Set(3)),
@@ -31,7 +31,7 @@ class Tests {
   @Test
   public void test_03() {
     new UnitTest
-      ("test_01",
+      ("test_03",
        "",
        new Counter(),
        TestCall.unblocks(new Set(3)),
