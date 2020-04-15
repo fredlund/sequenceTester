@@ -79,7 +79,7 @@ public class TestCall {
 		    Object result = unblockedCall.returnValue();
 		    if (!r.shouldReturn())
 			UnitTest.failTest
-			    (configurationDescription+
+			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
 			     " deberia haber lanzado "+
 			     "una excepcion "+
@@ -91,7 +91,7 @@ public class TestCall {
                       if ((correctReturnValues != null) &&
                           (correctReturnValues.length == 1)) {
 			UnitTest.failTest
-			    (configurationDescription+
+			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
 			     " devolvió el valor "+
 			     "incorrecto: "+result+
@@ -100,7 +100,7 @@ public class TestCall {
                              "\n"+Util.mkTrace(trace));
                       } else {
 			UnitTest.failTest
-			    (configurationDescription+
+			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
 			     " devolvió el valor "+
 			     "incorrecto: "+result+"\n"+Util.mkTrace(trace));
@@ -114,7 +114,7 @@ public class TestCall {
 		
 		    if (r.shouldReturn()) {
 			UnitTest.failTest
-			    (configurationDescription+
+			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
 			     " deberia haber terminado normalmente "+
 			     "pero lanzó la excepción "+exc+
@@ -122,7 +122,7 @@ public class TestCall {
 		    }
 		    if (r.checksValue() && !r.correctException(exc))
 			UnitTest.failTest
-			    (configurationDescription+
+			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
 			     " lanzo la excepcion "+
 			     "incorrecto: "+exc+
@@ -146,7 +146,7 @@ public class TestCall {
 		    else
 			llamadas = "la llamada "+callsString;
 		    UnitTest.failTest
-			(configurationDescription+
+			(prefixConfigurationDescription(configurationDescription)+
 			 "la llamada "+call.printCall()+
 			 " todavia es bloqueado aunque deberia haber sido"+
 			 " desbloqueado por "+llamadas+
@@ -158,7 +158,11 @@ public class TestCall {
 	return trace;
     }
 
-
+    String prefixConfigurationDescription(String configurationDescription) {
+      if (configurationDescription == "") return "";
+      else return "en la configuration "+configurationDescription+":\n";
+    }
+  
     void print_reason_for_unblocking_incorrectly(Call call, String trace, String configurationDescription) {
 	if (call.raisedException()) {
 	    Throwable exc = call.getException();
@@ -167,14 +171,14 @@ public class TestCall {
 	    String StackTrace = errors.toString();
 		
 	    UnitTest.failTest
-		(configurationDescription+
+		(prefixConfigurationDescription(configurationDescription)+
 		 "la llamada "+call.printCall()+
 		 " deberia bloquear\n"+
 		 "pero lanzó la excepción "+exc+
 		 "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
 	} else {
 	    UnitTest.failTest
-		(configurationDescription+
+		(prefixConfigurationDescription(configurationDescription)+
 		 "la llamada "+call.printCall()+" deberia bloquear\n"+
 		 "pero "+returned(call.returnValue())+
 		 "\n"+Util.mkTrace(trace));

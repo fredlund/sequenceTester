@@ -297,7 +297,7 @@ public class UnitTest {
    * Indicate a unit test failer.
    */
   public static void failTest(String msg) {
-    Assertions.assertTrue(false,"\n*** Test failure: "+msg);
+    Assertions.assertTrue(false,"\n*** Test failure:\n"+msg);
   }
   
   /**
