@@ -44,7 +44,17 @@ public interface Result {
      */
   public boolean correctException(Throwable exc);
 
-  // Temporary and ugly
-  public Object[] correctReturnValues();
+  /**
+   * Does the oracle accept a single return value, and is it capable of return it?
+   */
+  public boolean hasUniqueReturnValue();
+  /**
+   * Returns the single return value accepted by the oracle.
+   */
+  public Object uniqueReturnValue();
+  /**
+   * Return a class corresponding to the exception accepted by
+   * the oracle.
+   */
   public Class correctExceptionClass();
 }

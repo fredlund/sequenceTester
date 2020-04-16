@@ -68,13 +68,18 @@ public class Return implements Result {
       return false;
     }
 
-  public Object[] correctReturnValues() {
-    return values;
-  }
-
-    public boolean correctException(Throwable exc) {
+  public boolean correctException(Throwable exc) {
 	return exceptionClass.isInstance(exc);
     }
+
+
+  public boolean hasUniqueReturnValue() {
+    return values != null && values.length == 1;
+  }
+
+  public Object uniqueReturnValue() {
+    return values[0];
+  }
 
   public Class correctExceptionClass() {
     return exceptionClass;
