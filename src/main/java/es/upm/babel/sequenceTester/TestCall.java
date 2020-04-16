@@ -85,11 +85,10 @@ public class TestCall {
 			     "una excepcion "+
 			     "pero "+returned(unblockedCall.returnValue())+
 			     "\n"+Util.mkTrace(trace));
-		    if (r.checksValue() && !r.correctReturnValue(result)) {
+                    if (r.checksValue() && r.correctReturnValues() != null) {
                       Object[] correctReturnValues =
                         r.correctReturnValues();
-                      if ((correctReturnValues != null) &&
-                          (correctReturnValues.length == 1)) {
+                      if (correctReturnValues.length == 1) {
 			UnitTest.failTest
 			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
@@ -99,6 +98,15 @@ public class TestCall {
                              correctReturnValues[0]+
                              "\n"+Util.mkTrace(trace));
                       } else {
+			UnitTest.failTest
+			    (prefixConfigurationDescription(configurationDescription)+
+			     "la llamada "+unblockedCall.printCall()+
+			     " devolvió el valor "+
+			     "incorrecto: "+result+"\n"+Util.mkTrace(trace));
+                      }
+                    }
+                    if (r.checksValue()) {
+                      if (!r.correctReturnValue(result)) {
 			UnitTest.failTest
 			    (prefixConfigurationDescription(configurationDescription)+
 			     "la llamada "+unblockedCall.printCall()+
