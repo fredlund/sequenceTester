@@ -157,7 +157,7 @@ public class TestCall {
 
     String prefixConfigurationDescription(String configurationDescription) {
       if (configurationDescription == "") return "";
-      else return "en la configuration "+configurationDescription+":\n";
+      else return "con la configuration "+configurationDescription+",\n";
     }
   
     void print_reason_for_unblocking_incorrectly(Call call, String trace, String configurationDescription) {
@@ -174,9 +174,20 @@ public class TestCall {
 		 "pero lanzó la excepción "+exc+
 		 "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
 	} else {
+          boolean justExecuted = false;
+          for (Call executingCall : calls)
+            if (executingCall == call)
+              justExecuted = true;
+
+          String blockStr;
+          if (justExecuted)
+            blockStr = "deberia bloquear";
+          else
+            blockStr = "deberia todavía estar bloqueada después las llamadas "+Call.printCalls(calls);
+
 	    UnitTest.failTest
 		(prefixConfigurationDescription(configurationDescription)+
-		 "la llamada "+call.printCall()+" deberia bloquear\n"+
+		 "la llamada "+call.printCall()+" "+blockStr+"\n"+
 		 "pero "+returned(call.returnValue())+
 		 "\n"+Util.mkTrace(trace));
 	}

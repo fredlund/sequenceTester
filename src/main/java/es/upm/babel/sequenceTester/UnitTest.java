@@ -19,6 +19,7 @@ public class UnitTest {
   Object controller;
   String configurationDescription;
   static Checker checker = null;
+  static String testName;
   
   Map<Integer,Call> allCalls=null;
   Map<Integer,Call> blockedCalls=null;
@@ -70,6 +71,7 @@ public class UnitTest {
    * and unblocked correctly.
    */
   public void run() {
+    testName = name;
     allCalls = new HashMap<Integer,Call>();
     blockedCalls = new HashMap<Integer,Call>();
     
@@ -129,11 +131,11 @@ public class UnitTest {
       
       for (Integer unblockedId : testCall.mustUnblock()) {
         if (!active.containsKey(unblockedId)) {
-          throw new RuntimeException
+          failTestSyntax
             ("*** Test "+name+" is incorrect:\n"+
              Call.printCalls(testCall.calls())+
              " unblocks "+unblockedId+
-             " which is not in the active set "+active);
+             " which is not in the active set "+active+"\n");
         }
         Call call = active.get(unblockedId);
         if (call.bc().user() != null)
@@ -142,11 +144,11 @@ public class UnitTest {
       
       for (Integer unblockedId : testCall.mayUnblock()) {
         if (!active.containsKey(unblockedId)) {
-          throw new RuntimeException
+          failTestSyntax
             ("*** Test "+name+" is incorrect:\n"+
              Call.printCalls(testCall.calls())+
              " may unblocks "+unblockedId+
-             " which is not in the active set "+active);
+             " which is not in the active set "+active+"\n");
         }
       }
       
@@ -172,10 +174,10 @@ public class UnitTest {
         Set<Integer> unblockSet = new HashSet<Integer>();
         for (int i : alt.unblocks) unblockSet.add(i);
         if (unblockSets.contains(unblockSet)) {
-          throw new RuntimeException
+          failTestSyntax
             ("*** Test "+name+" is incorrect:\n"+
              "identical unblock sets are used in alternatives for "+
-             "calls "+Call.printCalls(b.calls()));
+             "calls "+Call.printCalls(b.calls())+"\n");
         } else unblockSets.add(unblockSet);
       }
       
@@ -194,11 +196,11 @@ public class UnitTest {
         for (Integer unblockedId : alt.unblocks) {
           Call call = newActive.get(unblockedId);
           if (call == null) {
-            throw new RuntimeException
+            failTestSyntax
               ("Internal testing error (alternatives): test "+
                name+
                " has an unblockedId "+unblockedId+
-               " which is not found in "+newActive);
+               " which is not found in "+newActive+"\n");
           }
           if (call.bc().user() != null)
             newBlockedUsers.remove(call.bc().user());
@@ -221,10 +223,10 @@ public class UnitTest {
     for (Call call : calls) {
       if (call.bc().user() != null &&
           blockedUsers.contains(call.bc().user())) {
-        throw new RuntimeException
+        failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
            "user "+call.bc().user()+" in call "+call.printCall()+
-           " is blocked");
+           " is blocked"+"\n");
       }
       blockedUsers.add(call.bc().user());
     }
@@ -234,13 +236,13 @@ public class UnitTest {
         System.out.println
           ("*** Test "+name+" is incorrect:\n"+
            "current counter is "+counter+
-           " but call "+call+" has id "+call.name());
+           " but call "+call+" has id "+call.name()+"\n");
         try { Thread.sleep(100); }
         catch (InterruptedException exc) {};
-        throw new RuntimeException
+        failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
            "current counter is "+counter+
-           " but call "+call+" has id "+call.name());
+           " but call "+call+" has id "+call.name()+"\n");
       }
       active.put(counter,call);
       ++counter;
@@ -280,7 +282,7 @@ public class UnitTest {
     } else if (stmt1 instanceof Nil) {
       return stmt2;
     } else {
-      UnitTest.failTestFramework("cannot compose statements "+stmt1+" and "+stmt2);
+      UnitTest.failTestFramework("cannot compose statements "+stmt1+" and "+stmt2+"\n");
       return stmt1;
     }
   }
@@ -297,7 +299,9 @@ public class UnitTest {
    * Indicate a unit test failer.
    */
   public static void failTest(String msg) {
-    Assertions.assertTrue(false,"\n*** Test failure:\n"+msg);
+    String failMessage = "\n\n*** Error en la pruebla "+testName+":\n"+msg;
+    System.out.println(failMessage);
+    Assertions.assertTrue(false,failMessage);
   }
   
   /**
@@ -305,7 +309,17 @@ public class UnitTest {
    * in the tested program but rather in the test system).
    */
   public static void failTestFramework(String msg) {
-    throw new TestErrorException("\n*** Failure in testing framework: "+msg);
+    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):"+msg+"\n";
+    failTest(message);
+  }
+  
+  /**
+   * Indicates a syntactic error in a particular test (i.e., not an error
+   * in the tested program but rather in the test suite).
+   */
+  public static void failTestSyntax(String msg) {
+    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\n";
+    failTest(message);
   }
   
   /**
