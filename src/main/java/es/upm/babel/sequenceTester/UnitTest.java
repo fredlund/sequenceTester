@@ -42,7 +42,6 @@ public class UnitTest {
     this.configurationDescription = configurationDescription;
     this.controller = controller;
     this.stmt = stmt;
-    checkSoundNess(name,stmt);
   }
   
   /**
@@ -62,7 +61,6 @@ public class UnitTest {
     this.configurationDescription = configurationDescription;
     this.controller = controller;
     this.stmt = sequence(testCalls);
-    checkSoundNess(name,stmt);
   }
   
   /**
@@ -72,6 +70,8 @@ public class UnitTest {
    */
   public void run() {
     testName = name;
+    checkSoundNess(name,stmt);
+
     allCalls = new HashMap<Integer,Call>();
     blockedCalls = new HashMap<Integer,Call>();
     
@@ -232,6 +232,7 @@ public class UnitTest {
     }
     
     for (Call call : calls) {
+      System.out.println("Call "+call+" has id "+call.name()+" counter="+counter);
       if (call.name() != counter) {
         System.out.println
           ("*** Test "+name+" is incorrect:\n"+
@@ -327,6 +328,7 @@ public class UnitTest {
    */
   public static Object startController(String name,BasicCall bc) {
     Call call = new Call(bc);
+    Call.reset();
     call.execute();
     if (call.isBlocked())
       UnitTest.failTest("creating an instance of "+name+" blocks");

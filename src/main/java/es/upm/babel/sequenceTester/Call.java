@@ -36,18 +36,21 @@ public class Call {
 	this.bc = bc;
 	this.r = r;
 	add_symbolic_var(this.symbolicName,this);
+        System.out.println("created "+this+" id="+name);
     }
 
     public Call(BasicCall bc, Result r) {
 	this.name = new_call_counter();
 	this.bc = bc;
 	this.r = r;
+        System.out.println("created "+this+" id="+name);
     }
 
     public Call(BasicCall bc) {
-	this.name = 0;
+        this.name = new_call_counter();
 	this.bc = bc;
 	this.r = Return.shouldReturn(true);
+        System.out.println("created "+this+" id="+name);
     }
 
     public BasicCall bc() {
