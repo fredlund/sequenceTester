@@ -64,6 +64,20 @@ public class UnitTest {
   }
   
   /**
+   * Defines the test name and does other internal bookkeeping that is required before
+   * the arguments of the UnitTest constructor is called in the tests.
+   */
+  public static void setupTest(String name) {
+    System.out.println("\n\nTesting "+name);
+    
+    // Set the test name (needed for the evaluation of arguments to the UnitTest constructor)
+    testName = name;
+    
+    // This creates a new map for the symbolic variables.
+    Call.reset();
+  }
+
+  /**
    * Executes a test statement. The method checks that calls return correct values
    * (according to the call sequence specification), and that calls are blocked
    * and unblocked correctly.
@@ -74,8 +88,6 @@ public class UnitTest {
 
     allCalls = new HashMap<Integer,Call>();
     blockedCalls = new HashMap<Integer,Call>();
-    
-    System.out.println("\nTesting "+name);
     
     if (name.equals("desarollo")) {
       System.out.println
@@ -89,6 +101,8 @@ public class UnitTest {
        controller,
        "",
        configurationDescription);
+
+    System.out.println("\nFinished testing "+name+"\n");
   }
   
   boolean contains(int i, int[] calls) {
@@ -108,6 +122,7 @@ public class UnitTest {
   
   // Soundness checks for sequences of calls
   private void checkSoundNess(String name, TestStmt stmt) {
+    
     Map<Integer,Call> active = new HashMap<Integer,Call>();
     Set<Object> blockedUsers = new HashSet<Object>();
     int counter = 1;
