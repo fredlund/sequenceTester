@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -324,7 +326,10 @@ public class UnitTest {
    * in the tested program but rather in the test system).
    */
   public static void failTestFramework(String msg) {
-    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):"+msg+"\n";
+    StringWriter errors = new StringWriter();
+    new Throwable().printStackTrace(new PrintWriter(errors));
+    String stackTrace = errors.toString();
+    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
     failTest(message);
   }
   
@@ -333,7 +338,10 @@ public class UnitTest {
    * in the tested program but rather in the test suite).
    */
   public static void failTestSyntax(String msg) {
-    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\n";
+    StringWriter errors = new StringWriter();
+    new Throwable().printStackTrace(new PrintWriter(errors));
+    String stackTrace = errors.toString();
+    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
     failTest(message);
   }
   

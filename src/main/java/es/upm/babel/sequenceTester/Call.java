@@ -50,6 +50,14 @@ public class Call {
     this.r = Return.shouldReturn(true);
   }
   
+  public Call(String symbolicName, BasicCall bc) {
+    this.name = new_call_counter();
+    this.symbolicName = symbolicName;
+    this.bc = bc;
+    this.r = Return.shouldReturn(true);
+    add_symbolic_var(this.symbolicName,this);
+  }
+  
   public BasicCall bc() {
     return bc;
   }
@@ -236,7 +244,7 @@ public class Call {
   public static Call lookupCall(String var) {
     Call result = symbolic_vars.get(var);
     if (result == null) {
-      UnitTest.failTestFramework("symbolic variable "+var+" missing");
+      UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolic_vars);
     }
     return result;
   }

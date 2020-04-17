@@ -28,10 +28,12 @@ public class TestCall {
                     Result[] mayUnblockResults) {
 	this.calls = calls;
 	this.mustUnblock = new HashSet<Integer>();
-	for (Integer i : mustUnblock)
+        if (mustUnblock != null)
+          for (Integer i : mustUnblock)
 	    this.mustUnblock.add(i);
 	this.mayUnblock = new HashSet<Integer>();
-	for (Integer i : mayUnblock)
+        if (mayUnblock != null)
+          for (Integer i : mayUnblock)
 	    this.mayUnblock.add(i);
         unblockChecks = new HashMap<Integer,Result>();
         if (mustUnblockResults != null) {
