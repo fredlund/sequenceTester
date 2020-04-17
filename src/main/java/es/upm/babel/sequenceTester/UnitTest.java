@@ -75,7 +75,7 @@ public class UnitTest {
     allCalls = new HashMap<Integer,Call>();
     blockedCalls = new HashMap<Integer,Call>();
     
-    System.out.println("\nTesting test "+name);
+    System.out.println("\nTesting "+name);
     
     if (name.equals("desarollo")) {
       System.out.println
@@ -232,7 +232,6 @@ public class UnitTest {
     }
     
     for (Call call : calls) {
-      System.out.println("Call "+call+" has id "+call.name()+" counter="+counter);
       if (call.name() != counter) {
         System.out.println
           ("*** Test "+name+" is incorrect:\n"+
@@ -328,7 +327,11 @@ public class UnitTest {
    */
   public static Object startController(String name,BasicCall bc) {
     Call call = new Call(bc);
+
+    // For now we have to reset the call counter since startController actions are not counted
+    // This is ugly and should be changed to a more flexible policy for action naming...
     Call.reset();
+
     call.execute();
     if (call.isBlocked())
       UnitTest.failTest("creating an instance of "+name+" blocks");
