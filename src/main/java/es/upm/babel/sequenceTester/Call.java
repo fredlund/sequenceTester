@@ -246,6 +246,7 @@ public class Call {
     if (result == null) {
       UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolic_vars);
     }
+    System.out.println("lookupCall("+var+") => "+result);
     return result;
   }
   

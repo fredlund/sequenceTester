@@ -3,6 +3,8 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.Duration;
+
 
 class Tests {
 
@@ -41,15 +43,26 @@ class Tests {
        ).run();
   }
 
+  @Test
+  public void test_04() {
+    System.out.println("in test_01");
+    assertTimeoutPreemptively
+      (Duration.ofSeconds(2),
+       () ->
+       new UnitTest
+       ("test_03",
+        "",
+        new Counter(),
+        TestCall.unblocks(new Set(3)),
+        TestCall.unblocks(Call.returns("dec",new Dec())),
+        TestCall.unblocks(Call.returns(new Print("The value returned from Dec() is "+UnitTest.returnValue("dec")))),
+        TestCall.unblocks(Call.raisesException(new AssertIsEqual(3),RuntimeException.class))
+        ).run());
+  }
+
   @BeforeEach
-  public void setup() throws Exception {
-    // We can install a custom test case checker here...
-    // UnitTest.installChecker(new RoboFabTestChecker());
-    
-    // This creates a new map for the symbolic variables.
-    // Probably this should be done under the hood, but for now the call
-    // to Call.reset is mandatory.
-    Call.reset();
+  public void setup(TestInfo testInfo) throws Exception {
+    UnitTest.setupTest(testInfo.getDisplayName());
   }
 }
 

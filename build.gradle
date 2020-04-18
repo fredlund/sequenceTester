@@ -17,7 +17,7 @@ javadoc {
 }
 
 dependencies {
-  implementation 'com.github.aherranz:cclib:master'
+  implementation 'com.github.fredlund:cclib:develop-SNAPSHOT'
   implementation 'org.junit.jupiter:junit-jupiter:5.6.1'
   testImplementation('org.junit.jupiter:junit-jupiter:5.6.1')
 }
@@ -28,7 +28,7 @@ test {
                 events "failed"
 		exceptionFormat "full"
                 // outputs.upToDateWhen {false}
-                // showStandardStreams = true
+                showStandardStreams = true
         }
 }
 

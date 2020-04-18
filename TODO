@@ -15,3 +15,7 @@ in a runtime error.
    TestCall.unblocks(new Set(value("counter"),3)),
    TestCall.blocks(Call.returns("await",new Await(value("counter"),4))),
    TestCall.unblocks(Call.returns(new Dec(value("counter"),2))).run();
+
+- cclib:
+
+provide a method in Tryer to check whether a call has started -- boolean started().
