@@ -61,6 +61,24 @@ class Tests {
         ).run());
   }
 
+  /*
+  @Test
+  public void test_05() {
+    assertTimeoutPreemptively
+      (Duration.ofSeconds(2),
+       () ->
+       new UnitTest
+       ("test_04",
+        "",
+        new Counter(),
+        TestCall.unblocks(new Set(3))
+        ,TestCall.unblocks(new Dec().n("dec"))
+        ,TestCall.unblocks(new Call((result) -> new Print("The value returned from Dec() is "+result),"dec"))
+        ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class)))
+        ).run());
+  }
+  */
+
   @BeforeEach
   public void setup(TestInfo testInfo) throws Exception {
     UnitTest.setupTest(testInfo.getDisplayName());

@@ -24,7 +24,6 @@ public class Call {
   String actualParameter;
   boolean started = false;
   private Object user = null;
-
   
   /**
    * Constructors a call. A call consists of a recipe for making a call,
