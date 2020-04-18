@@ -248,21 +248,6 @@ public class TestCall {
     return intparms;
   }
   
-  public static TestCall unblocks(BasicCall bc, String... unblocks) {
-    Call call = new Call(bc);
-    int unblock_spec[] = unblocks(unblocks);
-    int unblocks_arg[] = new int[unblock_spec.length+1];
-    for (int i=0; i<unblock_spec.length; i++)
-      unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
-    return
-      new TestCall(new Call[] {call},
-                   unblocks_arg,
-                   null,
-                   new int[] {},
-                   null);
-  }
-  
   public static TestCall unblocks(Call call, String... unblocks) {
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
@@ -273,24 +258,6 @@ public class TestCall {
       new TestCall(new Call[] {call},
                    unblocks_arg,
                    null,
-                   new int[] {},
-                   null);
-  }
-  
-  public static TestCall unblocks(BasicCall bc, Pair<String,Return>... unblocks) {
-    Call call = new Call(bc);
-    int unblock_spec[] = unblocks(unblocks);
-    int unblocks_arg[] = new int[unblock_spec.length+1];
-    for (int i=0; i<unblock_spec.length; i++)
-      unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
-    Result results[] = new Result[unblock_spec.length];
-    for (int i=0; i<unblock_spec.length; i++)
-      results[i] = unblocks[i].getRight();
-    return
-      new TestCall(new Call[] {call},
-                   unblocks_arg,
-                   results,
                    new int[] {},
                    null);
   }
@@ -310,16 +277,6 @@ public class TestCall {
                    results,
                    new int[] {},
                    null);
-  }
-  
-  public static TestCall blocks(String svar, BasicCall bc, String... unblocks) {
-    Call call = new Call(bc).n(svar);
-    int unblock_spec[] = unblocks(unblocks);
-    return new TestCall(new Call[] {call},
-                        unblock_spec,
-                        null,
-                        new int[]{},
-                        null);
   }
   
   public static TestCall blocks(Call call, String... unblocks) {

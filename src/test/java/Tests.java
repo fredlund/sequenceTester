@@ -16,7 +16,7 @@ class Tests {
        "",
        new Counter(),
        TestCall.unblocks(new Set(3)),
-       TestCall.blocks(Call.returns("await",new Await(4))),
+       TestCall.blocks(new Call(new Await(4)).n("await")),
        TestCall.unblocks(Call.returns(new Dec(),2))).run();
   }
 
