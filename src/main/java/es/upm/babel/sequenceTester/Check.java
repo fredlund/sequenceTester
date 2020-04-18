@@ -5,7 +5,7 @@ package es.upm.babel.sequenceTester;
  * A Class implementing common oracles (methods which decide if the execution
  * of a call was successfull). 
  */
-public class Return implements Result {
+public class Check implements Oracle {
   // Does the oracle check the return value?
   boolean hasReturnCheck = false;
   // Should the call return?
@@ -17,15 +17,15 @@ public class Return implements Result {
   // Permitted exception
   Class exceptionClass = null;
   
-  Return() { }
+  Check() { }
   
   /**
    * Factory method to create an oracle which checks that
    * the call returns normally, without an exception, 
    * and the value returned is included in the parameter values.
    */
-  static public Return returns(Object... values) {
-    Return r = new Return();
+  static public Check returns(Object... values) {
+    Check r = new Check();
     r.hasReturnCheck = true;
     r.shouldReturn = true;
     r.checksValue = true;
@@ -46,8 +46,8 @@ public class Return implements Result {
    * the call raises an exception where the exception class
    * is equal to the method parameter.
    */
-  static public Return raisesException(Class exceptionClass) {
-    Return r = new Return();
+  static public Check raisesException(Class exceptionClass) {
+    Check r = new Check();
     r.hasReturnCheck = true;
     r.shouldReturn = true;
     r.checksValue = true;
@@ -64,16 +64,16 @@ public class Return implements Result {
     exceptionClass;
   }
   
-  static public Return shouldReturn(boolean shouldReturn) {
-    Return r = new Return();
+  static public Check shouldReturn(boolean shouldReturn) {
+    Check r = new Check();
     r.hasReturnCheck = true;
     r.shouldReturn = shouldReturn;
     r.checksValue = false;
     return r;
   }
   
-  static public Return noCheck() {
-    Return r = new Return();
+  static public Check noCheck() {
+    Check r = new Check();
     r.hasReturnCheck = false;
     return r;
   }

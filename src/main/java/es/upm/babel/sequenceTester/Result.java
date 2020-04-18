@@ -8,7 +8,7 @@ public interface Result {
   /**
    * Does the oracle implement a return value check?
    *
-   * @return a boolean corresponding to whether the call specified a return value oracle.
+   * @return a boolean corresponding to whether the oracle checks the return value at all
    */
   public boolean hasReturnCheck();
   /**
