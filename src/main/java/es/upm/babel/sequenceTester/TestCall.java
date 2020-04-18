@@ -206,7 +206,7 @@ public class TestCall {
   }
   
   public static TestCall unblocks(BasicCall bc) {
-    Call call = Call.returns(bc);
+    Call call = new Call(bc);
     return
       new TestCall(new Call[] {call},
                    new int[] {call.name()},
@@ -216,7 +216,7 @@ public class TestCall {
   }
   
   public static TestCall blocks(String svar, BasicCall bc) {
-    Call call = Call.returns(svar, bc);
+    Call call = new Call(bc).n(svar);
     return
       new TestCall(new Call[] {call},
                    new int[] {},
@@ -249,7 +249,7 @@ public class TestCall {
   }
   
   public static TestCall unblocks(BasicCall bc, String... unblocks) {
-    Call call = Call.returns(bc);
+    Call call = new Call(bc);
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
@@ -278,7 +278,7 @@ public class TestCall {
   }
   
   public static TestCall unblocks(BasicCall bc, Pair<String,Return>... unblocks) {
-    Call call = Call.returns(bc);
+    Call call = new Call(bc);
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
@@ -313,7 +313,7 @@ public class TestCall {
   }
   
   public static TestCall blocks(String svar, BasicCall bc, String... unblocks) {
-    Call call = Call.returns(svar,bc);
+    Call call = new Call(bc).n(svar);
     int unblock_spec[] = unblocks(unblocks);
     return new TestCall(new Call[] {call},
                         unblock_spec,

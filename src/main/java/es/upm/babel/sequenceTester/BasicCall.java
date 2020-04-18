@@ -50,7 +50,6 @@ public abstract class BasicCall extends Tryer implements GetValue {
    * and the call did not raise an exception.
    */
   public boolean returned() {
-    System.out.println("in BasicCall ");
     return !isBlocked() && !raisedException();
   }
   

@@ -2,6 +2,7 @@ package es.upm.babel.sequenceTester;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.function.Function;
 
 
 /**
@@ -14,48 +15,85 @@ public class Call {
   
   final static protected int ESPERA_MIN_MS = 100;
   
+  // The internal name of the action -- this is too fragile and should change
   int name;
-  String symbolicName = null;
-  BasicCall bc;
+  String symbolicName;
   Result r;
+  BasicCall bc;
+  Function<Object,BasicCall> bcLambda;
+  String actualParameter;
+  boolean started = false;
+
   
   /**
    * Constructors a call. A call consists of a recipe for making a call,
-   * and an oracle that decides if an invocation of the call returned the
-   * correct result.
+   * and optionally a oracle that decides if an invocation of the call returned the
+   * correct result, and optionally a symbolic name for the call.
    *
    * @param bc an object which can execute the call.
+   */
+  public Call(BasicCall bc) {
+    this.bc = bc;
+    this.bcLambda = null;
+    // By default we check that the call returns normally.
+    this.r = Return.shouldReturn(true);
+    this.symbolicName = null;
+    this.name = new_call_counter();
+  }
+
+  /**
+   * Constructors a call that is parametetric on the result from a previous call, referenced
+   * by its symbolic name.
+   * A call consists of a recipe for making a call,
+   * and optionally a oracle that decides if an invocation of the call returned the
+   * correct result, and optionally a symbolic name for the call.
+   *
+   * @param bcLambda a function returning an object which can execute the call.
+   * @param name the (symbolic) name of the call which this call is parameteric on.
+   */
+  public Call(Function<Object,BasicCall> bcLambda, String name) {
+    this.bc = null;
+    this.bcLambda = bcLambda;
+    // By default we check that the call returns normally.
+    this.r = Return.shouldReturn(true);
+    this.symbolicName = null;
+    this.name = new_call_counter();
+    this.actualParameter = name;
+  }
+
+  /**
+   * Associates an oracle with a call.
    * @param r an oracle which decides if the call returned the correct value.
-   * @param symbolicName a symbolic name for the call. The symbolic variable
+   */
+  public Call oracle(Result r) {
+    this.r = r;
+    return this;
+  }
+                
+  /**
+   * A short name for the oracle method.
+   */
+  public Call o(Result r) {
+    return oracle(r);
+  }
+  
+  /**
+   * Associates a symbolic name with a call.
+   * The symbolic variable
    * may be used in a continuation (in the TestStmt where the call resides)
    * to specify that this call was unblocked by a later call.
    */
-  public Call(String symbolicName, BasicCall bc, Result r) {
-    this.name = new_call_counter();
+  public Call name(String symbolicName) {
     this.symbolicName = symbolicName;
-    this.bc = bc;
-    this.r = r;
     add_symbolic_var(this.symbolicName,this);
+    return this;
   }
-  
-  public Call(BasicCall bc, Result r) {
-    this.name = new_call_counter();
-    this.bc = bc;
-    this.r = r;
-  }
-  
-  public Call(BasicCall bc) {
-    this.name = new_call_counter();
-    this.bc = bc;
-    this.r = Return.shouldReturn(true);
-  }
-  
-  public Call(String symbolicName, BasicCall bc) {
-    this.name = new_call_counter();
-    this.symbolicName = symbolicName;
-    this.bc = bc;
-    this.r = Return.shouldReturn(true);
-    add_symbolic_var(this.symbolicName,this);
+
+  /**
+   * A short name for the name method.
+   */
+  public Call n(String symbolicName) {
+    return name(symbolicName);
   }
   
   public BasicCall bc() {
@@ -108,9 +146,28 @@ public class Call {
   }
   
   /**
+   * Returns true if the execution of the call has started.
+   */
+  public boolean hasStarted() {
+    return started;
+  }
+
+  /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
   public void makeCall() {
+    if (bcLambda != null) {
+      Call paramCall = Call.lookupCall(actualParameter);
+      if (paramCall.hasStarted() && paramCall.bc.returned()) {
+        Object returnValue = paramCall.returnValue();
+        this.bc = bcLambda.apply(returnValue);
+      } else {
+        UnitTest.failTestSyntax
+          ("Call "+ this + " depends on call " + paramCall + " which has not terminated yet");
+      }
+    }
+
+    started = true;
     bc.start();
   }
   
@@ -173,26 +230,6 @@ public class Call {
       else
         return callString;
     }
-  }
-  
-  public static Call returns(BasicCall bc) {
-    return new Call(bc,Return.shouldReturn(true));
-  }
-  
-  public static Call raisesException(BasicCall bc, Class exceptionClass) {
-    return new Call(bc,Return.raisesException(exceptionClass));
-  }
-  
-  public static Call returns(String name, BasicCall bc) {
-    return new Call(name,bc,Return.shouldReturn(true));
-  }
-  
-  public static Call returns(BasicCall bc, Object returnValue) {
-    return new Call(bc,Return.returns(true,returnValue));
-  }
-  
-  public static Call returns(String name, BasicCall bc, Object returnValue) {
-    return new Call(name,bc,Return.returns(true,returnValue));
   }
   
   public boolean isBlocked() {
