@@ -8,8 +8,6 @@ public class Print extends CounterCall implements GetValue {
 
   Print(String msg) {
     this.msg = msg;
-    
-    setUser("print");
   }
 
   public void toTry() {

@@ -156,8 +156,9 @@ public class UnitTest {
              " which is not in the active set "+active+"\n");
         }
         Call call = active.get(unblockedId);
-        if (call.bc().user() != null)
-          blockedUsers.remove(call.bc().user());
+        Object user = call.getUser();
+        if (user != null)
+          blockedUsers.remove(user);
       }
       
       for (Integer unblockedId : testCall.mayUnblock()) {
@@ -239,14 +240,14 @@ public class UnitTest {
                                           Set<Object> blockedUsers,
                                           int counter) {
     for (Call call : calls) {
-      if (!call.hasLambda() && call.bc().user() != null &&
-          blockedUsers.contains(call.bc().user())) {
+      Object user = call.getUser();
+      if (user != null && blockedUsers.contains(user)) {
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
-           "user "+call.bc().user()+" in call "+call.printCall()+
+           "user "+user+" in call "+call.printCall()+
            " is blocked"+"\n");
       }
-      blockedUsers.add(call.bc().user());
+      blockedUsers.add(user);
     }
     
     for (Call call : calls) {

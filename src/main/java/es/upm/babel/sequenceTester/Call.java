@@ -23,6 +23,7 @@ public class Call {
   Function<Object,BasicCall> bcLambda;
   String actualParameter;
   boolean started = false;
+  private Object user = null;
 
   
   /**
@@ -39,6 +40,7 @@ public class Call {
     this.r = Check.returns();
     this.symbolicName = null;
     this.name = new_call_counter();
+    this.user = bc.user();
   }
 
   /**
@@ -76,7 +78,31 @@ public class Call {
   public Call o(Oracle r) {
     return oracle(r);
   }
+
+  /**
+   * Sets the user (process) executing a call.
+   * Note: calling user on a Call overrides any user
+   * defined for the BasicCall .
+   */
+  public Call user(Object user) {
+    return this;
+  }
+
   
+  /**
+   * A short name for the user method.
+   */
+  public Call u(Object user) {
+    return user(user);
+  }
+
+  /**
+   * Retrieves the user of a call.
+   */
+  public Object getUser() {
+    return user;
+  }
+
   /**
    * Associates a symbolic name with a call.
    * The symbolic variable
@@ -120,8 +146,22 @@ public class Call {
     catch (InterruptedException exc) { };
   }
   
+  static void resolveLambda(Call call) {
+    if (call.bc() == null) {
+      Call paramCall = Call.lookupCall(call.actualParameter);
+      if (paramCall.hasStarted() && paramCall.bc.returned()) {
+        Object returnValue = paramCall.returnValue();
+        call.bc = call.bcLambda.apply(returnValue);
+      } else {
+        UnitTest.failTestSyntax
+          ("Call "+ call + " depends on call " + paramCall + " which has not terminated yet");
+      }
+    }
+  }
+
   static void execute(Call[] calls, Object controller,Map<Integer,Call> allCalls) {
     for (Call call : calls) {
+      resolveLambda(call);
       call.setController(controller);
       allCalls.put(call.name(),call);
       call.makeCall();
@@ -163,17 +203,6 @@ public class Call {
    * Executes the call. The method waits a fixed interval of time before returning.
    */
   public void makeCall() {
-    if (bc() == null) {
-      Call paramCall = Call.lookupCall(actualParameter);
-      if (paramCall.hasStarted() && paramCall.bc.returned()) {
-        Object returnValue = paramCall.returnValue();
-        this.bc = bcLambda.apply(returnValue);
-      } else {
-        UnitTest.failTestSyntax
-          ("Call "+ this + " depends on call " + paramCall + " which has not terminated yet");
-      }
-    }
-
     started = true;
     bc.start();
   }
@@ -206,7 +235,10 @@ public class Call {
   }
   
   public String toString() {
-    return bc.toString();
+    if (bc == null)
+      return "() -> ...";
+    else
+      return bc.toString();
   }
   
   public static String printCalls(Call[] calls) {
@@ -290,7 +322,6 @@ public class Call {
     if (result == null) {
       UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolic_vars);
     }
-    System.out.println("lookupCall("+var+") => "+result);
     return result;
   }
   
