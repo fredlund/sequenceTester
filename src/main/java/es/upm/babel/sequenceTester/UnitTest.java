@@ -239,7 +239,7 @@ public class UnitTest {
                                           Set<Object> blockedUsers,
                                           int counter) {
     for (Call call : calls) {
-      if (call.bc().user() != null &&
+      if (!call.hasLambda() && call.bc().user() != null &&
           blockedUsers.contains(call.bc().user())) {
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+

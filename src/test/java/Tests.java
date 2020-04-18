@@ -47,12 +47,11 @@ class Tests {
 
   @Test
   public void test_04() {
-    System.out.println("in test_01");
     assertTimeoutPreemptively
       (Duration.ofSeconds(2),
        () ->
        new UnitTest
-       ("test_03",
+       ("test_04",
         "",
         new Counter(),
         TestCall.unblocks(new Set(3))

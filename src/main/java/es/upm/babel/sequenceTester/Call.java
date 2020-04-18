@@ -153,10 +153,17 @@ public class Call {
   }
 
   /**
+   * Does the call represent a lambda abstraction?
+   */
+  public boolean hasLambda() {
+    return bcLambda != null;
+  }
+
+  /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
   public void makeCall() {
-    if (bcLambda != null) {
+    if (bc() == null) {
       Call paramCall = Call.lookupCall(actualParameter);
       if (paramCall.hasStarted() && paramCall.bc.returned()) {
         Object returnValue = paramCall.returnValue();
