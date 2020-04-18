@@ -6,38 +6,38 @@ package es.upm.babel.sequenceTester;
  * of a call was successfull). 
  */
 public class Check implements Oracle {
-  // Does the oracle check the return value?
-  boolean hasReturnCheck = false;
-  // Should the call return?
-  boolean shouldReturn = true;
-  // Does the oracle check the return value?
+  boolean returnsNormally;
   boolean checksValue = false;
-  // Permitted return values
   Object values[] = null;
-  // Permitted exception
   Class exceptionClass = null;
   
   Check() { }
   
   /**
    * Factory method to create an oracle which checks that
+   * the call returns normally, without an exception.
+   */
+  static public Check returns() {
+    Check r = new Check();
+    r.returnsNormally = true;
+    r.checksValue = false;
+    return r;
+  }
+  
+  /**
+   * Factory method to create an oracle which checks that
    * the call returns normally, without an exception, 
-   * and the value returned is included in the parameter values.
+   * and that the value returned is included in the parameter values.
    */
   static public Check returns(Object... values) {
-    Check r = new Check();
-    r.hasReturnCheck = true;
-    r.shouldReturn = true;
-    r.checksValue = true;
-    if (shouldReturn)
-      r.values = values;
-    else if (values.length != 1) {
-      System.out.println
-        ("*** Error in test: shouldReturn=false requires one argument");
+    if (values.length < 1) {
+      UnitTest.failTestSyntax("Call.returns(...) needs at least one argument value");
       throw new RuntimeException();
-    } else {
-      r.exceptionClass = (Class) values[0];
     }
+    Check r = new Check();
+    r.returnsNormally = true;
+    r.checksValue = true;
+    r.values = values;
     return r;
   }
   
@@ -48,49 +48,22 @@ public class Check implements Oracle {
    */
   static public Check raisesException(Class exceptionClass) {
     Check r = new Check();
-    r.hasReturnCheck = true;
-    r.shouldReturn = true;
-    r.checksValue = true;
-    if (shouldReturn)
-      r.values = values;
-    else if (values.length != 1) {
-      System.out.println
-        ("*** Error in test: shouldReturn=false requires one argument");
+    r.returnsNormally = false;
+    if (!(exceptionClass instanceof Class)) {
+      UnitTest.failTestSyntax("Call.exceptionClass(class) needs a Class as argument");
       throw new RuntimeException();
-    } else {
-      r.exceptionClass = (Class) values[0];
     }
-    return r;
-    exceptionClass;
-  }
-  
-  static public Check shouldReturn(boolean shouldReturn) {
-    Check r = new Check();
-    r.hasReturnCheck = true;
-    r.shouldReturn = shouldReturn;
-    r.checksValue = false;
+    r.exceptionClass = (Clsas) exceptionClass;
     return r;
   }
   
-  static public Check noCheck() {
-    Check r = new Check();
-    r.hasReturnCheck = false;
-    return r;
-  }
-  
-  public boolean hasReturnCheck() {
-    return hasReturnCheck;
-  }
-  
-  public boolean shouldReturn() {
-    return shouldReturn;
-  }
-  
-  public boolean checksValue() {
-    return checksValue;
+  public boolean returnsNormally() {
+    return returnsNormally;
   }
   
   public boolean correctReturnValue(Object result) {
+    if (!checksValue) return true;
+    
     for (Object element : values) {
       if (element.equals(result)) return true;
     }
@@ -101,9 +74,8 @@ public class Check implements Oracle {
     return exceptionClass.isInstance(exc);
   }
   
-  
   public boolean hasUniqueReturnValue() {
-    return values != null && values.length == 1;
+    return checksValue && values.length == 1;
   }
   
   public Object uniqueReturnValue() {
