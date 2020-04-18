@@ -77,7 +77,7 @@ public class TestCall {
       // Now for checking the results of all unblocked calls
 
       // First check if the call itself has an oracle
-      Oracle o = unblockedCall.result();
+      Oracle o = unblockedCall.oracle();
       // If not, the oracle may be in the unblock specification
       if (o == null) o = unblockChecks.get(unblockedCall.name());
 
@@ -86,12 +86,13 @@ public class TestCall {
         // Did the call terminate with an exception?
         if (unblockedCall.raisedException()) {
 
-          // No it raised an exception...
+          // Yes...
+          Throwable exc = unblockedCall.getException();
+
           // Does the oracle specify a normal return? (i.e., no exception)
           if (o.returnsNormally()) {
 
             // Yes, an error...
-            Throwable exc = unblockedCall.getException();
             StringWriter errors = new StringWriter();
             exc.printStackTrace(new PrintWriter(errors));
             String StackTrace = errors.toString();
@@ -106,7 +107,6 @@ public class TestCall {
 
           // Else check if the exception is the correct exception
           if (!o.correctException(exc)) {
-            Throwable exc = unblockedCall.getException();
             StringWriter errors = new StringWriter();
             exc.printStackTrace(new PrintWriter(errors));
             String StackTrace = errors.toString();
@@ -132,7 +132,7 @@ public class TestCall {
               (prefixConfigurationDescription(configurationDescription)+
                "la llamada "+unblockedCall.printCall()+
                " deberia haber lanzado "+
-               "la excepcion "+correctExceptionClass()+
+               "la excepcion "+o.correctExceptionClass()+
                "pero "+returned(unblockedCall.returnValue())+
                "\n"+Util.mkTrace(trace));
           }
@@ -275,7 +275,7 @@ public class TestCall {
     return intparms;
   }
   
-  public static int[] unblocks(Pair<String,Return>... parms) {
+  public static int[] unblocks(Pair<String,Oracle>... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
       intparms[i] = Call.lookupCall(parms[i].getLeft()).name();
@@ -296,7 +296,7 @@ public class TestCall {
                    null);
   }
   
-  public static TestCall unblocks(Call call, Pair<String,Return>... unblocks) {
+  public static TestCall unblocks(Call call, Pair<String,Oracle>... unblocks) {
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)

@@ -53,7 +53,7 @@ public class Check implements Oracle {
       UnitTest.failTestSyntax("Call.exceptionClass(class) needs a Class as argument");
       throw new RuntimeException();
     }
-    r.exceptionClass = (Clsas) exceptionClass;
+    r.exceptionClass = (Class) exceptionClass;
     return r;
   }
   

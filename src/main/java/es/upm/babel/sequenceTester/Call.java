@@ -18,7 +18,7 @@ public class Call {
   // The internal name of the action -- this is too fragile and should change
   int name;
   String symbolicName;
-  Result r;
+  Oracle r;
   BasicCall bc;
   Function<Object,BasicCall> bcLambda;
   String actualParameter;
@@ -36,7 +36,7 @@ public class Call {
     this.bc = bc;
     this.bcLambda = null;
     // By default we check that the call returns normally.
-    this.r = Return.shouldReturn(true);
+    this.r = Check.returns();
     this.symbolicName = null;
     this.name = new_call_counter();
   }
@@ -55,7 +55,7 @@ public class Call {
     this.bc = null;
     this.bcLambda = bcLambda;
     // By default we check that the call returns normally.
-    this.r = Return.shouldReturn(true);
+    this.r = Check.returns();
     this.symbolicName = null;
     this.name = new_call_counter();
     this.actualParameter = name;
@@ -65,7 +65,7 @@ public class Call {
    * Associates an oracle with a call.
    * @param r an oracle which decides if the call returned the correct value.
    */
-  public Call oracle(Result r) {
+  public Call oracle(Oracle r) {
     this.r = r;
     return this;
   }
@@ -73,7 +73,7 @@ public class Call {
   /**
    * A short name for the oracle method.
    */
-  public Call o(Result r) {
+  public Call o(Oracle r) {
     return oracle(r);
   }
   
@@ -100,7 +100,7 @@ public class Call {
     return bc;
   }
   
-  public Result result() {
+  public Oracle oracle() {
     return r;
   }
   
@@ -290,5 +290,4 @@ public class Call {
   public static Call[] parallel(Call... calls) {
     return calls;
   }
-  
 }
