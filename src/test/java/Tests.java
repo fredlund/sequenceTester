@@ -15,9 +15,10 @@ class Tests {
       ("test_01",
        "",
        new Counter(),
-       TestCall.unblocks(new Set(3)),
-       TestCall.blocks(new Call(new Await(4)).n("await")),
-       TestCall.unblocks(Call.returns(new Dec(),2))).run();
+       TestCall.unblocks(new Set(3))
+       ,TestCall.blocks(new Call(new Await(4)).n("await"))
+       ,TestCall.unblocks(new Call(new Dec()).o(Check.returns(2)))
+       ).run();
   }
 
   @Test
@@ -26,9 +27,10 @@ class Tests {
       ("test_02",
        "",
        new Counter(),
-       TestCall.unblocks(new Set(3)),
-       TestCall.blocks(Call.returns("whenEven",new WhenEven(),2)), 
-       TestCall.unblocks(Call.returns(new Dec(),2),"whenEven")).run();
+       TestCall.unblocks(new Set(3))
+       ,TestCall.blocks(new Call(new WhenEven()).n("whenEven").o(Check.returns(2)))
+       ,TestCall.unblocks(new Call(new Dec()).o(Check.returns(2)),"whenEven")
+       ).run();
   }
 
   @Test
@@ -37,9 +39,9 @@ class Tests {
       ("test_03",
        "",
        new Counter(),
-       TestCall.unblocks(new Set(3)),
-       TestCall.unblocks(Call.returns(new Dec(),2)),
-       TestCall.unblocks(Call.raisesException(new AssertIsEqual(3),RuntimeException.class))
+       TestCall.unblocks(new Set(3))
+       ,TestCall.unblocks(new Call(new Dec()).o(Check.returns(2)))
+       ,TestCall.unblocks(new Call(new AssertIsEqual(3)).o(Check.raisesException(RuntimeException.class)))
        ).run();
   }
 
@@ -53,10 +55,10 @@ class Tests {
        ("test_03",
         "",
         new Counter(),
-        TestCall.unblocks(new Set(3)),
-        TestCall.unblocks(Call.returns("dec",new Dec())),
-        TestCall.unblocks(Call.returns(new Print("The value returned from Dec() is "+UnitTest.returnValue("dec")))),
-        TestCall.unblocks(Call.raisesException(new AssertIsEqual(3),RuntimeException.class))
+        TestCall.unblocks(new Set(3))
+        ,TestCall.unblocks(new Call(new Dec()).n("dec"))
+        ,TestCall.unblocks(new Call((result) -> new Print("The value returned from Dec() is "+result),"dec"))
+        ,TestCall.unblocks(new Call(new AssertIsEqual(3)).o(Check.raisesException(RuntimeException.class)))
         ).run());
   }
 
