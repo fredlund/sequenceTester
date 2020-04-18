@@ -365,29 +365,5 @@ public class UnitTest {
          " the exception "+call.getException()+" was raised");
     return call.returnValue();
   }
-
-  /**
-   * Returns the return value (or null in case of void) of a call.
-   * @throws RuntimeException if the call has not terminated yet, or an exception was thrown.
-   */
-  public static Object returnValue(String symbolicName) {
-    System.out.println("returnValue("+symbolicName+")");
-    BasicCall bc = Call.lookupCall(symbolicName).bc;
-    System.out.println("returnValue for bc:"+bc);
-
-    if (!bc.hasStarted()) {
-      System.out.println(bc+" has not started");
-      throw new RuntimeException();
-    }
-
-    if (!bc.returned()) {
-      System.out.println(bc+" has not returned");
-      throw new RuntimeException();
-    }
-
-    
-    System.out.println("calling bc returnValue");
-    return bc.returnValue();
-  }
 }
 
