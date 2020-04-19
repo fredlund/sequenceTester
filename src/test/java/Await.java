@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Await extends CounterCall implements GetValue {
+public class Await extends CounterCall {
   private int waitingFor;
 
 

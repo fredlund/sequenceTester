@@ -30,15 +30,15 @@ public class Util {
     String unblocksString="";
     for (Call unblockedCall : newUnblocked) {
       if (unblocksString=="") unblocksString=unblockedCall.printCallWithReturn();
-      else unblocksString+=", "+unblockedCall.printCall();
+      else unblocksString+=", "+unblockedCall.toString();
     }
     if (unblocksString!="")
       unblocksString = " -- unblocked "+unblocksString;
     
     String callsString="";
     for (Call call : calls) {
-      if (callsString != "") callsString += "\n  "+call.printCall();
-      else callsString = call.printCall();
+      if (callsString != "") callsString += "\n  "+call;
+      else callsString = call.toString();
     }
     
     String callPlusUnblock;
@@ -59,7 +59,7 @@ public class Util {
     Set<Call> unblocked = new HashSet<Call>();
     
     for (Call blockedCall : blockedCalls.values()) {
-      if (!blockedCall.isBlocked())
+      if (!blockedCall.hasBlocked())
         unblocked.add(blockedCall);
     }
     return unblocked;

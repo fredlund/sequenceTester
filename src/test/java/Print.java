@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Print extends CounterCall implements GetValue {
+public class Print extends CounterCall {
   private String msg;
 
   Print(String msg) {

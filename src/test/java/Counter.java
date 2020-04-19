@@ -30,10 +30,7 @@ public class Counter {
     int returnValue = -1;
     
     while (returnValue % 2 != 0) {
-      System.out.println("in while");
-
       synchronized (this) {
-        System.out.println("counter="+counter);
         if (counter % 2 == 0)
           returnValue = counter;
       }
