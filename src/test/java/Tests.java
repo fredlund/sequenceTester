@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.Duration;
 
 
-// Maybe we should collapse Calls and BasicCalls?
-
 class Tests {
   @Test
   public void test_01() {
