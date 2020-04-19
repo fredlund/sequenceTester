@@ -17,7 +17,7 @@ public class Lambda extends Call {
    * and optionally a oracle that decides if an invocation of the call returned the
    * correct result, and optionally a symbolic name for the call.
    *
-   * @param bcLambda a function returning an object which can execute the call.
+   * @param lambda a function returning an object which can execute the call.
    * @param name the (symbolic) name of the call which this call is parameteric on.
    */
   public Lambda(Function<Object,Call> lambda, String name) {

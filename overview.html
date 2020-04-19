@@ -10,11 +10,18 @@ course "Concurrencia" at the Escuela Tecnica Superior
   de Ingenieros Informaticos at the Un
   iversidad Politecnica de Madrid, Spain.
 </p>
+<p>
+  The main idea is to write test cases as sequences of API calls,
+  and to provide excellent diagnostics of why a test case failed, i.e.,
+  showing a complete trace of the calls of a failed test case, and
+  indicating clearly the reason for failure. For example, that the call
+  is blocked although it should have been unblocked by a call,
+  or that it returned an incorrect value.
 
 <h1>Unit Tests</h1>
 <p>
-A unit test is an instance of the class
-{@link es.upm.babel.sequenceTester.TestStmt}. A test statement is either:
+A unit test is an instance of the 
+{@link es.upm.babel.sequenceTester.TestStmt} interface. A test statement is either:
 <dl>
   <dt>{@link es.upm.babel.sequenceTester.Nil}</dt>
   <dd>A test statement which always succeeds.</dd>
@@ -39,7 +46,7 @@ A unit test is an instance of the class
   </dd>
 </dl>
 </p>
-<h1>Call</h1>
+<h1>Calls</h1>
 <p>
   An instance of the {@link es.upm.babel.sequenceTester.Call} class is a
   <b>recipe for making
@@ -48,8 +55,9 @@ A unit test is an instance of the class
   A call may be given
   a symbolic name, which is useful to specify that it is later
   (during the execution of another call) unblocked.
+  Note that a Call instance extends the Tryer class of the cclib library.
 </p>
-<h1>TestCall</h1>
+<h1>TestCalls</h1>
 <p>
   An instance of the {@link es.upm.babel.sequenceTester.TestCall} class
   executes a set of calls in parallel, and <b>checks that
@@ -72,17 +80,19 @@ TestCall(Call[] calls,
   and the Result arrays codes the oracles for deciding if
   the unblocked calls returned correct values (or raised the
   correct exceptions).
+<p>
+  The TestCall class contains several so called factory methods for more convenient
+  specification of a TestCall.
+  </p>
 
-  <h1>Library Design</h1>
-  The library uses so called factory methods heavily in an intent
-  to make test cases easier to read. There are, for instance,
-  several such methods which can be used to create TestCalls
-  present in the {@link es.upm.babel.sequenceTester.TestCall}
-  class.
+  <h1>Oracles</h1>
+  Oracles checks the return values, or exceptions, of terminated calls.
+  Oracles are instances of the Oracle {@link es.upm.babel.sequenceTester.Oracle}
+  interface.
   
   <h1>An Example</h1>
 <p>
-  Suppose we have an API with three method: set(int),
+  Suppose we have an API with three methods: set(int),
   dec(), and whenZero() such that set(int) sets the value of a counter
   to the argument and always unblocks immediately,
   dec() decrements the value of the
@@ -97,11 +107,11 @@ Prefix
  Prefix
  (TestCall.unblocks(new Dec()),
   Prefix
-  (TestCall.blocks("whenZero",new WhenZero()),
+  (TestCall.blocks(new WhenZero().n("whenZero")),
    Prefix
    (TestCall.unblocks(new Dec()),
     Prefix
-    (TestCall.unblocks(new Dec(), "whenZero"),
+    (TestCall.unblocks(new Dec(),"whenZero"),
      Nil)))))
 }
   </pre>
@@ -111,8 +121,9 @@ Prefix
   (a call which immediately returns, i.e., "unblocks"),
   and then decrement the counter
   (a call which immediately returns),
-  and if we next call whenZero() that call blocks (does not return);
-  note that we give the call to whenZero() the symbolic name "whenZero".
+  and if we next call whenZero() that call blocks (does not return).
+  Note that we give the call to whenZero() the symbolic name "whenZero",
+  by calling the method name (or n), with the symbolic name as an argument.
   If next we decrement the counter again that call immediately
   returns. Finally if we again call dec() again
   then both that call returned immediately, <b>and</b>
@@ -123,7 +134,7 @@ Prefix
 {@code
 TestCall.unblocks(new Set(3)),
 TestCall.unblocks(new Dec()),
-TestCall.blocks("whenZero",new WhenZero()),
+TestCall.blocks(new WhenZero().n("whenZero")),
 TestCall.unblocks(new Dec()),
 TestCall.unblocks(new Dec(), "whenZero")
 }
@@ -137,15 +148,70 @@ TestCall.unblocks(new Dec(), "whenZero")
 <pre>
 {@code
 TestCall.unblocks(new Set(3)),
-TestCall.unblocks(Call.returns(new Dec(),2)),
-TestCall.blocks("whenZero",new WhenZero()),
-TestCall.unblocks(Call.returns(new Dec(),1),
-TestCall.unblocks(Call.returns(new Dec(),0), "whenZero")
+TestCall.unblocks(new Dec().o(Check.returns(2))),
+TestCall.blocks(new WhenZero().n("whenZero")),
+TestCall.unblocks(new Dec().o(Check.returns(1))),
+TestCall.unblocks(new Dec().o(Check.returns(0)), "whenZero")
 }
 </pre>
-Note that we have embedded the call specification new Dec()
-inside a call to return, e.g., Call.return(new Dec(),2),
-which indicates that the call should return the value 2.
+The specification of the decrement operation, e.g.,
+new Dec().o(Check.returns(2)),
+associates an oracle (using the method oracle or o)
+to the method call. The oracle is Check.returns(2),
+which specifies that the call returns normally with the value 2.
+The {@link es.upm.babel.sequenceTester.Check} class
+contains a number of convient oracles; it is also possible
+to define a custom oracle.
+</p>
+<h2>Subclassing Call</h2>
+<p>Next we consider what is needed to write a subclass for the
+  Call class; we examine the Dec call as an example:
+  <pre>
+    {@code
+public class Dec extends CounterCall {
+  private Object returnValue;
+
+  Dec() { setUser("dec"); }
+
+  // Executes the call
+  public void toTry() { returnValue = controller.dec();  }
+
+  // Returns the return value
+  public Object returnValue() { return returnValue;  }
+
+  // Prints the call
+  public String toString() { return "dec()"; }
+}
+    }
+  </pre>
+<p>
+  All such subclasses should define toTry which executes the call
+  and toString which is used to pretty print counterexamples.
+  If a call returns a value, such as Dec, then the returnValue method
+  should be defined too.
+  </p>
+<p>
+  </p>
+In fact the Dec class does not subclass Call directly, but CounterCall, which
+provides access to the controller object -- a convenient mechanism
+for passing an object to several such subclasses of Call which implement
+object methods:
+  <pre>
+    {@code
+public abstract class CounterCall extends Call {
+  Counter controller;
+
+  public CounterCall() { }
+
+  public void setController(Object controller) {
+    if (controller instanceof Counter)
+      this.controller = (Counter) controller;
+    else
+      throw new RuntimeException();
+  }
+}
+    }
+    </pre>
 </p>
 </body>
 </html>

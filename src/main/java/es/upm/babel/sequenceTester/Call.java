@@ -42,7 +42,7 @@ public abstract class Call extends Tryer {
 
   /**
    * Associates an oracle with a call.
-   * @param r an oracle which decides if the call returned the correct value.
+   * @param oracle an oracle which decides if the call returned the correct value.
    */
   public Call oracle(Oracle oracle) {
     this.oracle = oracle;
@@ -170,9 +170,7 @@ public abstract class Call extends Tryer {
   
   /**
    * Invoked by the call sequence in which the call resides. 
-   * This method is invoked before a call is made, and
-   * the method in turn invokes the {@link BasicCall#setController(Object)}
-   * method on the object that implements the call, thus
+   * This method is invoked before a call is made, thus
    * enabling an object to be passed from the call sequence to the actual call.
    *
    * @param controller The object passed from the call sequence to the call.
