@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class AssertIsEqual extends CounterCall implements GetValue {
+public class AssertIsEqual extends CounterCall {
   private int value;
 
   AssertIsEqual(int value) {

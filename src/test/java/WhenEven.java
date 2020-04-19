@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class WhenEven extends CounterCall implements GetValue {
+public class WhenEven extends CounterCall {
   private Object returnValue;
 
   WhenEven() {

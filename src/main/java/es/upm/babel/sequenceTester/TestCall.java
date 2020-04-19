@@ -173,7 +173,7 @@ public class TestCall {
     for (Integer UnblockedId : mustUnblock) {
       if (blockedCalls.containsKey(UnblockedId)) {
         Call call = allCalls.get(UnblockedId);
-        if (call.isBlocked()) {
+        if (call.hasBlocked()) {
           String llamadas;
           if (calls.length > 1)
             llamadas =

@@ -59,7 +59,7 @@ public class Util {
     Set<Call> unblocked = new HashSet<Call>();
     
     for (Call blockedCall : blockedCalls.values()) {
-      if (!blockedCall.isBlocked())
+      if (!blockedCall.hasBlocked())
         unblocked.add(blockedCall);
     }
     return unblocked;

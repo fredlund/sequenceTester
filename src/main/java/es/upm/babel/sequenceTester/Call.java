@@ -10,7 +10,7 @@ import java.util.HashMap;
  * Represents a BasicCall together with an oracle for deciding if the call
  * executed correctly.
  */
-public abstract class Call extends Tryer implements GetValue {
+public abstract class Call extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> symbolic_vars = null;
   
@@ -23,6 +23,8 @@ public abstract class Call extends Tryer implements GetValue {
   boolean started = false;
   private Object user = null;
   private Object returnValue;
+  private Object controller;
+  
   
   /**
    * Constructors a call. A call consists of a recipe for making a call,
@@ -119,7 +121,7 @@ public abstract class Call extends Tryer implements GetValue {
    * and the call did not raise an exception.
    */
   public boolean returned() {
-    return !isBlocked() && !raisedException();
+    return !hasBlocked() && !raisedException();
   }
   
   /**
@@ -176,7 +178,14 @@ public abstract class Call extends Tryer implements GetValue {
    * @param controller The object passed from the call sequence to the call.
    */
   public void setController(Object controller) {
-    setController(controller);
+    this.controller = controller;
+  }
+  
+  /**
+   * Returns the controller.
+   */
+  public Object getController() {
+    return controller;
   }
   
   /**
@@ -192,24 +201,6 @@ public abstract class Call extends Tryer implements GetValue {
   public void makeCall() {
     started = true;
     start();
-  }
-  
-  /**
-   * Did a call raise an exception?
-   *
-   * @return a boolean corresponding to whether the call raised an exception or not.
-   */
-  public boolean raisedException() {
-    return raisedException();
-  }
-  
-  /**
-   * The exception raised by the call (if any).
-   *
-   * @return an object corresponding to the exception raised by the call.
-   */
-  public Throwable getException() {
-    return getException();
   }
   
   public static String printCalls(Call[] calls) {
@@ -238,12 +229,12 @@ public abstract class Call extends Tryer implements GetValue {
     }
   }
   
-  public boolean isBlocked() {
+  public boolean hasBlocked() {
     /**
-     * In the "current" cclib a call may be:
-     * - blocked (call.isBlocked())
+     * In the "current" cclib a tryer may be:
+     * - blocked (tryer.isBlocked())
      * - blocked because it terminated with an exception 
-     * (call.raisedException())
+     * (tryer.raisedException())
      * - or not blocked because it terminated normally.
      *
      * In the code below we instead consider a call blocked

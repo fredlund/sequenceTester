@@ -356,7 +356,7 @@ public class UnitTest {
     Call.reset();
 
     call.execute();
-    if (call.isBlocked())
+    if (call.hasBlocked())
       UnitTest.failTest("creating an instance of "+name+" blocks");
     if (call.raisedException())
       UnitTest.failTest
