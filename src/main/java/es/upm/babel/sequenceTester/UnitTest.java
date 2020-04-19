@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Represents a unit test which embedding a unit test statement.
  */
 public class UnitTest {
-  static Checker checker = null;
+  static TestCaseChecker checker = null;
   static String testName;
 
   TestStmt stmt;
@@ -119,7 +119,7 @@ public class UnitTest {
    * is (syntactically) valid, in addition to the standard syntactic checker.
    * @param checker the name of the checker.
    */
-  public static void installChecker(Checker checker) {
+  public static void installChecker(TestCaseChecker checker) {
     UnitTest.checker = checker;
   }
   
