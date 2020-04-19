@@ -99,7 +99,7 @@ public class TestCall {
          
             UnitTest.failTest
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
+               "la llamada "+unblockedCall+
                " deberia haber terminado normalmente "+
                "pero lanzó la excepción "+exc+
                "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
@@ -113,7 +113,7 @@ public class TestCall {
 
             UnitTest.failTest
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
+               "la llamada "+unblockedCall+
                " lanzo la excepcion "+
                "incorrecto: "+exc+
                "; debería haber lanzado la exception "+
@@ -130,7 +130,7 @@ public class TestCall {
             // Yes; an error
             UnitTest.failTest
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
+               "la llamada "+unblockedCall+
                " deberia haber lanzado "+
                "la excepcion "+o.correctExceptionClass()+
                "pero "+returned(unblockedCall.returnValue())+
@@ -148,7 +148,7 @@ public class TestCall {
               Object uniqueReturnValue = o.uniqueReturnValue();
               UnitTest.failTest
                 (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall.printCall()+
+                 "la llamada "+unblockedCall+
                  " devolvió el valor "+
                  "incorrecto: "+result+
                  "; debería haber devuelto el valor "+
@@ -158,7 +158,7 @@ public class TestCall {
               // No; worse diagnostic output
               UnitTest.failTest
                 (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall.printCall()+
+                 "la llamada "+unblockedCall+
                  " devolvió el valor "+
                  "incorrecto: "+result+"\n"+Util.mkTrace(trace));
             }
@@ -182,7 +182,7 @@ public class TestCall {
             llamadas = "la llamada "+callsString;
           UnitTest.failTest
             (prefixConfigurationDescription(configurationDescription)+
-             "la llamada "+call.printCall()+
+             "la llamada "+call+
              " todavia es bloqueado aunque deberia haber sido"+
              " desbloqueado por "+llamadas+
              "\n"+Util.mkTrace(trace));
@@ -206,7 +206,7 @@ public class TestCall {
       
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+
+         "la llamada "+call+
          " deberia bloquear\n"+
          "pero lanzó la excepción "+exc+
          "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
@@ -224,7 +224,7 @@ public class TestCall {
       
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+" "+blockStr+"\n"+
+         "la llamada "+call+" "+blockStr+"\n"+
          "pero "+returned(call.returnValue())+
          "\n"+Util.mkTrace(trace));
     }
@@ -239,18 +239,7 @@ public class TestCall {
                    null);
   }
   
-  public static TestCall unblocks(BasicCall bc) {
-    Call call = new Call(bc);
-    return
-      new TestCall(new Call[] {call},
-                   new int[] {call.name()},
-                   null,
-                   new int[] {},
-                   null);
-  }
-  
-  public static TestCall blocks(String svar, BasicCall bc) {
-    Call call = new Call(bc).n(svar);
+  public static TestCall blocks(String svar, Call call) {
     return
       new TestCall(new Call[] {call},
                    new int[] {},

@@ -1,15 +1,16 @@
 package es.upm.babel.sequenceTester;
 
+import es.upm.babel.cclib.Tryer;
+
 import java.util.Map;
 import java.util.HashMap;
-import java.util.function.Function;
 
 
 /**
  * Represents a BasicCall together with an oracle for deciding if the call
  * executed correctly.
  */
-public class Call {
+public abstract class Call extends Tryer implements GetValue {
   private static int counter = 1;
   private static Map<String,Call> symbolic_vars = null;
   
@@ -19,47 +20,21 @@ public class Call {
   int name;
   String symbolicName;
   Oracle r;
-  BasicCall bc;
-  Function<Object,BasicCall> bcLambda;
-  String actualParameter;
   boolean started = false;
   private Object user = null;
+  private Object returnValue;
   
   /**
    * Constructors a call. A call consists of a recipe for making a call,
    * and optionally a oracle that decides if an invocation of the call returned the
    * correct result, and optionally a symbolic name for the call.
-   *
-   * @param bc an object which can execute the call.
    */
-  public Call(BasicCall bc) {
-    this.bc = bc;
-    this.bcLambda = null;
+  public Call() {
     // By default we check that the call returns normally.
     this.r = Check.returns();
     this.symbolicName = null;
     this.name = new_call_counter();
-    this.user = bc.user();
-  }
-
-  /**
-   * Constructors a call that is parametetric on the result from a previous call, referenced
-   * by its symbolic name.
-   * A call consists of a recipe for making a call,
-   * and optionally a oracle that decides if an invocation of the call returned the
-   * correct result, and optionally a symbolic name for the call.
-   *
-   * @param bcLambda a function returning an object which can execute the call.
-   * @param name the (symbolic) name of the call which this call is parameteric on.
-   */
-  public Call(Function<Object,BasicCall> bcLambda, String name) {
-    this.bc = null;
-    this.bcLambda = bcLambda;
-    // By default we check that the call returns normally.
-    this.r = Check.returns();
-    this.symbolicName = null;
-    this.name = new_call_counter();
-    this.actualParameter = name;
+    this.user = user();
   }
 
   /**
@@ -121,14 +96,48 @@ public class Call {
     return name(symbolicName);
   }
   
-  public BasicCall bc() {
-    return bc;
-  }
-  
   public Oracle oracle() {
     return r;
   }
   
+  /**
+   * Returns the return value of the call (if any).
+   */
+  public Object returnValue() {
+    return returnValue;
+  }
+  
+  /**
+   * Sets the return value of the call (if any).
+   */
+  public void setReturnValue(Object returnValue) {
+    this.returnValue = returnValue;
+  }
+  
+  /**
+   * Checks whether the call returned normally. That is, it is not blocked
+   * and the call did not raise an exception.
+   */
+  public boolean returned() {
+    return !isBlocked() && !raisedException();
+  }
+  
+  /**
+   * Sets the user (process) executing a call.
+   * The library enforces that if a call from a user is blocked, 
+   * another call from the same user cannot be made.
+   */
+  public void setUser(Object user) {
+    this.user = user;
+  }
+  
+  /**
+   * Returns the user of the call.
+   */
+  public Object user() {
+    return user;
+  }
+
   public int name() {
     return this.name;
   }
@@ -145,22 +154,8 @@ public class Call {
     catch (InterruptedException exc) { };
   }
   
-  static void resolveLambda(Call call) {
-    if (call.bc() == null) {
-      Call paramCall = Call.lookupCall(call.actualParameter);
-      if (paramCall.hasStarted() && paramCall.bc.returned()) {
-        Object returnValue = paramCall.returnValue();
-        call.bc = call.bcLambda.apply(returnValue);
-      } else {
-        UnitTest.failTestSyntax
-          ("Call "+ call + " depends on call " + paramCall + " which has not terminated yet");
-      }
-    }
-  }
-
   static void execute(Call[] calls, Object controller,Map<Integer,Call> allCalls) {
     for (Call call : calls) {
-      resolveLambda(call);
       call.setController(controller);
       allCalls.put(call.name(),call);
       call.makeCall();
@@ -181,7 +176,7 @@ public class Call {
    * @param controller The object passed from the call sequence to the call.
    */
   public void setController(Object controller) {
-    bc.setController(controller);
+    setController(controller);
   }
   
   /**
@@ -192,18 +187,11 @@ public class Call {
   }
 
   /**
-   * Does the call represent a lambda abstraction?
-   */
-  public boolean hasLambda() {
-    return bcLambda != null;
-  }
-
-  /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
   public void makeCall() {
     started = true;
-    bc.start();
+    start();
   }
   
   /**
@@ -212,16 +200,7 @@ public class Call {
    * @return a boolean corresponding to whether the call raised an exception or not.
    */
   public boolean raisedException() {
-    return bc.raisedException();
-  }
-  
-  /**
-   * The value returned from the call (if any).
-   *
-   * @return an object corresponding to the value returned by the call.
-   */
-  public Object returnValue() {
-    return bc.returnValue();
+    return raisedException();
   }
   
   /**
@@ -230,41 +209,30 @@ public class Call {
    * @return an object corresponding to the exception raised by the call.
    */
   public Throwable getException() {
-    return bc.getException();
-  }
-  
-  public String toString() {
-    if (bc == null)
-      return "() -> ...";
-    else
-      return bc.toString();
+    return getException();
   }
   
   public static String printCalls(Call[] calls) {
     if (calls.length == 1)
-      return calls[0].printCall();
+      return calls[0].toString();
     else {
       String callsString="";
       for (Call call : calls) {
-        if (callsString != "") callsString += "\n  "+call.printCall();
-        else callsString = call.printCall();
+        if (callsString != "") callsString += "\n  "+call;
+        else callsString = call.toString();
       }
       return callsString;
     }
   }
   
-  public String printCall() {
-    return name()+":"+this.toString();
-  }
-  
   public String printCallWithReturn() {
-    String callString = printCall();
-    if (bc.raisedException())
-      return callString + " raised " + bc.getException();
+    String callString = this.toString();
+    if (raisedException())
+      return callString + " raised " + getException();
     else {
-      Object returnValue = bc.returnValue();
+      Object returnValue = returnValue();
       if (returnValue != null)
-        return callString + " returned " + bc.returnValue();
+        return callString + " returned " + returnValue();
       else
         return callString;
     }
@@ -282,7 +250,7 @@ public class Call {
      * if the call truly blocked AND it did not raise an
      * exception.
      **/
-    return bc.isBlocked() && !bc.raisedException();
+    return isBlocked() && !raisedException();
   }
   
   public int hashCode() {

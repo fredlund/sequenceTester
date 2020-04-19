@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class CounterCall extends BasicCall {
+public abstract class CounterCall extends Call {
   Counter controller;
 
   public CounterCall() { }
