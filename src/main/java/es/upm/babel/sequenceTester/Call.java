@@ -1,5 +1,7 @@
 package es.upm.babel.sequenceTester;
 
+import es.upm.babel.cclib.Tryer;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -8,64 +10,136 @@ import java.util.HashMap;
  * Represents a BasicCall together with an oracle for deciding if the call
  * executed correctly.
  */
-public class Call {
+public abstract class Call extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> symbolic_vars = null;
   
   final static protected int ESPERA_MIN_MS = 100;
   
+  // The internal name of the action -- this is too fragile and should change
   int name;
-  String symbolicName = null;
-  BasicCall bc;
-  Result r;
+  String symbolicName;
+  Oracle r;
+  boolean started = false;
+  private Object user = null;
+  private Object returnValue;
+  private Object controller;
+  
   
   /**
    * Constructors a call. A call consists of a recipe for making a call,
-   * and an oracle that decides if an invocation of the call returned the
-   * correct result.
-   *
-   * @param bc an object which can execute the call.
+   * and optionally a oracle that decides if an invocation of the call returned the
+   * correct result, and optionally a symbolic name for the call.
+   */
+  public Call() {
+    // By default we check that the call returns normally.
+    this.r = Check.returns();
+    this.symbolicName = null;
+    this.name = new_call_counter();
+    this.user = user();
+  }
+
+  /**
+   * Associates an oracle with a call.
    * @param r an oracle which decides if the call returned the correct value.
-   * @param symbolicName a symbolic name for the call. The symbolic variable
+   */
+  public Call oracle(Oracle r) {
+    this.r = r;
+    return this;
+  }
+                
+  /**
+   * A short name for the oracle method.
+   */
+  public Call o(Oracle r) {
+    return oracle(r);
+  }
+
+  /**
+   * Sets the user (process) executing a call.
+   * Note: calling user on a Call overrides any user
+   * defined for the BasicCall .
+   */
+  public Call user(Object user) {
+    return this;
+  }
+
+  
+  /**
+   * A short name for the user method.
+   */
+  public Call u(Object user) {
+    return user(user);
+  }
+
+  /**
+   * Retrieves the user of a call.
+   */
+  public Object getUser() {
+    return user;
+  }
+
+  /**
+   * Associates a symbolic name with a call.
+   * The symbolic variable
    * may be used in a continuation (in the TestStmt where the call resides)
    * to specify that this call was unblocked by a later call.
    */
-  public Call(String symbolicName, BasicCall bc, Result r) {
-    this.name = new_call_counter();
+  public Call name(String symbolicName) {
     this.symbolicName = symbolicName;
-    this.bc = bc;
-    this.r = r;
     add_symbolic_var(this.symbolicName,this);
+    return this;
+  }
+
+  /**
+   * A short name for the name method.
+   */
+  public Call n(String symbolicName) {
+    return name(symbolicName);
   }
   
-  public Call(BasicCall bc, Result r) {
-    this.name = new_call_counter();
-    this.bc = bc;
-    this.r = r;
-  }
-  
-  public Call(BasicCall bc) {
-    this.name = new_call_counter();
-    this.bc = bc;
-    this.r = Return.shouldReturn(true);
-  }
-  
-  public Call(String symbolicName, BasicCall bc) {
-    this.name = new_call_counter();
-    this.symbolicName = symbolicName;
-    this.bc = bc;
-    this.r = Return.shouldReturn(true);
-    add_symbolic_var(this.symbolicName,this);
-  }
-  
-  public BasicCall bc() {
-    return bc;
-  }
-  
-  public Result result() {
+  public Oracle oracle() {
     return r;
   }
   
+  /**
+   * Returns the return value of the call (if any).
+   */
+  public Object returnValue() {
+    return returnValue;
+  }
+  
+  /**
+   * Sets the return value of the call (if any).
+   */
+  public void setReturnValue(Object returnValue) {
+    this.returnValue = returnValue;
+  }
+  
+  /**
+   * Checks whether the call returned normally. That is, it is not blocked
+   * and the call did not raise an exception.
+   */
+  public boolean returned() {
+    return !hasBlocked() && !raisedException();
+  }
+  
+  /**
+   * Sets the user (process) executing a call.
+   * The library enforces that if a call from a user is blocked, 
+   * another call from the same user cannot be made.
+   */
+  public void setUser(Object user) {
+    this.user = user;
+  }
+  
+  /**
+   * Returns the user of the call.
+   */
+  public Object user() {
+    return user;
+  }
+
   public int name() {
     return this.name;
   }
@@ -104,110 +178,70 @@ public class Call {
    * @param controller The object passed from the call sequence to the call.
    */
   public void setController(Object controller) {
-    bc.setController(controller);
+    this.controller = controller;
   }
   
+  /**
+   * Returns the controller.
+   */
+  public Object getController() {
+    return controller;
+  }
+  
+  /**
+   * Returns true if the execution of the call has started.
+   */
+  public boolean hasStarted() {
+    return started;
+  }
+
   /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
   public void makeCall() {
-    bc.start();
-  }
-  
-  /**
-   * Did a call raise an exception?
-   *
-   * @return a boolean corresponding to whether the call raised an exception or not.
-   */
-  public boolean raisedException() {
-    return bc.raisedException();
-  }
-  
-  /**
-   * The value returned from the call (if any).
-   *
-   * @return an object corresponding to the value returned by the call.
-   */
-  public Object returnValue() {
-    return bc.returnValue();
-  }
-  
-  /**
-   * The exception raised by the call (if any).
-   *
-   * @return an object corresponding to the exception raised by the call.
-   */
-  public Throwable getException() {
-    return bc.getException();
-  }
-  
-  public String toString() {
-    return bc.toString();
+    started = true;
+    start();
   }
   
   public static String printCalls(Call[] calls) {
     if (calls.length == 1)
-      return calls[0].printCall();
+      return calls[0].toString();
     else {
       String callsString="";
       for (Call call : calls) {
-        if (callsString != "") callsString += "\n  "+call.printCall();
-        else callsString = call.printCall();
+        if (callsString != "") callsString += "\n  "+call;
+        else callsString = call.toString();
       }
       return callsString;
     }
   }
   
-  public String printCall() {
-    return name()+":"+this.toString();
-  }
-  
   public String printCallWithReturn() {
-    String callString = printCall();
-    if (bc.raisedException())
-      return callString + " raised " + bc.getException();
+    String callString = this.toString();
+    if (raisedException())
+      return callString + " raised " + getException();
     else {
-      Object returnValue = bc.returnValue();
+      Object returnValue = returnValue();
       if (returnValue != null)
-        return callString + " returned " + bc.returnValue();
+        return callString + " returned " + returnValue();
       else
         return callString;
     }
   }
   
-  public static Call returns(BasicCall bc) {
-    return new Call(bc,Return.shouldReturn(true));
-  }
-  
-  public static Call raisesException(BasicCall bc, Class exceptionClass) {
-    return new Call(bc,Return.raisesException(exceptionClass));
-  }
-  
-  public static Call returns(String name, BasicCall bc) {
-    return new Call(name,bc,Return.shouldReturn(true));
-  }
-  
-  public static Call returns(BasicCall bc, Object returnValue) {
-    return new Call(bc,Return.returns(true,returnValue));
-  }
-  
-  public static Call returns(String name, BasicCall bc, Object returnValue) {
-    return new Call(name,bc,Return.returns(true,returnValue));
-  }
-  
-  public boolean isBlocked() {
+  public boolean hasBlocked() {
     /**
-     * In the "current" cclib a call may be:
-     * - blocked (call.isBlocked())
+     * In the "current" cclib a tryer may be:
+     * - blocked (tryer.isBlocked())
      * - blocked because it terminated with an exception 
-     * (call.raisedException())
+     * (tryer.raisedException())
      * - or not blocked because it terminated normally.
      *
      * In the code below we instead consider a call blocked
      * if the call truly blocked AND it did not raise an
      * exception.
      **/
-    return bc.isBlocked() && !bc.raisedException();
+    return isBlocked() && !raisedException();
   }
   
   public int hashCode() {
@@ -246,12 +280,10 @@ public class Call {
     if (result == null) {
       UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolic_vars);
     }
-    System.out.println("lookupCall("+var+") => "+result);
     return result;
   }
   
   public static Call[] parallel(Call... calls) {
     return calls;
   }
-  
 }

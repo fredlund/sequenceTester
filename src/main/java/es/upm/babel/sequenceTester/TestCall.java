@@ -19,13 +19,13 @@ public class TestCall {
   private Set<Integer> callIds;
   private Set<Integer> mustUnblock;
   private Set<Integer> mayUnblock;
-  private Map<Integer,Result> unblockChecks;
+  private Map<Integer,Oracle> unblockChecks;
   
   public TestCall(Call[] calls,
                   int[] mustUnblock,
-                  Result[] mustUnblockResults,
+                  Oracle[] mustUnblockOracles,
                   int[] mayUnblock,
-                  Result[] mayUnblockResults) {
+                  Oracle[] mayUnblockOracles) {
     this.calls = calls;
     this.mustUnblock = new HashSet<Integer>();
     if (mustUnblock != null)
@@ -35,17 +35,17 @@ public class TestCall {
     if (mayUnblock != null)
       for (Integer i : mayUnblock)
         this.mayUnblock.add(i);
-    unblockChecks = new HashMap<Integer,Result>();
-    if (mustUnblockResults != null) {
+    unblockChecks = new HashMap<Integer,Oracle>();
+    if (mustUnblockOracles != null) {
       for (int i=0; i<mustUnblock.length-1; i++) {
-        if (mustUnblockResults[i] != null)
-          unblockChecks.put(mustUnblock[i],mustUnblockResults[i]);
+        if (mustUnblockOracles[i] != null)
+          unblockChecks.put(mustUnblock[i],mustUnblockOracles[i]);
       }
     }
-    if (mayUnblockResults != null) {
+    if (mayUnblockOracles != null) {
       for (int i=0; i<mayUnblock.length; i++) {
-        if (mayUnblockResults[i] != null)
-          unblockChecks.put(mayUnblock[i],mayUnblockResults[i]);
+        if (mayUnblockOracles[i] != null)
+          unblockChecks.put(mayUnblock[i],mayUnblockOracles[i]);
       }
     }
   }
@@ -56,7 +56,6 @@ public class TestCall {
                         String trace,
                         String configurationDescription) {
     // Issue parallel calls
-    System.out.println("Will execute "+Call.printCalls(calls));
     Call.execute(calls,controller,allCalls);
     
     // Compute unblocked (and change blockedCalls)
@@ -75,62 +74,97 @@ public class TestCall {
         print_reason_for_unblocking_incorrectly(unblockedCall,trace,configurationDescription);
       }
       
-      Result r = unblockedCall.result();
-      if (r == null) r = unblockChecks.get(unblockedCall.name());
-      if (r != null && r.hasReturnCheck()) {
-        if (!unblockedCall.raisedException()) {
-          Object result = unblockedCall.returnValue();
-          if (!r.shouldReturn())
+      // Now for checking the results of all unblocked calls
+
+      // First check if the call itself has an oracle
+      Oracle o = unblockedCall.oracle();
+      // If not, the oracle may be in the unblock specification
+      if (o == null) o = unblockChecks.get(unblockedCall.name());
+
+      if (o != null) {
+
+        // Did the call terminate with an exception?
+        if (unblockedCall.raisedException()) {
+
+          // Yes...
+          Throwable exc = unblockedCall.getException();
+
+          // Does the oracle specify a normal return? (i.e., no exception)
+          if (o.returnsNormally()) {
+
+            // Yes, an error...
+            StringWriter errors = new StringWriter();
+            exc.printStackTrace(new PrintWriter(errors));
+            String StackTrace = errors.toString();
+         
             UnitTest.failTest
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
+               "la llamada "+unblockedCall+
+               " deberia haber terminado normalmente "+
+               "pero lanzó la excepción "+exc+
+               "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
+          }
+
+          // Else check if the exception is the correct exception
+          if (!o.correctException(exc)) {
+            StringWriter errors = new StringWriter();
+            exc.printStackTrace(new PrintWriter(errors));
+            String StackTrace = errors.toString();
+
+            UnitTest.failTest
+              (prefixConfigurationDescription(configurationDescription)+
+               "la llamada "+unblockedCall+
+               " lanzo la excepcion "+
+               "incorrecto: "+exc+
+               "; debería haber lanzado la exception "+
+               o.correctExceptionClass().getName()+
+               "\n"+"\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
+          }
+        } else {
+          // No, the call terminated normally...
+          Object result = unblockedCall.returnValue();
+
+          // Does the oracle specify an exception?
+          if (!o.returnsNormally()) {
+
+            // Yes; an error
+            UnitTest.failTest
+              (prefixConfigurationDescription(configurationDescription)+
+               "la llamada "+unblockedCall+
                " deberia haber lanzado "+
-               "una excepcion "+
+               "la excepcion "+o.correctExceptionClass()+
                "pero "+returned(unblockedCall.returnValue())+
                "\n"+Util.mkTrace(trace));
-          if (r.checksValue() && !r.correctReturnValue(result)) {
-            if (r.hasUniqueReturnValue()) {
-              Object uniqueReturnValue = r.uniqueReturnValue();
+          }
+
+          // No, a normal return was specified.
+          // Check the return value
+          if (!o.correctReturnValue(result)) {
+
+            // An error; does the oracle specify a unique return value?
+            if (o.hasUniqueReturnValue()) {
+
+              // Yes; we can provide better diagnostic output
+              Object uniqueReturnValue = o.uniqueReturnValue();
               UnitTest.failTest
                 (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall.printCall()+
+                 "la llamada "+unblockedCall+
                  " devolvió el valor "+
                  "incorrecto: "+result+
                  "; debería haber devuelto el valor "+
                  uniqueReturnValue+
                  "\n"+Util.mkTrace(trace));
             } else {
+              // No; worse diagnostic output
               UnitTest.failTest
                 (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall.printCall()+
+                 "la llamada "+unblockedCall+
                  " devolvió el valor "+
                  "incorrecto: "+result+"\n"+Util.mkTrace(trace));
             }
           }
-        } else {
-          Throwable exc = unblockedCall.getException();
-          StringWriter errors = new StringWriter();
-          exc.printStackTrace(new PrintWriter(errors));
-          String StackTrace = errors.toString();
-          
-          if (r.shouldReturn()) {
-            UnitTest.failTest
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
-               " deberia haber terminado normalmente "+
-               "pero lanzó la excepción "+exc+
-               "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
-          }
-          if (r.checksValue() && !r.correctException(exc))
-            UnitTest.failTest
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall.printCall()+
-               " lanzo la excepcion "+
-               "incorrecto: "+exc+
-               "; debería haber lanzado la exception "+
-               r.correctExceptionClass().getName()+
-               "\n"+"\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
-        }	    
+        }
+
       }
     }
     
@@ -139,7 +173,7 @@ public class TestCall {
     for (Integer UnblockedId : mustUnblock) {
       if (blockedCalls.containsKey(UnblockedId)) {
         Call call = allCalls.get(UnblockedId);
-        if (call.isBlocked()) {
+        if (call.hasBlocked()) {
           String llamadas;
           if (calls.length > 1)
             llamadas =
@@ -148,7 +182,7 @@ public class TestCall {
             llamadas = "la llamada "+callsString;
           UnitTest.failTest
             (prefixConfigurationDescription(configurationDescription)+
-             "la llamada "+call.printCall()+
+             "la llamada "+call+
              " todavia es bloqueado aunque deberia haber sido"+
              " desbloqueado por "+llamadas+
              "\n"+Util.mkTrace(trace));
@@ -172,7 +206,7 @@ public class TestCall {
       
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+
+         "la llamada "+call+
          " deberia bloquear\n"+
          "pero lanzó la excepción "+exc+
          "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
@@ -190,7 +224,7 @@ public class TestCall {
       
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+" "+blockStr+"\n"+
+         "la llamada "+call+" "+blockStr+"\n"+
          "pero "+returned(call.returnValue())+
          "\n"+Util.mkTrace(trace));
     }
@@ -205,18 +239,7 @@ public class TestCall {
                    null);
   }
   
-  public static TestCall unblocks(BasicCall bc) {
-    Call call = Call.returns(bc);
-    return
-      new TestCall(new Call[] {call},
-                   new int[] {call.name()},
-                   null,
-                   new int[] {},
-                   null);
-  }
-  
-  public static TestCall blocks(String svar, BasicCall bc) {
-    Call call = Call.returns(svar, bc);
+  public static TestCall blocks(String svar, Call call) {
     return
       new TestCall(new Call[] {call},
                    new int[] {},
@@ -241,26 +264,11 @@ public class TestCall {
     return intparms;
   }
   
-  public static int[] unblocks(Pair<String,Return>... parms) {
+  public static int[] unblocks(Pair<String,Oracle>... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
       intparms[i] = Call.lookupCall(parms[i].getLeft()).name();
     return intparms;
-  }
-  
-  public static TestCall unblocks(BasicCall bc, String... unblocks) {
-    Call call = Call.returns(bc);
-    int unblock_spec[] = unblocks(unblocks);
-    int unblocks_arg[] = new int[unblock_spec.length+1];
-    for (int i=0; i<unblock_spec.length; i++)
-      unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
-    return
-      new TestCall(new Call[] {call},
-                   unblocks_arg,
-                   null,
-                   new int[] {},
-                   null);
   }
   
   public static TestCall unblocks(Call call, String... unblocks) {
@@ -277,49 +285,21 @@ public class TestCall {
                    null);
   }
   
-  public static TestCall unblocks(BasicCall bc, Pair<String,Return>... unblocks) {
-    Call call = Call.returns(bc);
+  public static TestCall unblocks(Call call, Pair<String,Oracle>... unblocks) {
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
       unblocks_arg[i] = unblock_spec[i];
     unblocks_arg[unblock_spec.length] = call.name();
-    Result results[] = new Result[unblock_spec.length];
+    Oracle oracles[] = new Oracle[unblock_spec.length];
     for (int i=0; i<unblock_spec.length; i++)
-      results[i] = unblocks[i].getRight();
+      oracles[i] = unblocks[i].getRight();
     return
       new TestCall(new Call[] {call},
                    unblocks_arg,
-                   results,
+                   oracles,
                    new int[] {},
                    null);
-  }
-  
-  public static TestCall unblocks(Call call, Pair<String,Return>... unblocks) {
-    int unblock_spec[] = unblocks(unblocks);
-    int unblocks_arg[] = new int[unblock_spec.length+1];
-    for (int i=0; i<unblock_spec.length; i++)
-      unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
-    Result results[] = new Result[unblock_spec.length];
-    for (int i=0; i<unblock_spec.length; i++)
-      results[i] = unblocks[i].getRight();
-    return
-      new TestCall(new Call[] {call},
-                   unblocks_arg,
-                   results,
-                   new int[] {},
-                   null);
-  }
-  
-  public static TestCall blocks(String svar, BasicCall bc, String... unblocks) {
-    Call call = Call.returns(svar,bc);
-    int unblock_spec[] = unblocks(unblocks);
-    return new TestCall(new Call[] {call},
-                        unblock_spec,
-                        null,
-                        new int[]{},
-                        null);
   }
   
   public static TestCall blocks(Call call, String... unblocks) {

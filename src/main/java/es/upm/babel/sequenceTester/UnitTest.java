@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Represents a unit test which embedding a unit test statement.
  */
 public class UnitTest {
-  static Checker checker = null;
+  static TestCaseChecker checker = null;
   static String testName;
 
   TestStmt stmt;
@@ -119,7 +119,7 @@ public class UnitTest {
    * is (syntactically) valid, in addition to the standard syntactic checker.
    * @param checker the name of the checker.
    */
-  public static void installChecker(Checker checker) {
+  public static void installChecker(TestCaseChecker checker) {
     UnitTest.checker = checker;
   }
   
@@ -156,8 +156,9 @@ public class UnitTest {
              " which is not in the active set "+active+"\n");
         }
         Call call = active.get(unblockedId);
-        if (call.bc().user() != null)
-          blockedUsers.remove(call.bc().user());
+        Object user = call.getUser();
+        if (user != null)
+          blockedUsers.remove(user);
       }
       
       for (Integer unblockedId : testCall.mayUnblock()) {
@@ -220,8 +221,8 @@ public class UnitTest {
                " has an unblockedId "+unblockedId+
                " which is not found in "+newActive+"\n");
           }
-          if (call.bc().user() != null)
-            newBlockedUsers.remove(call.bc().user());
+          if (call.user() != null)
+            newBlockedUsers.remove(call.user());
           newActive.remove(unblockedId);
         }
         
@@ -239,14 +240,14 @@ public class UnitTest {
                                           Set<Object> blockedUsers,
                                           int counter) {
     for (Call call : calls) {
-      if (call.bc().user() != null &&
-          blockedUsers.contains(call.bc().user())) {
+      Object user = call.getUser();
+      if (user != null && blockedUsers.contains(user)) {
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
-           "user "+call.bc().user()+" in call "+call.printCall()+
+           "user "+user+" in call "+call+
            " is blocked"+"\n");
       }
-      blockedUsers.add(call.bc().user());
+      blockedUsers.add(user);
     }
     
     for (Call call : calls) {
@@ -349,15 +350,13 @@ public class UnitTest {
   /**
    * Starts a controller with a given name and the call to create it.
    */
-  public static Object startController(String name,BasicCall bc) {
-    Call call = new Call(bc);
-
+  public static Object startController(String name, Call call) {
     // For now we have to reset the call counter since startController actions are not counted
     // This is ugly and should be changed to a more flexible policy for action naming...
     Call.reset();
 
     call.execute();
-    if (call.isBlocked())
+    if (call.hasBlocked())
       UnitTest.failTest("creating an instance of "+name+" blocks");
     if (call.raisedException())
       UnitTest.failTest
