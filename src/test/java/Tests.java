@@ -54,7 +54,8 @@ class Tests {
         new Counter(),
         TestCall.unblocks(new Set(3))
         ,TestCall.unblocks(new Dec().n("dec"))
-        ,TestCall.unblocks(new Lambda((result) -> new Print("The value returned from Dec() is "+result),"dec"))
+        ,TestCall.unblocks(new Lambda((result) -> new Print("The value returned from Dec() is "+result).n("print").o(Check.returns(2)),"dec"))
+        ,TestCall.unblocks(new Lambda((result) -> new Print("The value returned from Print() is "+result),"print"))
         ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class)))
         ).run());
   }

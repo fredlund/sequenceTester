@@ -5,5 +5,8 @@ package es.upm.babel.sequenceTester;
  * cases are statically sound).
  */
 public interface TestCaseChecker {
-    public void check(String name, TestStmt stmt);
+  /**
+   * Checks a test statement.
+   */
+  public void check(String name, TestStmt stmt);
 }

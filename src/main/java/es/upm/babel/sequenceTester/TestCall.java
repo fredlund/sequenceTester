@@ -55,14 +55,13 @@ public class TestCall {
                         Object controller,
                         String trace,
                         String configurationDescription) {
+
     // Issue parallel calls
     Call.execute(calls,controller,allCalls);
     
     // Compute unblocked (and change blockedCalls)
     Set<Call> newUnblocked = Util.newUnblocked(calls, blockedCalls);
-    
     String callsString = Call.printCalls(calls);
-    
     trace = Util.extendTrace(calls,newUnblocked,trace);
     
     // Check that each unbloked call is either

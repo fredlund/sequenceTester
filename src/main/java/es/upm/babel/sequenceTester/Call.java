@@ -19,7 +19,7 @@ public abstract class Call extends Tryer {
   // The internal name of the action -- this is too fragile and should change
   int name;
   String symbolicName;
-  Oracle r;
+  Oracle oracle;
   boolean started = false;
   private Object user = null;
   private Object returnValue;
@@ -27,43 +27,43 @@ public abstract class Call extends Tryer {
   
   
   /**
-   * Constructors a call. A call consists of a recipe for making a call,
+   * Constructs a call. A call consists of a recipe for making a call,
    * and optionally a oracle that decides if an invocation of the call returned the
    * correct result, and optionally a symbolic name for the call.
    */
   public Call() {
-    // By default we check that the call returns normally.
-    this.r = Check.returns();
     this.symbolicName = null;
     this.name = new_call_counter();
     this.user = user();
+
+    // By default we check that the call returns normally.
+    this.oracle = Check.returns();
   }
 
   /**
    * Associates an oracle with a call.
    * @param r an oracle which decides if the call returned the correct value.
    */
-  public Call oracle(Oracle r) {
-    this.r = r;
+  public Call oracle(Oracle oracle) {
+    this.oracle = oracle;
     return this;
   }
                 
   /**
-   * A short name for the oracle method.
+   * Provides a short name for the oracle method.
    */
-  public Call o(Oracle r) {
-    return oracle(r);
+  public Call o(Oracle oracle) {
+    return oracle(oracle);
   }
 
   /**
    * Sets the user (process) executing a call.
-   * Note: calling user on a Call overrides any user
-   * defined for the BasicCall .
+   * The library enforces that if a call from a user is blocked, 
+   * another call from the same user cannot be made.
    */
   public Call user(Object user) {
     return this;
   }
-
   
   /**
    * A short name for the user method.
@@ -72,6 +72,15 @@ public abstract class Call extends Tryer {
     return user(user);
   }
 
+  /**
+   * Sets the user (process) executing a call.
+   * The library enforces that if a call from a user is blocked, 
+   * another call from the same user cannot be made.
+   */
+  public void setUser(Object user) {
+    this.user = user;
+  }
+  
   /**
    * Retrieves the user of a call.
    */
@@ -99,7 +108,7 @@ public abstract class Call extends Tryer {
   }
   
   public Oracle oracle() {
-    return r;
+    return oracle;
   }
   
   /**
@@ -122,15 +131,6 @@ public abstract class Call extends Tryer {
    */
   public boolean returned() {
     return !hasBlocked() && !raisedException();
-  }
-  
-  /**
-   * Sets the user (process) executing a call.
-   * The library enforces that if a call from a user is blocked, 
-   * another call from the same user cannot be made.
-   */
-  public void setUser(Object user) {
-    this.user = user;
   }
   
   /**

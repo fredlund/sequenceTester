@@ -14,6 +14,10 @@ public class Print extends CounterCall {
     System.out.println(msg);
   }
 
+  public Object returnValue() {
+    return 2;
+  }
+
   public String toString() {
     return "print(\""+msg+"\")";
   }

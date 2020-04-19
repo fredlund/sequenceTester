@@ -5,4 +5,10 @@ TOOD list
 
 - cclib:
 
-provide a method in Tryer to check whether a call has started -- boolean started().
+Provide a method in Tryer to check whether a call has started -- boolean started().
+
+- Make call numbering less fragile.
+
+- Clean up documentation.
+
+- Use a getter/setter style uniformly.

@@ -13,9 +13,10 @@ public class Util {
   
   public static Set<Call> newUnblocked(Call[] calls, Map<Integer,Call> blockedCalls)
   {
-    for (Call call : calls)
+    for (Call call : calls) {
       blockedCalls.put(call.name(),call);
-    
+    }
+
     // Checks which previously blocked calls have become unblocked
     // and remove these unblocked calls from the list of blocked calls
     Set<Call> newUnblocked = computeUnblocked(blockedCalls);

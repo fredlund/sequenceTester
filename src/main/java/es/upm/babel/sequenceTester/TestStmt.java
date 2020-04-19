@@ -7,9 +7,13 @@ import java.util.Map;
  * execute.
  */
 public interface TestStmt {
-    public void execute(Map<Integer,Call> allCalls,
-			Map<Integer,Call> blockedCalls,
-			Object controller,
-			String trace,
-			String configurationDescription);
+
+  /**
+   * Executes a test statement.
+   */
+  void execute(Map<Integer,Call> allCalls,
+               Map<Integer,Call> blockedCalls,
+               Object controller,
+               String trace,
+               String configurationDescription);
 }
