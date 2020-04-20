@@ -40,7 +40,7 @@ public class Lambda extends Call {
       Object returnValue = paramCall.returnValue();
       this.called = lambda.apply(returnValue);
       called.setController(getController());
-      if (oracle == null) oracle = called.oracle();
+      if (oracle == null) oracle = called.getOracle();
       return called;
     } else {
       UnitTest.failTestSyntax

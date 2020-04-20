@@ -76,7 +76,7 @@ public class TestCall {
       // Now for checking the results of all unblocked calls
 
       // First check if the call itself has an oracle
-      Oracle o = unblockedCall.oracle();
+      Oracle o = unblockedCall.getOracle();
       // If not, the oracle may be in the unblock specification
       if (o == null) o = unblockChecks.get(unblockedCall.getCallId());
 

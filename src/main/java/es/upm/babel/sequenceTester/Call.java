@@ -107,7 +107,10 @@ public abstract class Call extends Tryer {
     return name(symbolicName);
   }
   
-  public Oracle oracle() {
+  /**
+   * Returns the oracle of the call (otherwise null).
+   */
+  public Oracle getOracle() {
     return oracle;
   }
   
@@ -137,6 +140,9 @@ public abstract class Call extends Tryer {
     return this.callId;
   }
   
+  /**
+   * Returns the symbolic name of the call (otherwise null).
+   */
   String getSymbolicName() {
     return this.symbolicName;
   }
@@ -189,12 +195,12 @@ public abstract class Call extends Tryer {
   /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
-  public void makeCall() {
+   void makeCall() {
     started = true;
     start();
   }
   
-  public static String printCalls(Call[] calls) {
+  static String printCalls(Call[] calls) {
     if (calls.length == 1)
       return calls[0].toString();
     else {
@@ -207,7 +213,7 @@ public abstract class Call extends Tryer {
     }
   }
   
-  public String printCallWithReturn() {
+  String printCallWithReturn() {
     String callString = this.toString();
     if (raisedException())
       return callString + " raised " + getException();
@@ -252,7 +258,7 @@ public abstract class Call extends Tryer {
     return result;
   }
   
-  public static void reset() {
+  static void reset() {
     counter = 1;
     symbolicVars = new HashMap<String,Call>();
   }
@@ -266,15 +272,11 @@ public abstract class Call extends Tryer {
     symbolicVars.put(var,call);
   }
   
-  public static Call lookupCall(String var) {
+  static Call lookupCall(String var) {
     Call result = symbolicVars.get(var);
     if (result == null) {
       UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolicVars);
     }
     return result;
-  }
-  
-  public static Call[] parallel(Call... calls) {
-    return calls;
   }
 }
