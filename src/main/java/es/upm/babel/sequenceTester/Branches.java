@@ -70,11 +70,11 @@ public class Branches implements TestStmt {
     }
   }
   
-  public Call[] calls() {
+  Call[] calls() {
     return calls;
   }
   
-  public Alternative[] alternatives() {
+  Alternative[] alternatives() {
     return alternatives;
   }
   

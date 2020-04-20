@@ -26,11 +26,11 @@ public class Alternative {
     return new Alternative(intparms, new Nil());
   }
   
-  public int[] unblocks() {
+  int[] unblocks() {
     return unblocks;
   }
   
-  public TestStmt continuation() {
+  TestStmt continuation() {
     return continuation;
   }
 }
