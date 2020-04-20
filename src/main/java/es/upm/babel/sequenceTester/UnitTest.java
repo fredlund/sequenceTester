@@ -221,8 +221,8 @@ public class UnitTest {
                " has an unblockedId "+unblockedId+
                " which is not found in "+newActive+"\n");
           }
-          if (call.user() != null)
-            newBlockedUsers.remove(call.user());
+          if (call.getUser() != null)
+            newBlockedUsers.remove(call.getUser());
           newActive.remove(unblockedId);
         }
         
@@ -251,17 +251,17 @@ public class UnitTest {
     }
     
     for (Call call : calls) {
-      if (call.name() != counter) {
+      if (call.getCallId() != counter) {
         System.out.println
           ("*** Test "+name+" is incorrect:\n"+
            "current counter is "+counter+
-           " but call "+call+" has id "+call.name()+"\n");
+           " but call "+call+" has id "+call.getCallId()+"\n");
         try { Thread.sleep(100); }
         catch (InterruptedException exc) {};
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
            "current counter is "+counter+
-           " but call "+call+" has id "+call.name()+"\n");
+           " but call "+call+" has id "+call.getCallId()+"\n");
       }
       active.put(counter,call);
       ++counter;

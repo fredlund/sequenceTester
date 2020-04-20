@@ -68,8 +68,8 @@ public class TestCall {
     // listed in the xor or must unblocked enumeration,
     // and check that the value (or exception) is correct
     for (Call unblockedCall : newUnblocked) {
-      if (!mustUnblock.contains(unblockedCall.name()) &&
-          !mayUnblock.contains(unblockedCall.name())) {
+      if (!mustUnblock.contains(unblockedCall.getCallId()) &&
+          !mayUnblock.contains(unblockedCall.getCallId())) {
         print_reason_for_unblocking_incorrectly(unblockedCall,trace,configurationDescription);
       }
       
@@ -78,7 +78,7 @@ public class TestCall {
       // First check if the call itself has an oracle
       Oracle o = unblockedCall.oracle();
       // If not, the oracle may be in the unblock specification
-      if (o == null) o = unblockChecks.get(unblockedCall.name());
+      if (o == null) o = unblockChecks.get(unblockedCall.getCallId());
 
       if (o != null) {
 
@@ -232,7 +232,7 @@ public class TestCall {
   public static TestCall unblocks(Call call) {
     return
       new TestCall(new Call[] {call},
-                   new int[] {call.name()},
+                   new int[] {call.getCallId()},
                    null,
                    new int[] {},
                    null);
@@ -259,14 +259,14 @@ public class TestCall {
   public static int[] unblocks(String... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i]).name();
+      intparms[i] = Call.lookupCall(parms[i]).getCallId();
     return intparms;
   }
   
   public static int[] unblocks(Pair<String,Oracle>... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i].getLeft()).name();
+      intparms[i] = Call.lookupCall(parms[i].getLeft()).getCallId();
     return intparms;
   }
   
@@ -275,7 +275,7 @@ public class TestCall {
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
       unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
+    unblocks_arg[unblock_spec.length] = call.getCallId();
     return
       new TestCall(new Call[] {call},
                    unblocks_arg,
@@ -289,7 +289,7 @@ public class TestCall {
     int unblocks_arg[] = new int[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
       unblocks_arg[i] = unblock_spec[i];
-    unblocks_arg[unblock_spec.length] = call.name();
+    unblocks_arg[unblock_spec.length] = call.getCallId();
     Oracle oracles[] = new Oracle[unblock_spec.length];
     for (int i=0; i<unblock_spec.length; i++)
       oracles[i] = unblocks[i].getRight();

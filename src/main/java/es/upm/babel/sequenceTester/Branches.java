@@ -40,7 +40,7 @@ public class Branches implements TestStmt {
           boolean matches = false;
           int i = 0;
           while (i < alt.unblocks.length && !matches) {
-            if (call.name == alt.unblocks[i]) matches=true;
+            if (call.getCallId() == alt.unblocks[i]) matches=true;
             else i++;
           }
           if (!matches) {

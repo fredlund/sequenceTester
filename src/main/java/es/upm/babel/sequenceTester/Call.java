@@ -12,12 +12,12 @@ import java.util.HashMap;
  */
 public abstract class Call extends Tryer {
   private static int counter = 1;
-  private static Map<String,Call> symbolic_vars = null;
+  private static Map<String,Call> symbolicVars = null;
   
   final static protected int ESPERA_MIN_MS = 100;
   
-  // The internal name of the action -- this is too fragile and should change
-  int name;
+  // The internal id of the action -- this is too fragile and should change
+  int callId;
   String symbolicName;
   Oracle oracle;
   boolean started = false;
@@ -33,8 +33,8 @@ public abstract class Call extends Tryer {
    */
   public Call() {
     this.symbolicName = null;
-    this.name = new_call_counter();
-    this.user = user();
+    this.callId = newCallCounter();
+    this.user = getUser();
 
     // By default we check that the call returns normally.
     this.oracle = Check.returns();
@@ -96,7 +96,7 @@ public abstract class Call extends Tryer {
    */
   public Call name(String symbolicName) {
     this.symbolicName = symbolicName;
-    add_symbolic_var(this.symbolicName,this);
+    addSymbolicVar(this.symbolicName,this);
     return this;
   }
 
@@ -133,18 +133,11 @@ public abstract class Call extends Tryer {
     return !hasBlocked() && !raisedException();
   }
   
-  /**
-   * Returns the user of the call.
-   */
-  public Object user() {
-    return user;
-  }
-
-  public int name() {
-    return this.name;
+  int getCallId() {
+    return this.callId;
   }
   
-  public String symbolicName() {
+  String getSymbolicName() {
     return this.symbolicName;
   }
   
@@ -159,7 +152,7 @@ public abstract class Call extends Tryer {
   static void execute(Call[] calls, Object controller,Map<Integer,Call> allCalls) {
     for (Call call : calls) {
       call.setController(controller);
-      allCalls.put(call.name(),call);
+      allCalls.put(call.getCallId(),call);
       call.makeCall();
     }
     
@@ -243,17 +236,17 @@ public abstract class Call extends Tryer {
   }
   
   public int hashCode() {
-    return name;
+    return getCallId();
   }
   
   public boolean equals(Object obj) {
     if (obj instanceof Call) {
       Call otherCall = (Call) obj;
-      return name() == otherCall.name();
+      return getCallId() == otherCall.getCallId();
     } else return false;
   }
   
-  static int new_call_counter() {
+  static int newCallCounter() {
     int result = counter;
     ++counter;
     return result;
@@ -261,22 +254,22 @@ public abstract class Call extends Tryer {
   
   public static void reset() {
     counter = 1;
-    symbolic_vars = new HashMap<String,Call>();
+    symbolicVars = new HashMap<String,Call>();
   }
   
-  static void add_symbolic_var(String var, Call call) {
-    Call result = symbolic_vars.get(var);
+  static void addSymbolicVar(String var, Call call) {
+    Call result = symbolicVars.get(var);
     if (result != null) {
       UnitTest.failTestFramework
         ("symbolic variable "+var+" already has a value "+result);
     }
-    symbolic_vars.put(var,call);
+    symbolicVars.put(var,call);
   }
   
   public static Call lookupCall(String var) {
-    Call result = symbolic_vars.get(var);
+    Call result = symbolicVars.get(var);
     if (result == null) {
-      UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolic_vars);
+      UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolicVars);
     }
     return result;
   }

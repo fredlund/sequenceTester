@@ -14,14 +14,14 @@ public class Util {
   public static Set<Call> newUnblocked(Call[] calls, Map<Integer,Call> blockedCalls)
   {
     for (Call call : calls) {
-      blockedCalls.put(call.name(),call);
+      blockedCalls.put(call.getCallId(),call);
     }
 
     // Checks which previously blocked calls have become unblocked
     // and remove these unblocked calls from the list of blocked calls
     Set<Call> newUnblocked = computeUnblocked(blockedCalls);
     for (Call unblockedCall : newUnblocked)
-      blockedCalls.remove(unblockedCall.name());
+      blockedCalls.remove(unblockedCall.getCallId());
     
     return newUnblocked;
   }

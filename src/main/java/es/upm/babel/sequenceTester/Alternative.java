@@ -15,14 +15,14 @@ public class Alternative {
   public static Alternative alternative(TestStmt continuation, String... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i]).name();
+      intparms[i] = Call.lookupCall(parms[i]).getCallId();
     return new Alternative(intparms, continuation);
   }
   
   public static Alternative alternative(String... parms) {
     int intparms[] = new int[parms.length];
     for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i]).name();
+      intparms[i] = Call.lookupCall(parms[i]).getCallId();
     return new Alternative(intparms, new Nil());
   }
   
