@@ -69,5 +69,42 @@ public class Util {
   public static String mkTrace(String trace) {
     return "\nTrace (error detectado en la ultima linea):\n"+trace+"\n\n";
   }
+
+  /**
+   * Returns a test statement composed of a sequence of calls.
+   */
+  public static TestStmt sequence(TestCall... testCalls) {
+    return sequenceEndsWith(testCalls, new Nil());
+  }
+  
+  /**
+   * Returns a test statement composed of a sequence of calls,
+   * and ending with test statement parameter.
+   */
+  public static TestStmt sequenceEndsWith(TestCall[] testCalls, TestStmt endStmt) {
+    int index = testCalls.length-1;
+    TestStmt stmt = endStmt;
+    while (index >= 0) {
+      stmt = new Prefix(testCalls[index--],stmt);
+    }
+    return stmt;
+  }
+  
+  /**
+   * Sequential composition of two test statements.
+   */
+  public static TestStmt compose(TestStmt stmt1, TestStmt stmt2) {
+    if (stmt1 instanceof Prefix) {
+      Prefix prefix = (Prefix) stmt1;
+      TestCall testCall = prefix.testCall();
+      TestStmt stmt = prefix.stmt();
+      return new Prefix(testCall,compose(stmt,stmt2));
+    } else if (stmt1 instanceof Nil) {
+      return stmt2;
+    } else {
+      UnitTest.failTestFramework("cannot compose statements "+stmt1+" and "+stmt2+"\n");
+      return stmt1;
+    }
+  }
 }
 
