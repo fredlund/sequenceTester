@@ -10,7 +10,7 @@ import java.util.Set;
 public class Branches implements TestStmt {
   private Call[] calls;
   private Alternative[] alternatives;
-  
+
   public Branches(Call[] calls, Alternative[] alternatives) {
     this.calls = calls;
     this.alternatives = alternatives;
@@ -20,7 +20,7 @@ public class Branches implements TestStmt {
          " and alternatives.length="+alternatives.length);
     }
   }
-  
+
   public void execute(Map<Integer,Call> allCalls,
                       Map<Integer,Call> blockedCalls,
                       Object controller,
@@ -28,9 +28,9 @@ public class Branches implements TestStmt {
                       String configurationDescription) {
     Call.execute(calls,controller,allCalls);
     Set<Call> newUnblocked = Util.newUnblocked(calls, blockedCalls);
-    
+
     trace = Util.extendTrace(calls, newUnblocked, trace);
-    
+
     int index = 0; boolean found=false;
     while (index < alternatives.length && !found) {
       Alternative alt = alternatives[index];
@@ -51,7 +51,7 @@ public class Branches implements TestStmt {
       }
       if (!found) ++index;
     }
-    
+
     if (found) {
       alternatives[index].continuation.execute
         (allCalls,blockedCalls,controller,trace,configurationDescription);
@@ -61,7 +61,7 @@ public class Branches implements TestStmt {
         if (unblocksString=="") unblocksString=unblockedCall.toString();
         else unblocksString+=", "+unblockedCall;
       }
-      
+
       UnitTest.failTest
         ("ninguno de los alternativos desbloquea todos las llamadas "+
          unblocksString+
@@ -69,15 +69,15 @@ public class Branches implements TestStmt {
          "\n"+Util.mkTrace(trace));
     }
   }
-  
-  Call[] calls() {
+
+  public Call[] calls() {
     return calls;
   }
-  
-  Alternative[] alternatives() {
+
+  public Alternative[] alternatives() {
     return alternatives;
   }
-  
+
   public static Branches branches(Call[] calls, Alternative... alternatives) {
     return new Branches(calls,alternatives);
   }
