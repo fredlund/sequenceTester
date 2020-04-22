@@ -25,11 +25,11 @@ public class Prefix implements TestStmt {
 	testStmt.execute(allCalls, blockedCalls, controller, trace, configurationDescription);
     }
 
-    TestCall testCall() {
+    public TestCall testCall() {
 	return testCall;
     }
 
-    TestStmt stmt() {
+    public TestStmt stmt() {
 	return testStmt;
     }
 
@@ -37,6 +37,3 @@ public class Prefix implements TestStmt {
 	return "Prefix("+testCall+","+testStmt+")";
     }
 }
-
-    
-    
