@@ -85,4 +85,8 @@ public class Check implements Oracle {
   public Class correctExceptionClass() {
     return exceptionClass;
   }
+
+  public String error() {
+    return null;
+  }
 }

@@ -29,6 +29,12 @@ public interface Oracle {
   public boolean correctException(Throwable exc);
   
   /**
+   * Optionally returns a String explaining the error. 
+   * A null return result is valid.
+   */
+  public String error();
+  
+  /**
    * Does the oracle accept a single return value, and is it capable of return it?
    */
   public boolean hasUniqueReturnValue();

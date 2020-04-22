@@ -35,13 +35,16 @@ public class TestCall {
     if (mayUnblock != null)
       for (Integer i : mayUnblock)
         this.mayUnblock.add(i);
+
     unblockChecks = new HashMap<Integer,Oracle>();
+
     if (mustUnblockOracles != null) {
-      for (int i=0; i<mustUnblock.length-1; i++) {
+      for (int i=0; i<mustUnblock.length; i++) {
         if (mustUnblockOracles[i] != null)
           unblockChecks.put(mustUnblock[i],mustUnblockOracles[i]);
       }
     }
+
     if (mayUnblockOracles != null) {
       for (int i=0; i<mayUnblock.length; i++) {
         if (mayUnblockOracles[i] != null)
@@ -74,97 +77,15 @@ public class TestCall {
       }
       
       // Now for checking the results of all unblocked calls
+      // Note that we can have oracles in two places:
+      // associated with the call itself, and/or in the testcall.
+      // We need to chekck both.
 
       // First check if the call itself has an oracle
-      Oracle o = unblockedCall.getOracle();
-      // If not, the oracle may be in the unblock specification
-      if (o == null) o = unblockChecks.get(unblockedCall.getCallId());
+      checkOracle(unblockedCall, unblockedCall.getOracle(), trace, configurationDescription);
 
-      if (o != null) {
-
-        // Did the call terminate with an exception?
-        if (unblockedCall.raisedException()) {
-
-          // Yes...
-          Throwable exc = unblockedCall.getException();
-
-          // Does the oracle specify a normal return? (i.e., no exception)
-          if (o.returnsNormally()) {
-
-            // Yes, an error...
-            StringWriter errors = new StringWriter();
-            exc.printStackTrace(new PrintWriter(errors));
-            String StackTrace = errors.toString();
-         
-            UnitTest.failTest
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
-               " deberia haber terminado normalmente "+
-               "pero lanzó la excepción "+exc+
-               "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
-          }
-
-          // Else check if the exception is the correct exception
-          if (!o.correctException(exc)) {
-            StringWriter errors = new StringWriter();
-            exc.printStackTrace(new PrintWriter(errors));
-            String StackTrace = errors.toString();
-
-            UnitTest.failTest
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
-               " lanzo la excepcion "+
-               "incorrecto: "+exc+
-               "; debería haber lanzado la exception "+
-               o.correctExceptionClass().getName()+
-               "\n"+"\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
-          }
-        } else {
-          // No, the call terminated normally...
-          Object result = unblockedCall.returnValue();
-
-          // Does the oracle specify an exception?
-          if (!o.returnsNormally()) {
-
-            // Yes; an error
-            UnitTest.failTest
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
-               " deberia haber lanzado "+
-               "la excepcion "+o.correctExceptionClass()+
-               "pero "+returned(unblockedCall.returnValue())+
-               "\n"+Util.mkTrace(trace));
-          }
-
-          // No, a normal return was specified.
-          // Check the return value
-          if (!o.correctReturnValue(result)) {
-
-            // An error; does the oracle specify a unique return value?
-            if (o.hasUniqueReturnValue()) {
-
-              // Yes; we can provide better diagnostic output
-              Object uniqueReturnValue = o.uniqueReturnValue();
-              UnitTest.failTest
-                (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall+
-                 " devolvió el valor "+
-                 "incorrecto: "+result+
-                 "; debería haber devuelto el valor "+
-                 uniqueReturnValue+
-                 "\n"+Util.mkTrace(trace));
-            } else {
-              // No; worse diagnostic output
-              UnitTest.failTest
-                (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall+
-                 " devolvió el valor "+
-                 "incorrecto: "+result+"\n"+Util.mkTrace(trace));
-            }
-          }
-        }
-
-      }
+      // There may also be an oracle in the unblock specification
+      checkOracle(unblockedCall, unblockChecks.get(unblockedCall.getCallId()), trace, configurationDescription);
     }
     
     // Check that each call that must have been unblocked,
@@ -191,11 +112,102 @@ public class TestCall {
     return trace;
   }
   
+
+  void checkOracle(Call unblockedCall, Oracle o, String trace, String configurationDescription) {
+    if (o != null) {
+      // Did the call terminate with an exception?
+      if (unblockedCall.raisedException()) {
+        
+        // Yes...
+        Throwable exc = unblockedCall.getException();
+        
+        // Does the oracle specify a normal return? (i.e., no exception)
+        if (o.returnsNormally()) {
+          
+          // Yes, an error...
+          StringWriter errors = new StringWriter();
+          exc.printStackTrace(new PrintWriter(errors));
+          String StackTrace = errors.toString();
+          
+          UnitTest.failTest
+            (prefixConfigurationDescription(configurationDescription)+
+             "la llamada "+unblockedCall+
+             " deberia haber terminado normalmente "+
+             "pero lanzó la excepción "+exc+
+             "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
+        }
+        
+        // Else check if the exception is the correct exception
+        if (!o.correctException(exc)) {
+          StringWriter errors = new StringWriter();
+          exc.printStackTrace(new PrintWriter(errors));
+          String StackTrace = errors.toString();
+          
+          UnitTest.failTest
+            (prefixConfigurationDescription(configurationDescription)+
+             "la llamada "+unblockedCall+
+             " lanzo la excepcion "+
+             "incorrecto: "+exc+
+             "; debería haber lanzado la exception "+
+             o.correctExceptionClass().getName()+
+             "\n"+"\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace));
+        }
+      } else {
+        // No, the call terminated normally...
+        Object result = unblockedCall.returnValue();
+        
+        // Does the oracle specify an exception?
+        if (!o.returnsNormally()) {
+          
+          // Yes; an error
+          UnitTest.failTest
+            (prefixConfigurationDescription(configurationDescription)+
+             "la llamada "+unblockedCall+
+             " deberia haber lanzado "+
+             "la excepcion "+o.correctExceptionClass()+
+             "pero "+returned(unblockedCall.returnValue())+
+             "\n"+Util.mkTrace(trace));
+        }
+        
+        // No, a normal return was specified.
+        // Check the return value
+        if (!o.correctReturnValue(result)) {
+          
+          // An error; does the oracle specify a unique return value?
+          if (o.hasUniqueReturnValue()) {
+            
+            // Yes; we can provide better diagnostic output
+            Object uniqueReturnValue = o.uniqueReturnValue();
+            UnitTest.failTest
+              (prefixConfigurationDescription(configurationDescription)+
+               "la llamada "+unblockedCall+
+               " devolvió el valor "+
+               "incorrecto: "+result+
+               "; debería haber devuelto el valor "+
+               uniqueReturnValue+
+               "\n"+Util.mkTrace(trace));
+          } else {
+            // No; possibly worse diagnostic output
+            String errorStr = o.error();
+
+            UnitTest.failTest
+              (prefixConfigurationDescription(configurationDescription)+
+               "la llamada "+unblockedCall+
+               " devolvió el valor "+
+               "incorrecto: "+result+
+               (errorStr != null ? " "+errorStr : "")+
+               "\n"+Util.mkTrace(trace));
+          }
+        }
+      }
+    }
+  }
+    
   String prefixConfigurationDescription(String configurationDescription) {
     if (configurationDescription == "") return "";
     else return "con la configuration "+configurationDescription+",\n";
   }
-  
+    
   void print_reason_for_unblocking_incorrectly(Call call, String trace, String configurationDescription) {
     if (call.raisedException()) {
       Throwable exc = call.getException();
