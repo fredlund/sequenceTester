@@ -30,8 +30,9 @@ public class Util {
     // Compute a new trace
     String unblocksString="";
     for (Call unblockedCall : newUnblocked) {
-      if (unblocksString=="") unblocksString=unblockedCall.printCallWithReturn();
-      else unblocksString+=", "+unblockedCall.toString();
+      String callString = unblockedCall.printCallWithReturn();
+      if (unblocksString=="") unblocksString=callString;
+      else unblocksString+=", "+callString;
     }
     if (unblocksString!="")
       unblocksString = " -- unblocked "+unblocksString;
