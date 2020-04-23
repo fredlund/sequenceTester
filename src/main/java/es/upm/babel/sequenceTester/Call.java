@@ -24,7 +24,7 @@ public abstract class Call extends Tryer {
   private Object user = null;
   private Object returnValue;
   private Object controller;
-
+  private int waitTime;
 
   /**
    * Constructs a call. A call consists of a recipe for making a call,
@@ -35,9 +35,9 @@ public abstract class Call extends Tryer {
     this.symbolicName = null;
     this.callId = newCallCounter();
     this.user = getUser();
-
     // By default we check that the call returns normally.
     this.oracle = Check.returns();
+    this.waitTime = ESPERA_MIN_MS;
   }
 
   /**
@@ -54,6 +54,13 @@ public abstract class Call extends Tryer {
    */
   public Call o(Oracle oracle) {
     return oracle(oracle);
+  }
+
+  /**
+   * Returns the oracle of the call (otherwise null).
+   */
+  public Oracle getOracle() {
+    return oracle;
   }
 
   /**
@@ -108,10 +115,25 @@ public abstract class Call extends Tryer {
   }
 
   /**
-   * Returns the oracle of the call (otherwise null).
+   * Sets wait time for calls until deciding they have blocked (in milliseconds)
    */
-  public Oracle getOracle() {
-    return oracle;
+  public Call waitTime(int milliSecs) {
+    this.waitTime = milliSecs;
+    return this;
+  }
+
+  /**
+   * Sets wait time for calls until deciding they have blocked (in milliseconds)
+   */
+  public Call w(int milliSecs) {
+    return waitTime(milliSecs);
+  }
+
+  /**
+   * Returns wait time for calls until deciding they have blocked (in milliseconds)
+   */
+  public int getWaitTime() {
+    return this.waitTime;
   }
 
   /**
@@ -151,11 +173,17 @@ public abstract class Call extends Tryer {
     makeCall();
 
     // Wait a while before checking which calls blocked
-    try { Thread.sleep(ESPERA_MIN_MS); }
+    try { Thread.sleep(waitTime); }
     catch (InterruptedException exc) { };
   }
 
   static void execute(Call[] calls, Object controller,Map<Integer,Call> allCalls) {
+    int maxWaitTime = 0;
+
+    for (Call call : calls) {
+      maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
+    }
+
     for (Call call : calls) {
       call.setController(controller);
       allCalls.put(call.getCallId(),call);
@@ -163,7 +191,7 @@ public abstract class Call extends Tryer {
     }
 
     // Wait a while before checking which calls blocked
-    try { Thread.sleep(ESPERA_MIN_MS); }
+    try { Thread.sleep(maxWaitTime); }
     catch (InterruptedException exc) { };
   }
 
