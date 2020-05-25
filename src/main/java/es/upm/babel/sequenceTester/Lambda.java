@@ -25,7 +25,6 @@ public class Lambda extends Call {
     this.lambda = lambda;
     this.actualParameter = name;
     this.called = null;
-    this.oracle = null;
   }
 
   public void makeCall() {
@@ -63,6 +62,10 @@ public class Lambda extends Call {
 
   public boolean raisedException() {
     return called != null & called.raisedException();
+  }
+
+  public Throwable getException() {
+    return called.getException();
   }
 
   public boolean hasBlocked() {

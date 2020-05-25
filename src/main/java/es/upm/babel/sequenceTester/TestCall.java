@@ -117,7 +117,7 @@ public class TestCall {
     if (o != null) {
       // Did the call terminate with an exception?
       if (unblockedCall.raisedException()) {
-        
+
         // Yes...
         Throwable exc = unblockedCall.getException();
         

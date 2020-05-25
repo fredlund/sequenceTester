@@ -23,7 +23,7 @@ public class Counter {
   }
 
   public synchronized void assertIsEqual(int value) {
-    if (counter != value) throw new RuntimeException();
+    if (counter != value) throw new RuntimeException(counter + " != " + value);
   }
 
   public int whenEven() {
