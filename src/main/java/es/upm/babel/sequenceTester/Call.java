@@ -155,7 +155,7 @@ public abstract class Call extends Tryer {
    * and the call did not raise an exception.
    */
   public boolean returned() {
-    return !hasBlocked() && !raisedException();
+    return hasStarted() && !hasBlocked() && !raisedException();
   }
 
   int getCallId() {
@@ -306,5 +306,25 @@ public abstract class Call extends Tryer {
       UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolicVars);
     }
     return result;
+  }
+
+  public static Object returnValue(String callName) {
+    Call call = symbolicVars.get(callName);
+    
+    if (call == null) {
+      UnitTest.failTestFramework("no call named "+callName+" exists");
+      return null;
+    }
+
+    if (!call.returned()) {
+      UnitTest.failTestFramework("call "+callName+" has not returned");
+      return null;
+    }
+
+    return call.returnValue();
+  }
+  
+  public static Object v(String callName) {
+    return returnValue(callName);
   }
 }

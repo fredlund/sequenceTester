@@ -2,42 +2,33 @@ package es.upm.babel.sequenceTester;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.function.Function;
 
-public class Lambda extends Call {
+public class Command extends Call {
 
-  private Function<Object,Call> lambda;
-  private String actualParameter;
-  private Call called;
+  private Function<Object,Call> command;
 
   /**
-   * Constructors a call that is parametetric on the result from a previous call, referenced
-   * by its symbolic name.
-   * A call consists of a recipe for making a call,
-   * and optionally a oracle that decides if an invocation of the call returned the
-   * correct result, and optionally a symbolic name for the call.
-   *
-   * @param lambda a function returning an object which can execute the call.
+   * Constructors a call that is suspended.
+   * @param command a function returning an object which can execute the call.
    * @param name the (symbolic) name of the call which this call is parameteric on.
    */
-  public Lambda(Function<Object,Call> lambda, String name) {
+  public Command(Runnable command) {
     super();
-    this.lambda = lambda;
-    this.actualParameter = name;
+    this.command = command;
     this.called = null;
   }
 
   public void makeCall() {
-    Call resolvedCall = resolveLambda();
+    Call resolvedCall = resolveCommand();
     started = true;
     resolvedCall.makeCall();
   }
 
-  Call resolveLambda() {
+  Call resolveCommand() {
     Call paramCall = lookupCall(actualParameter);
     if (paramCall.hasStarted() && paramCall.returned()) {
       Object returnValue = paramCall.returnValue();
-      this.called = lambda.apply(returnValue);
+      this.called = command.apply(returnValue);
       called.setController(getController());
       if (oracle == null) oracle = called.getOracle();
       return called;
@@ -49,14 +40,14 @@ public class Lambda extends Call {
   }
 
   public void toTry() throws Throwable {
-    UnitTest.failTestFramework("trying to executing a lambda abstraction "+this);
+    UnitTest.failTestFramework("trying to executing a command abstraction "+this);
   }
 
   public boolean hasStarted() {
     return called != null && called.hasStarted();
   }
 
-  public boolean returned() {
+ public boolean returned() {
     return called != null && called.returned();
   }
 
@@ -80,6 +71,6 @@ public class Lambda extends Call {
     if (called != null)
       return "(\""+actualParameter+"\") -> "+called;
     else
-      return "(\""+actualParameter+"\") -> "+lambda;
+      return "(\""+actualParameter+"\") -> "+command;
   }
 }

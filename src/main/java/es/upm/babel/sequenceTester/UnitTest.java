@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnitTest {
   static TestCaseChecker checker = null;
   static String testName;
+  static Map<String,Call> namedCalls;
 
   TestStmt stmt;
   String trace="\nCall trace:\n";
@@ -91,6 +92,7 @@ public class UnitTest {
 
     allCalls = new HashMap<Integer,Call>();
     blockedCalls = new HashMap<Integer,Call>();
+    namedCalls = new HashMap<String,Call>();
     
     if (name.equals("desarollo")) {
       System.out.println
@@ -325,6 +327,22 @@ public class UnitTest {
       UnitTest.failTest
         ("when creating an instance of "+name+
          " the exception "+call.getException()+" was raised");
+    return call.returnValue();
+  }
+
+  public static Object returnValue(String callName) {
+    Call call = namedCalls.get(callName);
+    
+    if (call == null) {
+      failTestFramework("no call named "+callName+" exists");
+      return null;
+    }
+
+    if (!call.returned()) {
+      failTestFramework("call "+callName+" has not returned");
+      return null;
+    }
+
     return call.returnValue();
   }
 }
