@@ -4,7 +4,7 @@ package es.upm.babel.sequenceTester;
 /**
  * Implements a generic pair of objects.
  */
-class Pair<X,Y> {
+public class Pair<X,Y> {
   
   private X left;
   private Y right;

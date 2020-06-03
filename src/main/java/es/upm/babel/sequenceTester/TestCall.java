@@ -268,20 +268,6 @@ public class TestCall {
                    null);
   }
   
-  public static int[] unblocks(String... parms) {
-    int intparms[] = new int[parms.length];
-    for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i]).getCallId();
-    return intparms;
-  }
-  
-  public static int[] unblocks(Pair<String,Oracle>... parms) {
-    int intparms[] = new int[parms.length];
-    for (int i=0; i<parms.length; i++)
-      intparms[i] = Call.lookupCall(parms[i].getLeft()).getCallId();
-    return intparms;
-  }
-  
   public static TestCall unblocks(Call call, String... unblocks) {
     int unblock_spec[] = unblocks(unblocks);
     int unblocks_arg[] = new int[unblock_spec.length+1];
@@ -302,9 +288,10 @@ public class TestCall {
     for (int i=0; i<unblock_spec.length; i++)
       unblocks_arg[i] = unblock_spec[i];
     unblocks_arg[unblock_spec.length] = call.getCallId();
-    Oracle oracles[] = new Oracle[unblock_spec.length];
+    Oracle oracles[] = new Oracle[unblock_spec.length+1];
     for (int i=0; i<unblock_spec.length; i++)
       oracles[i] = unblocks[i].getRight();
+    oracles[unblock_spec.length] = null;
     return
       new TestCall(new Call[] {call},
                    unblocks_arg,
@@ -336,6 +323,20 @@ public class TestCall {
                         null,
                         new int[] {},
                         null);
+  }
+  
+  public static int[] unblocks(String... parms) {
+    int intparms[] = new int[parms.length];
+    for (int i=0; i<parms.length; i++)
+      intparms[i] = Call.lookupCall(parms[i]).getCallId();
+    return intparms;
+  }
+  
+  public static int[] unblocks(Pair<String,Oracle>... parms) {
+    int intparms[] = new int[parms.length];
+    for (int i=0; i<parms.length; i++)
+      intparms[i] = Call.lookupCall(parms[i].getLeft()).getCallId();
+    return intparms;
   }
   
   public String returned(Object value) {
