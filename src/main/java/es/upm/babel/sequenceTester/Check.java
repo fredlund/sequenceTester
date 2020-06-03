@@ -1,5 +1,7 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.function.Predicate;
+
 
 /**
  * A Class implementing common oracles (methods which decide if the execution
@@ -10,6 +12,7 @@ public class Check implements Oracle {
   boolean checksValue = false;
   Object values[] = null;
   Class exceptionClass = null;
+  Predicate<Object> pred = null;
   
   Check() { }
   
@@ -64,9 +67,13 @@ public class Check implements Oracle {
   public boolean correctReturnValue(Object result) {
     if (!checksValue) return true;
     
+    if (pred != null)
+      return pred.test(result);
+
     for (Object element : values) {
       if (element.equals(result)) return true;
     }
+
     return false;
   }
   
@@ -75,7 +82,7 @@ public class Check implements Oracle {
   }
   
   public boolean hasUniqueReturnValue() {
-    return checksValue && values.length == 1;
+    return checksValue && values != null && values.length == 1;
   }
   
   public Object uniqueReturnValue() {
@@ -88,5 +95,13 @@ public class Check implements Oracle {
 
   public String error() {
     return null;
+  }
+
+  public static Oracle lambda(Predicate<Object> pred) {
+    Check r = new Check();
+    r.pred = pred;
+    r.returnsNormally = true;
+    r.checksValue = true;
+    return r;
   }
 }

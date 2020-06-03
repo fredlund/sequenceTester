@@ -281,7 +281,7 @@ public class UnitTest {
    * Indicate a unit test failer.
    */
   public static void failTest(String msg) {
-    String failMessage = "\n\n*** Error en la pruebla "+testName+":\n"+msg;
+    String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg;
     System.out.println(failMessage);
     Assertions.assertTrue(false,failMessage);
   }
