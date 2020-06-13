@@ -263,6 +263,16 @@ public class Unblocks {
     return unblockList;
   }
 
+  public static List<Pair<Integer,Oracle>> unblocksSpec(List<Pair<String,Oracle>> unblocks) {
+    List<Pair<Integer,Oracle>> unblocksList = new ArrayList<>();
+    for (Pair<String,Oracle> pair : unblocks) {
+      Pair<Integer,Oracle> oracleSpec = unblockSpec(pair.getLeft());
+      oracleSpec.setRight(pair.getRight());
+      unblocksList.add(0,oracleSpec);
+    }
+    return unblocksList;
+  }
+
   public List<Pair<Integer,Oracle>> mustUnblock() {
     return mustUnblock;
   }

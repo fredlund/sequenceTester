@@ -61,12 +61,7 @@ public class TestCall {
   }
   
   public static TestCall unblocks(Call[] calls, List<Pair<String,Oracle>> mustUnblocks) {
-    List<Pair<Integer,Oracle>> unblocks = new ArrayList<>();
-    for (Pair<String,Oracle> pair : mustUnblocks) {
-      Pair<Integer,Oracle> oracleSpec = Unblocks.unblockSpec(pair.getLeft());
-      oracleSpec.setRight(pair.getRight());
-      unblocks.add(0,oracleSpec);
-    }
+    List<Pair<Integer,Oracle>> unblocks = Unblocks.unblocksSpec(mustUnblocks);
     for (Call call : calls)
       unblocks.add(0,Unblocks.unblockSpec(call));
     return new TestCall(calls, new Unblocks(unblocks,null));
