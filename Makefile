@@ -2,7 +2,7 @@
 
 
 all: 
-	sh ./gradlew jar
+	sh ./gradlew build
 
 
 
@@ -16,3 +16,7 @@ javadoc:
 
 test:
 	sh ./gradlew test
+
+clean:
+	sh ./gradlew clean
+

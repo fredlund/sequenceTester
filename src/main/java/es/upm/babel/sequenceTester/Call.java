@@ -4,6 +4,7 @@ import es.upm.babel.cclib.Tryer;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 
 /**
@@ -177,7 +178,7 @@ public abstract class Call extends Tryer {
     catch (InterruptedException exc) { };
   }
 
-  static void execute(Call[] calls, Object controller,Map<Integer,Call> allCalls) {
+  static Set<Call> execute(Call[] calls, Object controller,Map<Integer,Call> allCalls, Map<Integer,Call> blockedCalls) {
     int maxWaitTime = 0;
 
     for (Call call : calls) {
@@ -193,6 +194,10 @@ public abstract class Call extends Tryer {
     // Wait a while before checking which calls blocked
     try { Thread.sleep(maxWaitTime); }
     catch (InterruptedException exc) { };
+
+    // Compute unblocked (and change blockedCalls)
+    Set<Call> newUnblocked = Util.newUnblocked(calls, blockedCalls);
+    return newUnblocked;
   }
 
   /**

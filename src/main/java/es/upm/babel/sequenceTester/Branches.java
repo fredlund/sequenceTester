@@ -26,36 +26,22 @@ public class Branches implements TestStmt {
                       Object controller,
                       String trace,
                       String configurationDescription) {
-    Call.execute(calls,controller,allCalls);
-    Set<Call> newUnblocked = Util.newUnblocked(calls, blockedCalls);
-
+    Set<Call> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
     trace = Util.extendTrace(calls, newUnblocked, trace);
 
-    int index = 0; boolean found=false;
+    // Check that there exists an alternative that explains the execution result
+    int index = 0; boolean found=false; Alternative alternative = null;
+
     while (index < alternatives.length && !found) {
-      Alternative alt = alternatives[index];
-      if (newUnblocked.size() == alt.unblocks.length) {
+      alternative = alternatives[index];
+      Unblocks unblocks = alternative.unblocks();
+      if (unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,configurationDescription,false,false))
         found = true;
-        for (Call call : newUnblocked) {
-          boolean matches = false;
-          int i = 0;
-          while (i < alt.unblocks.length && !matches) {
-            if (call.getCallId() == alt.unblocks[i]) matches=true;
-            else i++;
-          }
-          if (!matches) {
-            found=false;
-            break;
-          }
-        }
-      }
-      if (!found) ++index;
+      else 
+        ++index;
     }
 
-    if (found) {
-      alternatives[index].continuation.execute
-        (allCalls,blockedCalls,controller,trace,configurationDescription);
-    } else {
+    if (!found) {
       String unblocksString="";
       for (Call unblockedCall : newUnblocked) {
         if (unblocksString=="") unblocksString=unblockedCall.toString();
@@ -63,11 +49,13 @@ public class Branches implements TestStmt {
       }
 
       UnitTest.failTest
-        ("ninguno de los alternativos desbloquea todos las llamadas "+
+        ("ninguno de los alternativos desbloquea correctamente todos las llamadas "+
          unblocksString+
          " que fueron desbloqueados"+
          "\n"+Util.mkTrace(trace));
     }
+
+    alternative.continuation().execute(allCalls,blockedCalls,controller,trace,configurationDescription);
   }
 
   public Call[] calls() {
