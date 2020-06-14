@@ -212,5 +212,21 @@ public abstract class CounterCall extends Call {
     }
     </pre>
 </p>
+<h1>Frequently asked questions</h1>
+<p>
+  To retrieve the return value of a call given its symbolic name
+  use the method {@link es.upm.babel.sequenceTester.Call#returnValue(String)}.</p>
+<p>
+  How do we check if a call is blocking? A call is deemed blocking if it has not returned after
+  some specified small time interval.
+  The default can be changed by calling the {@link es.upm.babel.sequenceTester.Call#waitTime(int)} method.
+</p>
+<p>
+  Want to write an oracle that is parametric on the return value of its call?
+  If so use the {@link es.upm.babel.sequenceTester.Check#lambda(java.util.function.Predicate<Object>)} method.
+    An example: suppose that we have a call {@code IsEven(int n)} that returns true
+    if n is even. Then we can write make a call and check its return value in the following way:
+    {@code new IsEven(n).oracle(Check.lambda(x -> (x % 2) == 0))}.
+</p>
 </body>
 </html>
