@@ -29,19 +29,18 @@ A unit test is an instance of the
   <dt>{@link es.upm.babel.sequenceTester.Prefix}(TestCall call, TestStatement stmt)</dt>
   <dd>A test statement
   which first executes the TestCall call, and if that succeeds, then
-  continues with succeeding TestStatement stmt.</dd>
+  continues with succeeding statement.</dd>
   <dt>{@link es.upm.babel.sequenceTester.Branches}(Call[] calls, Alternative... alternatives)</dt>
   <dd>
   A branch statement can handle nondeterminism in the tested
   program. First the calls are executed in parallel then
   the alternatives are checked to see if any of them can explain the
   result of executing the parallel calls. 
-  An alternative is an array describing which parallel calls
-  were unblocked. That is, for an alternative to match
-  the execution result
-  all unblocked parallel calls must be
-  mentioned in the alternative unblock array).
-  An alternative also has a
+  An alternative describes which calls unblocked, with optional oracles attached.
+  For an alternative to match
+  the execution result,
+  the unblocked calls must be accepted by the alternative unblock specification.
+  An alternative has a
   continuation statement which is used to continue the test.
   </dd>
 </dl>
@@ -73,7 +72,7 @@ TestCall(Call[] calls, Unblocks unblocks)
 
   <h1>Oracles</h1>
   Oracles checks the return values, or exceptions, of terminated calls.
-  Oracles are instances of the Oracle {@link es.upm.babel.sequenceTester.Oracle}
+  Oracles are instances of the {@link es.upm.babel.sequenceTester.Oracle}
   interface.
   
 <h1>Unblocks</h1>
@@ -82,12 +81,11 @@ TestCall(Call[] calls, Unblocks unblocks)
   and has a constructor
   <pre>
     {@code
-  public Unblocks(List<Pair<String,Oracle>> mustUnblock,
-                  List<Pair<String,Oracle>> mayUnblock)
+  public Unblocks(Map<String,Oracle> mustUnblock, Map<String,Oracle> mayUnblock)
    }
   </pre>
-  The lists contains pairs of a String (specifies the call instance) and an optional oracle
-  (it may be null). Note that oracles can be associated directly with calls and/or with an
+  The maps associated the symbolic name of a call with an optional oracle (the oracle may be null).
+  Note that oracles can be associated directly with calls and/or with an
   unblock specification.
   </p>
 

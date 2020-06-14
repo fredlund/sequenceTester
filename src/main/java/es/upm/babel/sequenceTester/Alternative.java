@@ -1,9 +1,5 @@
 package es.upm.babel.sequenceTester;
 
-/**
- * Represents an alternative in a branching statement of an unit test.
- */
-
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +7,10 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+
+/**
+ * Represents an alternative in a branching statement of an unit test.
+ */
 
 public class Alternative {
   private TestStmt continuation;
