@@ -1,6 +1,6 @@
 package es.upm.babel.sequenceTester;
 
-import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -16,8 +16,8 @@ public class Prefix implements TestStmt {
 	this.testStmt = testStmt;
     }
 
-    public void execute(Map<Integer,Call> allCalls,
-			Map<Integer,Call> blockedCalls,
+    public void execute(Set<Call> allCalls,
+			Set<Call> blockedCalls,
 			Object controller,
 			String trace,
 			String configurationDescription) {

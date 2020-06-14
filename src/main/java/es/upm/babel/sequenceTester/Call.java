@@ -13,13 +13,12 @@ import java.util.Set;
  */
 public abstract class Call extends Tryer {
   private static int counter = 1;
-  private static Map<String,Call> symbolicVars = null;
+  private static Map<String,Call> names = null;
 
   final static protected int ESPERA_MIN_MS = 100;
 
-  // The internal id of the action -- this is too fragile and should change
-  int callId;
-  String symbolicName;
+  String name;
+  boolean hasSymbolicName = false;
   Oracle oracle;
   boolean started = false;
   private Object user = null;
@@ -33,12 +32,12 @@ public abstract class Call extends Tryer {
    * correct result, and optionally a symbolic name for the call.
    */
   public Call() {
-    this.symbolicName = null;
-    this.callId = newCallCounter();
+    this.name = newName();
     this.user = getUser();
     // By default we check that the call returns normally.
     this.oracle = Check.returns();
     this.waitTime = ESPERA_MIN_MS;
+    addName(this.name,this);
   }
 
   /**
@@ -98,21 +97,23 @@ public abstract class Call extends Tryer {
 
   /**
    * Associates a symbolic name with a call.
-   * The symbolic variable
+   * The symbolic name
    * may be used in a continuation (in the TestStmt where the call resides)
    * to specify that this call was unblocked by a later call.
    */
-  public Call name(String symbolicName) {
-    this.symbolicName = symbolicName;
-    addSymbolicVar(this.symbolicName,this);
+  public Call name(String name) {
+    this.name = name;
+    deleteName(this.name);
+    addName(this.name,this);
+    this.hasSymbolicName = true;
     return this;
   }
 
   /**
    * A short name for the name method.
    */
-  public Call n(String symbolicName) {
-    return name(symbolicName);
+  public Call n(String name) {
+    return name(name);
   }
 
   /**
@@ -159,15 +160,11 @@ public abstract class Call extends Tryer {
     return hasStarted() && !hasBlocked() && !raisedException();
   }
 
-  int getCallId() {
-    return this.callId;
-  }
-
   /**
-   * Returns the symbolic name of the call (otherwise null).
+   * Returns the symbolic name of the call
    */
   String getSymbolicName() {
-    return this.symbolicName;
+    return this.name;
   }
 
   public void execute() {
@@ -178,7 +175,7 @@ public abstract class Call extends Tryer {
     catch (InterruptedException exc) { };
   }
 
-  static Set<Call> execute(Call[] calls, Object controller,Map<Integer,Call> allCalls, Map<Integer,Call> blockedCalls) {
+  static Set<Call> execute(Call[] calls, Object controller, Set<Call> allCalls, Set<Call> blockedCalls) {
     int maxWaitTime = 0;
 
     for (Call call : calls) {
@@ -187,7 +184,7 @@ public abstract class Call extends Tryer {
 
     for (Call call : calls) {
       call.setController(controller);
-      allCalls.put(call.getCallId(),call);
+      allCalls.add(call);
       call.makeCall();
     }
 
@@ -275,46 +272,39 @@ public abstract class Call extends Tryer {
   }
 
   public int hashCode() {
-    return getCallId();
+    return getSymbolicName().hashCode();
   }
 
   public boolean equals(Object obj) {
     if (obj instanceof Call) {
       Call otherCall = (Call) obj;
-      return getCallId() == otherCall.getCallId();
+      return getSymbolicName().equals(otherCall.getSymbolicName());
     } else return false;
-  }
-
-  static int newCallCounter() {
-    int result = counter;
-    ++counter;
-    return result;
   }
 
   static void reset() {
     counter = 1;
-    symbolicVars = new HashMap<String,Call>();
+    names = new HashMap<String,Call>();
   }
 
-  static void addSymbolicVar(String var, Call call) {
-    Call result = symbolicVars.get(var);
-    if (result != null) {
-      UnitTest.failTestFramework
-        ("symbolic variable "+var+" already has a value "+result);
-    }
-    symbolicVars.put(var,call);
+  static void deleteName(String name) {
+    names.remove(name);
   }
 
-  static Call lookupCall(String var) {
-    Call result = symbolicVars.get(var);
+  static void addName(String name, Call call) {
+    names.put(name,call);
+  }
+
+  static Call lookupCall(String name) {
+    Call result = names.get(name);
     if (result == null) {
-      UnitTest.failTestFramework("symbolic variable "+var+" missing\nmap="+symbolicVars);
+      UnitTest.failTestFramework("no call named "+name+" exists in\nmap="+names);
     }
     return result;
   }
 
   public static Object returnValue(String callName) {
-    Call call = symbolicVars.get(callName);
+    Call call = names.get(callName);
     
     if (call == null) {
       UnitTest.failTestFramework("no call named "+callName+" exists");
@@ -331,5 +321,9 @@ public abstract class Call extends Tryer {
   
   public static Object v(String callName) {
     return returnValue(callName);
+  }
+
+  private String newName() {
+    return "$call_"+Integer.valueOf(counter++).toString();
   }
 }

@@ -23,8 +23,8 @@ public class TestCall {
     this.unblocks = unblocks;
   }
   
-  public String execute(Map<Integer,Call> allCalls,
-                        Map<Integer,Call> blockedCalls,
+  public String execute(Set<Call> allCalls,
+                        Set<Call> blockedCalls,
                         Object controller,
                         String trace,
                         String configurationDescription) {
@@ -50,10 +50,10 @@ public class TestCall {
   // Convenience factory methods.
 
   public static TestCall unblocks(Call[] calls, String... unblocks) {
-    List<Pair<Integer,Oracle>> unblockSpecs = Unblocks.unblocksSpec(unblocks);
+    Map<String,Oracle> unblocksMap = Unblocks.unblocksMap(unblocks);
     for (Call call : calls)
-      unblockSpecs.add(0,Unblocks.unblockSpec(call));
-    return new TestCall(calls, new Unblocks(unblockSpecs,null));
+      unblocksMap.put(call.getSymbolicName(),null);
+    return new TestCall(calls, new Unblocks(unblocksMap,null));
   }
   
   public static TestCall unblocks(Call call, String... unblocks) {
@@ -61,10 +61,10 @@ public class TestCall {
   }
   
   public static TestCall unblocks(Call[] calls, List<Pair<String,Oracle>> mustUnblocks) {
-    List<Pair<Integer,Oracle>> unblocks = Unblocks.unblocksSpec(mustUnblocks);
+    Map<String,Oracle> unblocksMap = Unblocks.unblocksMap(mustUnblocks);
     for (Call call : calls)
-      unblocks.add(0,Unblocks.unblockSpec(call));
-    return new TestCall(calls, new Unblocks(unblocks,null));
+      unblocksMap.put(call.getSymbolicName(),null);
+    return new TestCall(calls, new Unblocks(unblocksMap,null));
   }
   
   public static TestCall unblocks(Call call, List<Pair<String,Oracle>> mustUnblocks) {

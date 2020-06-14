@@ -11,17 +11,17 @@ import java.util.HashSet;
  */
 public class Util {
   
-  public static Set<Call> newUnblocked(Call[] calls, Map<Integer,Call> blockedCalls)
+  public static Set<Call> newUnblocked(Call[] calls, Set<Call> blockedCalls)
   {
     for (Call call : calls) {
-      blockedCalls.put(call.getCallId(),call);
+      blockedCalls.add(call);
     }
 
     // Checks which previously blocked calls have become unblocked
     // and remove these unblocked calls from the list of blocked calls
     Set<Call> newUnblocked = computeUnblocked(blockedCalls);
     for (Call unblockedCall : newUnblocked)
-      blockedCalls.remove(unblockedCall.getCallId());
+      blockedCalls.remove(unblockedCall);
     
     return newUnblocked;
   }
@@ -57,10 +57,10 @@ public class Util {
     return trace;
   }
   
-  static Set<Call> computeUnblocked(Map<Integer,Call> blockedCalls) {
+  static Set<Call> computeUnblocked(Set<Call> blockedCalls) {
     Set<Call> unblocked = new HashSet<Call>();
     
-    for (Call blockedCall : blockedCalls.values()) {
+    for (Call blockedCall : blockedCalls) {
       if (!blockedCall.hasBlocked())
         unblocked.add(blockedCall);
     }

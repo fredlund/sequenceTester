@@ -65,24 +65,10 @@ A unit test is an instance of the
   The TestCall has a constructor
   <pre>
     {@code
-TestCall(Call[] calls,
-         int[] mustUnblock,
-         Result[] mustUnblockResults,
-         int[] mayUnblock,
-         Result[] mayUnblockResults)
+TestCall(Call[] calls, Unblocks unblocks)
    }
 </pre>
-  The calls are executed in parallel,
-  mustUnblock specifies the calls that <em>must</em> have been unblocked
-  (including potentially earlier calls),
-  mayUnblock specifies the calls that <em>may</em> have been unblocked
-  (including potentially earlier calls),
-  and the Result arrays codes the oracles for deciding if
-  the unblocked calls returned correct values (or raised the
-  correct exceptions).
-<p>
-  The TestCall class contains several so called factory methods for more convenient
-  specification of a TestCall.
+  The calls are executed in parallel, and unblocks specifies which calls <em>must</em> or <em>may</em> unblock.
   </p>
 
   <h1>Oracles</h1>
@@ -90,6 +76,21 @@ TestCall(Call[] calls,
   Oracles are instances of the Oracle {@link es.upm.babel.sequenceTester.Oracle}
   interface.
   
+<h1>Unblocks</h1>
+<p>
+  An unblock instance specifies which calls <em>must</em> or <em>may</em> unblock,
+  and has a constructor
+  <pre>
+    {@code
+  public Unblocks(List<Pair<String,Oracle>> mustUnblock,
+                  List<Pair<String,Oracle>> mayUnblock)
+   }
+  </pre>
+  The lists contains pairs of a String (specifies the call instance) and an optional oracle
+  (it may be null). Note that oracles can be associated directly with calls and/or with an
+  unblock specification.
+  </p>
+
   <h1>An Example</h1>
 <p>
   Suppose we have an API with three methods: set(int),

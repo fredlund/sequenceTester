@@ -30,16 +30,15 @@ public class Alternative {
   }
 
   public static Alternative alternative(String[] parms, TestStmt continuation) {
-    return new Alternative(Unblocks.must(parms), continuation);
+    return new Alternative(new Unblocks(Unblocks.unblocksMap(parms),null), continuation);
   }
 
   public static Alternative alternative(TestStmt continuation, String... parms) {
-    return new Alternative(Unblocks.must(parms), continuation);
+    return alternative(parms, continuation);
   }
 
   public static Alternative alternative(TestStmt continuation, List<Pair<String,Oracle>> mustUnblocks) {
-    List<Pair<Integer,Oracle>> unblocks = Unblocks.unblocksSpec(mustUnblocks);
-    return new Alternative(new Unblocks(unblocks,null),continuation);
+    return new Alternative(new Unblocks(Unblocks.unblocksMap(mustUnblocks),null),continuation);
   }
 
   public String toString() {

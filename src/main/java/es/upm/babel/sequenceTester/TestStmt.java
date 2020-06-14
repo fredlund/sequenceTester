@@ -1,6 +1,6 @@
 package es.upm.babel.sequenceTester;
 
-import java.util.Map;
+import java.util.Set;
 
 /**
  * The type of a unit test statement -- what unit test cases
@@ -11,8 +11,8 @@ public interface TestStmt {
   /**
    * Executes a test statement.
    */
-  void execute(Map<Integer,Call> allCalls,
-               Map<Integer,Call> blockedCalls,
+  void execute(Set<Call> allCalls,
+               Set<Call> blockedCalls,
                Object controller,
                String trace,
                String configurationDescription);

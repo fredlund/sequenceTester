@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnitTest {
   static TestCaseChecker checker = null;
   static String testName;
-  static Map<String,Call> namedCalls;
 
   TestStmt stmt;
   String trace="\nCall trace:\n";
@@ -25,8 +24,8 @@ public class UnitTest {
   Object controller;
   String configurationDescription;
   
-  Map<Integer,Call> allCalls=null;
-  Map<Integer,Call> blockedCalls=null;
+  Set<Call> allCalls=null;
+  Set<Call> blockedCalls=null;
   
   /**
    * Constructs a call sequence
@@ -90,9 +89,8 @@ public class UnitTest {
     testName = name;
     checkSoundNess(name,stmt);
 
-    allCalls = new HashMap<Integer,Call>();
-    blockedCalls = new HashMap<Integer,Call>();
-    namedCalls = new HashMap<String,Call>();
+    allCalls = new HashSet<Call>();
+    blockedCalls = new HashSet<Call>();
     
     if (name.equals("desarollo")) {
       System.out.println
@@ -128,17 +126,16 @@ public class UnitTest {
   // Soundness checks for sequences of calls
   private void checkSoundNess(String name, TestStmt stmt) {
     
-    Map<Integer,Call> active = new HashMap<Integer,Call>();
+    Set<String> active = new HashSet<String>();
     Set<Object> blockedUsers = new HashSet<Object>();
-    int counter = 1;
-    checkSoundNess(name,stmt,active,blockedUsers,counter);
+    checkSoundNess(name,stmt,active,blockedUsers);
     if (checker != null) checker.check(name,stmt);
   }
   
   // blockedUsers are the users that are currently executing a call, and so cannot execute another until
   // that call returns.
   // active are the currently active calls.
-  private int checkSoundNess(String name,TestStmt stmt,Map<Integer,Call> active,Set<Object> blockedUsers,int counter) {
+  private void checkSoundNess(String name,TestStmt stmt,Set<String> active,Set<Object> blockedUsers) {
 
     if (stmt instanceof Prefix) {
       Prefix prefix = (Prefix) stmt;
@@ -146,97 +143,67 @@ public class UnitTest {
       TestStmt continuation = prefix.stmt();
       
       // Update blocked users and active calls
-      counter =
-        checkAndUpdateActiveBlocked
-        (name,
-         testCall.calls(),
-         active,
-         blockedUsers,
-         counter);
+      checkAndUpdateActiveBlocked(name,testCall.calls(),active,blockedUsers);
 
       // Check that unblocks only refers to active calls and update blocked users
       checkUnblocksActive(testCall.calls(), testCall.unblocks(), blockedUsers, active);
 
       // Remove unblocked calls from active
-      for (Pair<Integer,Oracle> pair : testCall.unblocks().mustUnblock()) {
-        Integer unblockedId = pair.getLeft();
-        active.remove(unblockedId);
+      for (String unblocked : testCall.unblocks().mustUnblock().keySet()) {
+        active.remove(unblocked);
       }
-      checkSoundNess(name,continuation,active,blockedUsers,counter);
+      checkSoundNess(name,continuation,active,blockedUsers);
     }
 
     else if (stmt instanceof Branches) {
       Branches b = (Branches) stmt;
       
       // Update blocked and active calls
-      counter =
-        checkAndUpdateActiveBlocked
-        (name,
-         b.calls(),
-         active,
-         blockedUsers,
-         counter);
+      checkAndUpdateActiveBlocked(name,b.calls(),active,blockedUsers);
       
       for (Alternative alt : b.alternatives()) {
-        Map<Integer,Call> newActive = new HashMap<Integer,Call>();
-        Set<Object> newBlockedUsers = new HashSet<Object>();
-        
-        // Copy active and blocked users
-        for (Map.Entry<Integer,Call> mEntry : active.entrySet()) {
-          newActive.put(mEntry.getKey(),mEntry.getValue());
-        }
-        for (Object obj : blockedUsers) {
-          newBlockedUsers.add(obj);
-        }
+        Set<String> newActive = new HashSet<>(active);
+        Set<Object> newBlockedUsers = new HashSet<Object>(blockedUsers);
 
         // Check that unblocks only refers to active calls and update blocked users
         checkUnblocksActive(b.calls(), alt.unblocks(), newBlockedUsers, newActive);
 
-        for (Pair<Integer,Oracle> pair : alt.unblocks().mustUnblock()) {
-          Integer unblockedId = pair.getLeft();
-          newActive.remove(unblockedId);
+        for (String unblocked : alt.unblocks().mustUnblock().keySet()) {
+          newActive.remove(unblocked);
         }
-        counter = checkSoundNess(name,alt.continuation(),newActive,newBlockedUsers,counter);
+        checkSoundNess(name,alt.continuation(),newActive,newBlockedUsers);
       }
     }
-    
-    return counter;
   }
   
-  private void checkUnblocksActive(Call[] calls, Unblocks unblocks, Set<Object> blockedUsers, Map<Integer,Call> active) {
-    for (Pair<Integer,Oracle> pair : unblocks.mustUnblock()) {
-      Integer unblockedId = pair.getLeft();
-      if (!active.containsKey(unblockedId)) {
+  private void checkUnblocksActive(Call[] calls, Unblocks unblocks, Set<Object> blockedUsers, Set<String> active) {
+    for (String unblocked : unblocks.mustUnblock().keySet()) {
+      if (!active.contains(unblocked)) {
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
            Call.printCalls(calls)+
-           " unblocks "+unblockedId+
+           " unblocks "+unblocked+
            " which is not in the active set "+active+"\n");
       }
-      Call call = active.get(unblockedId);
+      Call call = Call.lookupCall(unblocked);
       Object user = call.getUser();
       if (user != null)
         blockedUsers.remove(user);
     }
       
-    for (Pair<Integer,Oracle> pair : unblocks.mayUnblock()) {
-      Integer unblockedId = pair.getLeft();
-      if (!active.containsKey(unblockedId)) {
+    for (String unblocked : unblocks.mayUnblock().keySet()) {
+      if (!active.contains(unblocked)) {
         failTestSyntax
           ("*** Test "+name+" is incorrect:\n"+
            Call.printCalls(calls)+
-           " may unblocks "+unblockedId+
+           " may unblocks "+unblocked+
            " which is not in the active set "+active+"\n");
       }
     }
   }
       
 
-  private int checkAndUpdateActiveBlocked(String name,
-                                          Call[] calls,
-                                          Map<Integer,Call> active,
-                                          Set<Object> blockedUsers,
-                                          int counter) {
+  private void checkAndUpdateActiveBlocked(String name, Call[] calls, Set<String> active, Set<Object> blockedUsers) {
     for (Call call : calls) {
       Object user = call.getUser();
       if (user != null && blockedUsers.contains(user)) {
@@ -249,22 +216,8 @@ public class UnitTest {
     }
     
     for (Call call : calls) {
-      if (call.getCallId() != counter) {
-        System.out.println
-          ("*** Test "+name+" is incorrect:\n"+
-           "current counter is "+counter+
-           " but call "+call+" has id "+call.getCallId()+"\n");
-        try { Thread.sleep(100); }
-        catch (InterruptedException exc) {};
-        failTestSyntax
-          ("*** Test "+name+" is incorrect:\n"+
-           "current counter is "+counter+
-           " but call "+call+" has id "+call.getCallId()+"\n");
-      }
-      active.put(counter,call);
-      ++counter;
+      active.add(call.getSymbolicName());
     }
-    return counter;
   }
 
   /**
@@ -323,22 +276,6 @@ public class UnitTest {
       UnitTest.failTest
         ("when creating an instance of "+name+
          " the exception "+call.getException()+" was raised");
-    return call.returnValue();
-  }
-
-  public static Object returnValue(String callName) {
-    Call call = namedCalls.get(callName);
-    
-    if (call == null) {
-      failTestFramework("no call named "+callName+" exists");
-      return null;
-    }
-
-    if (!call.returned()) {
-      failTestFramework("call "+callName+" has not returned");
-      return null;
-    }
-
     return call.returnValue();
   }
 }

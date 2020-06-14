@@ -21,8 +21,8 @@ public class Branches implements TestStmt {
     }
   }
 
-  public void execute(Map<Integer,Call> allCalls,
-                      Map<Integer,Call> blockedCalls,
+  public void execute(Set<Call> allCalls,
+                      Set<Call> blockedCalls,
                       Object controller,
                       String trace,
                       String configurationDescription) {
