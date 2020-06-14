@@ -35,7 +35,8 @@ A unit test is an instance of the
   A branch statement can handle nondeterminism in the tested
   program. First the calls are executed in parallel then
   the alternatives are checked to see if any of them can explain the
-  result of executing the parallel calls. 
+  result of executing the parallel calls. The alternatives are checked
+  sequentially, from left (earlier in the array) to the right.
   An alternative describes which calls unblocked, with optional oracles attached.
   For an alternative to match
   the execution result,
