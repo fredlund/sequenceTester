@@ -63,11 +63,9 @@ A unit test is an instance of the
   executes a set of calls in parallel, and <b>checks that
   the correct calls are <em>blocked</em> and <em>unblocked</em></b>.
   The TestCall has a constructor
-  <pre>
     {@code
 TestCall(Call[] calls, Unblocks unblocks)
-   }
-</pre>
+   }.
   The calls are executed in parallel, and unblocks specifies which calls <em>must</em> or <em>may</em> unblock.
   </p>
 
@@ -80,11 +78,9 @@ TestCall(Call[] calls, Unblocks unblocks)
 <p>
   An unblock instance specifies which calls <em>must</em> or <em>may</em> unblock,
   and has a constructor
-  <pre>
     {@code
   public Unblocks(Map<String,Oracle> mustUnblock, Map<String,Oracle> mayUnblock)
-   }
-  </pre>
+   }.
   The maps associated the symbolic name of a call with an optional oracle (the oracle may be null).
   Note that oracles can be associated directly with calls and/or with an
   unblock specification.
@@ -229,5 +225,25 @@ public abstract class CounterCall extends Call {
     if n is even. Then we can write make a call and check its return value in the following way:
     {@code new IsEven(n).oracle(Check.lambda(x -> (x % 2) == 0))}.
 </p>
+<p>
+  If we want to use previous return values in subsequent calls
+  or oracles of subsequent calls this is easy to achieve. Consider
+  for instance an operation {@code Rand()} that returns a random
+  integer, and an operation {@IsEven(n)} that checks whether is
+  parameter is even. We can check such an API using the test case:
+  <pre>
+{@code
+TestCall.unblocks(new Rand().n("rand")),
+TestCall.unblocks(new Lambda
+                  (() ->
+                     {
+                       Integer rndInt = (Integer) Call.returnValue("rand");
+                       return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
+                     }))
+}
+</pre>
+Note that we postpone the creation of the IsEven call using
+  the {@link es.upm.babel.sequenceTester.Lambda} call subclass.
+  </p>
 </body>
 </html>

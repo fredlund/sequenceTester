@@ -43,6 +43,21 @@ class Tests {
        ).run();
   }
 
+  @Test
+  public void test_04() {
+    new UnitTest
+      ("test_04",
+       "",
+       new Counter(),
+       TestCall.unblocks(new Rand().n("rand")),
+       TestCall.unblocks(new Lambda(() ->
+                                    {
+                                      Integer rndInt = (Integer) Call.returnValue("rand");
+                                      return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
+                                    }))
+       ).run();
+  }
+
   @BeforeEach
   public void setup(TestInfo testInfo) throws Exception {
     UnitTest.setupTest(testInfo.getDisplayName());

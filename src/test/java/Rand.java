@@ -20,6 +20,6 @@ public class Rand extends CounterCall {
   }
 
   public String toString() {
-    return "set("+value+")";
+    return "rand()";
   }
 }

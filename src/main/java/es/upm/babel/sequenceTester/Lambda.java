@@ -2,20 +2,22 @@ package es.upm.babel.sequenceTester;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.function.Supplier;
 
-public class Command extends Call {
+public class Lambda extends Call {
 
-  private Function<Object,Call> command;
+  private Supplier<Call> call;
+  private Call called;
 
   /**
    * Constructors a call that is suspended.
-   * @param command a function returning an object which can execute the call.
-   * @param name the (symbolic) name of the call which this call is parameteric on.
+   * @param call a Java supplier returning an call.
    */
-  public Command(Runnable command) {
+  public Lambda(Supplier<Call> call) {
     super();
-    this.command = command;
+    this.call = call;
     this.called = null;
+    this.oracle = null;
   }
 
   public void makeCall() {
@@ -25,18 +27,10 @@ public class Command extends Call {
   }
 
   Call resolveCommand() {
-    Call paramCall = lookupCall(actualParameter);
-    if (paramCall.hasStarted() && paramCall.returned()) {
-      Object returnValue = paramCall.returnValue();
-      this.called = command.apply(returnValue);
-      called.setController(getController());
-      if (oracle == null) oracle = called.getOracle();
-      return called;
-    } else {
-      UnitTest.failTestSyntax
-        ("Call "+ this + " depends on call " + paramCall + " which has not terminated yet");
-      throw new RuntimeException();
-    }
+    this.called = call.get();
+    called.setController(getController());
+    if (oracle == null) oracle = called.getOracle();
+    return called;
   }
 
   public void toTry() throws Throwable {
@@ -69,8 +63,8 @@ public class Command extends Call {
   
   public String toString() {
     if (called != null)
-      return "(\""+actualParameter+"\") -> "+called;
+      return called.toString();
     else
-      return "(\""+actualParameter+"\") -> "+command;
+      return "() -> "+call;
   }
 }
