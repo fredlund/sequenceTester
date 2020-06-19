@@ -2,6 +2,7 @@ package es.upm.babel.sequenceTester;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 
 /**
@@ -68,5 +69,11 @@ public class Branches implements TestStmt {
 
   public static Branches branches(Call[] calls, Alternative... alternatives) {
     return new Branches(calls,alternatives);
+  }
+
+  public String toString() {
+    return
+      "Branches (" + Call.printCalls(calls) +
+      ")\n [" + Arrays.toString(alternatives) + "]";
   }
 }

@@ -86,6 +86,11 @@ public class TestCall {
   public static TestCall blocks(Call call) {
     return blocks(call, new String[] {});
   }
+
+  public String toString() {
+    return
+      Call.printCalls(calls) + " with unblocks " + unblocks;
+  }
 }
 
 
