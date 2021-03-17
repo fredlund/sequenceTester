@@ -1,5 +1,6 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -47,6 +48,17 @@ public class Check<V> implements Oracle<V> {
   
   /**
    * Factory method to create an oracle which checks that
+   * the call returns normally, without an exception, 
+   * and that the value returned is included in the parameter values.
+   */
+  public static <V> Check<V> returns(V value) {
+    List<V> values = new ArrayList<>();
+    values.add(value);
+    return returns(values);
+  }
+  
+  /**
+   * Factory method to create an oracle which checks that
    * the call raises an exception where the exception class
    * is equal to the method parameter.
    */
@@ -65,6 +77,10 @@ public class Check<V> implements Oracle<V> {
     return returnsNormally;
   }
   
+  public boolean checksReturnValue() {
+    return checksValue;
+  }
+
   @SuppressWarnings("unchecked")
   public boolean correctReturnValue(Object result) {
     V returnValue = null;
@@ -75,8 +91,6 @@ public class Check<V> implements Oracle<V> {
       UnitTest.failTestSyntax("cannot convert return value to the correct type");
     }
 
-    if (!checksValue) return true;
-    
     if (pred != null)
       return pred.test(returnValue);
 

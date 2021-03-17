@@ -53,7 +53,7 @@ class Tests {
        TestCall.unblocks(new Lambda(() ->
                                     {
                                       Integer rndInt = (Integer) Call.returnValue("rand");
-                                      return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
+                                      return new IsEven(rndInt).oracle(Check.<Boolean>returns((rndInt % 2) == 0));
                                     }))
        ).run();
   }
@@ -70,7 +70,7 @@ class Tests {
        TestCall.unblocks(new Lambda(() ->
                                     {
                                       int rndInt = randR.getReturnValue();
-                                      return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
+                                      return new IsEven(rndInt).oracle(Check.<Boolean>returns((rndInt % 2) == 0));
                                     }))
        ).run();
   }

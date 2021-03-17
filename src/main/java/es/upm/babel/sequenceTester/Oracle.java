@@ -13,6 +13,11 @@ public interface Oracle<V> {
   public boolean returnsNormally();
 
   /**
+   * Does the oracle check the return value of the call?
+   */
+  public boolean checksReturnValue();
+  
+  /**
    * Checks whether the valued returned by the call is correct.
    *
    * @return a boolean corresponding to whether the call

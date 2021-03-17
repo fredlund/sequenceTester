@@ -5,18 +5,12 @@ import java.util.Random;
 
 
 public class Rand extends CounterCall<Integer> {
-  private Integer returnValue;
-
   Rand() {
     setUser("rand");
   }
 
   public void toTry() {
-    returnValue = new Random().nextInt();
-  }
-
-  public Integer returnValue() {
-    return returnValue;
+    setReturnValue(new Random().nextInt());
   }
 
   public String toString() {

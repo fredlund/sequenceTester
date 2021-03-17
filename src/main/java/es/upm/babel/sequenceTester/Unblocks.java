@@ -143,9 +143,6 @@ public class Unblocks {
           }
         }
       } else {
-        // No, the call terminated normally...
-        Object result = unblockedCall.returnValue();
-        
         // Does the oracle specify an exception?
         if (!o.returnsNormally()) {
           
@@ -157,42 +154,44 @@ public class Unblocks {
                "la llamada "+unblockedCall+
                " deberia haber lanzado "+
                "la excepcion "+o.correctExceptionClass()+
-               "pero "+returned(unblockedCall.returnValue())+
+               "pero terminó normalmente"+
                "\n"+Util.mkTrace(trace), doFail, doPrint);
         }
         
         // No, a normal return was specified.
         // Check the return value
-        if (isOk && !o.correctReturnValue(result)) {
-          
-          // An error
-          isOk = false;
+        if (isOk && o.checksReturnValue()) {
+          Object result = unblockedCall.returnValue();
+          if (!o.correctReturnValue(unblockedCall.returnValue())) {
+            // An error
+            isOk = false;
 
-          if (doFail || doPrint) {
-            // Does the oracle specify a unique return value?
-            if (o.hasUniqueReturnValue()) {
+            if (doFail || doPrint) {
+              // Does the oracle specify a unique return value?
+              if (o.hasUniqueReturnValue()) {
               
-              // Yes; we can provide better diagnostic output
-              Object uniqueReturnValue = o.uniqueReturnValue();
-              doFailOrPrint
-                (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall+
-                 " devolvió el valor "+
-                 "incorrecto: "+result+
-                 "; debería haber devuelto el valor "+
-                 uniqueReturnValue+
-                 "\n"+Util.mkTrace(trace), doFail, doPrint);
-            } else {
-              // No; possibly worse diagnostic output
-              String errorStr = o.error();
+                // Yes; we can provide better diagnostic output
+                Object uniqueReturnValue = o.uniqueReturnValue();
+                doFailOrPrint
+                  (prefixConfigurationDescription(configurationDescription)+
+                   "la llamada "+unblockedCall+
+                   " devolvió el valor "+
+                   "incorrecto: "+result+
+                   "; debería haber devuelto el valor "+
+                   uniqueReturnValue+
+                   "\n"+Util.mkTrace(trace), doFail, doPrint);
+              } else {
+                // No; possibly worse diagnostic output
+                String errorStr = o.error();
 
-              doFailOrPrint
-                (prefixConfigurationDescription(configurationDescription)+
-                 "la llamada "+unblockedCall+
-                 " devolvió el valor "+
-                 "incorrecto: "+result+
-                 (errorStr != null ? " "+errorStr : "")+
-                 "\n"+Util.mkTrace(trace), doFail, doPrint);
+                doFailOrPrint
+                  (prefixConfigurationDescription(configurationDescription)+
+                   "la llamada "+unblockedCall+
+                   " devolvió el valor "+
+                   "incorrecto: "+result+
+                   (errorStr != null ? " "+errorStr : "")+
+                   "\n"+Util.mkTrace(trace), doFail, doPrint);
+              }
             }
           }
         }

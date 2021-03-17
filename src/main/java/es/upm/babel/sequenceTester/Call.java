@@ -16,7 +16,7 @@ public abstract class Call<V> extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> names = null;
 
-  final static protected int ESPERA_MIN_MS = 100;
+  final static protected int ESPERA_MIN_MS = 150;
 
   String name;
   boolean hasSymbolicName = false;
@@ -160,7 +160,7 @@ public abstract class Call<V> extends Tryer {
    * Returns the return value of the call (if any).
    */
   public V returnValue() {
-    return returner.getReturnValue();
+    return returner.getReturnValue(this);
   }
 
   /**
@@ -266,9 +266,8 @@ public abstract class Call<V> extends Tryer {
     if (raisedException())
       return callString + " raised " + getException();
     else {
-      Object returnValue = returnValue();
-      if (returnValue != null)
-        return callString + " returned " + returnValue();
+      if (returner.hasReturnValue())
+        return callString + " returned " + returner.getReturnValue(this);
       else
         return callString;
     }
