@@ -26,18 +26,6 @@ public class Return<E> {
   /**
    * Gets the return value of the call (and otherwise fails).
    */
-  public E getReturnValue(Call<E> call) {
-    if (!hasReturnValue) {
-      UnitTest.failTestSyntax("no return value set for call "+call);
-      return null;
-    } else {
-      return this.returnValue;
-    }
-  }
-
-  /**
-   * Gets the return value of the call (and otherwise fails).
-   */
   public E getReturnValue() {
     if (!hasReturnValue) {
       UnitTest.failTestSyntax("no return value set");

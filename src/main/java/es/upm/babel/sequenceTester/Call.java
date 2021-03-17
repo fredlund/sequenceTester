@@ -143,7 +143,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the returner for the call.
    */
-  public Call returner(Return<V> returner) {
+  public Call returnsTo(Return<V> returner) {
     this.returner = returner;
     return this;
   }
@@ -152,15 +152,14 @@ public abstract class Call<V> extends Tryer {
    * A short name for the returner method.
    */
   public Call r(Return<V> returner) {
-    this.returner = returner;
-    return this;
+    return returnsTo(returner);
   }
 
   /**
    * Returns the return value of the call (if any).
    */
   public V returnValue() {
-    return returner.getReturnValue(this);
+    return returner.getReturnValue();
   }
 
   /**
@@ -267,7 +266,7 @@ public abstract class Call<V> extends Tryer {
       return callString + " raised " + getException();
     else {
       if (returner.hasReturnValue())
-        return callString + " returned " + returner.getReturnValue(this);
+        return callString + " returned " + returner.getReturnValue();
       else
         return callString;
     }
