@@ -43,6 +43,7 @@ A unit test is an instance of the
   the unblocked calls must be accepted by the alternative unblock specification.
   An alternative has a
   continuation statement which is used to continue the test.
+  If no alternative matches, the execution of the test case fails.
   </dd>
 </dl>
 </p>
@@ -57,6 +58,12 @@ A unit test is an instance of the
   (during the execution of another call) unblocked.
   Note that a Call instance extends the Tryer class of the cclib library.
 </p>
+
+  <h1>Oracles</h1>
+  Oracles checks the return values, or exceptions, of terminated calls.
+  Oracles are instances of the {@link es.upm.babel.sequenceTester.Oracle}
+  interface.
+  
 <h1>TestCalls</h1>
 <p>
   An instance of the {@link es.upm.babel.sequenceTester.TestCall} class
@@ -64,16 +71,11 @@ A unit test is an instance of the
   the correct calls are <em>blocked</em> and <em>unblocked</em></b>.
   The TestCall has a constructor
     {@code
-TestCall(Call[] calls, Unblocks unblocks)
+TestCall(List<Call> calls, Unblocks unblocks)
    }.
   The calls are executed in parallel, and unblocks specifies which calls <em>must</em> or <em>may</em> unblock.
   </p>
 
-  <h1>Oracles</h1>
-  Oracles checks the return values, or exceptions, of terminated calls.
-  Oracles are instances of the {@link es.upm.babel.sequenceTester.Oracle}
-  interface.
-  
 <h1>Unblocks</h1>
 <p>
   An unblock instance specifies which calls <em>must</em> or <em>may</em> unblock,
@@ -88,16 +90,15 @@ TestCall(Call[] calls, Unblocks unblocks)
 
   <h1>An Example</h1>
 <p>
-  Suppose we have an API with three methods: set(int),
-  dec(), and whenZero() such that set(int) sets the value of a counter
+  Suppose we have an API with three methods: {@code set(int)},
+  {@code dec()}, and {@code whenZero()} such that {@code set(int)} sets the value of a counter
   to the argument and always unblocks immediately,
-  dec() decrements the value of the
+  {@code dec()} decrements the value of the
   counter by 1 and always unblocks immediately, whereas
-  a call to whenZero() unblocks when the value of the counter becomes 0.
+  a call to {@code whenZero()} unblocks when the value of the counter becomes 0.
 </p>
 <p>An example unit test for this API may then be:
-  <pre>
-{@code
+<pre>{@code
 Prefix
 (TestCall.unblocks(new Set(3)),
  Prefix
@@ -109,8 +110,7 @@ Prefix
     Prefix
     (TestCall.unblocks(new Dec(),"whenZero"),
      Nil)))))
-}
-  </pre>
+}</pre>
   Given constructors Set(int), Dec() and WhenZero() which creates
   instances of a Call (sub)class,
   the test expresses that if we first set the counter to 3
@@ -125,7 +125,7 @@ Prefix
   then both that call returned immediately, <b>and</b>
   also the earlier call to whenZero() returned ("unblocked").
 </p>
-<p>Using the library API we can write this unit more compactly as a sequence:
+<p>Using the library API we can write this test more compactly as a sequence:
 <pre>
 {@code
 TestCall.unblocks(new Set(3)),
@@ -180,6 +180,14 @@ public class Dec extends CounterCall<Integer> {
   and toString which is used to pretty print counterexamples.
   If a call returns a value, such as Dec, then the {@code setReturnValue} method
   should be called with the value as the argument.
+</p>
+<p>
+  The {@code setUser("dec")} method call in the constructor specifies which "user" (or actor)
+  executes the constructed call. The library enforces the restriction that whenever a call from
+  a user blocks, then no more calls from that user will be issued until the original call
+  was unblocked. If a test case specifies that a call should be made from a blocked user,
+  then that test case is not well-formed, and the testing run is aborted with an error message;
+  this does not constitute a test failure in the traditional sense.
   </p>
 <p>
   </p>
@@ -234,7 +242,7 @@ We can retrieve the return value of a call given its symbolic name
     This method unfortunately returns an {@code Object},
     thus often requiring a type cast in oracle code, which
     can cause an exception to be thrown at test time.
-    A type-safe alternative uses a {@link Return} class instance for storing the
+    A type-safe alternative uses a {@link es.upm.babel.sequenceTester.Return} class instance for storing the
     value returned by the call returned by {@code Rand()}, e.g.,
  <pre>
 {@code      
@@ -249,7 +257,7 @@ TestCall.unblocks(new Rand().name("rand").returnsTo(randR)),}
     Apart from referring to a previous return value,
     we need a mechanism to postpone the creation of a
     new {@code Call} subclass instance, until the arguments have become available.
-    This can be achieved by creating an instance of the {@link Lambda} class.
+    This can be achieved by creating an instance of the {@link es.upm.babel.sequenceTester.Lambda} class.
     Consider for example an operation {@code Rand()} that returns a random
     integer, and an operation {@code IsEven(n)} that checks whether its
     parameter is even. We can check such an API using the below test case which
