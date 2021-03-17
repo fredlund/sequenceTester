@@ -4,16 +4,16 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-public class Lambda extends Call {
+public class Lambda<V> extends Call<V> {
 
-  private Supplier<Call> call;
-  private Call called;
+  private Supplier<Call<V>> call;
+  private Call<V> called;
 
   /**
    * Constructors a call that is suspended.
    * @param call a Java supplier returning an call.
    */
-  public Lambda(Supplier<Call> call) {
+  public Lambda(Supplier<Call<V>> call) {
     super();
     this.call = call;
     this.called = null;
@@ -21,12 +21,12 @@ public class Lambda extends Call {
   }
 
   public void makeCall() {
-    Call resolvedCall = resolveCommand();
+    Call<V> resolvedCall = resolveCommand();
     started = true;
     resolvedCall.makeCall();
   }
 
-  Call resolveCommand() {
+  Call<V> resolveCommand() {
     this.called = call.get();
     called.setController(getController());
     if (oracle == null) oracle = called.getOracle();
@@ -57,7 +57,7 @@ public class Lambda extends Call {
     return called != null && called.hasBlocked();
   }
   
-  public Object returnValue() {
+  public V returnValue() {
     return called.returnValue();
   }
   

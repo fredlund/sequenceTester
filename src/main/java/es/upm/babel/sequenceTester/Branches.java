@@ -1,5 +1,6 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Arrays;
@@ -9,25 +10,25 @@ import java.util.Arrays;
  * Represents a unit test statement branch in an unit test.
  */
 public class Branches implements TestStmt {
-  private Call[] calls;
+  private List<Call<?>> calls;
   private Alternative[] alternatives;
 
-  public Branches(Call[] calls, Alternative[] alternatives) {
+  public Branches(List<Call<?>> calls, Alternative[] alternatives) {
     this.calls = calls;
     this.alternatives = alternatives;
-    if (calls.length <= 0 || alternatives.length < 0) {
+    if (calls.size() <= 0 || alternatives.length < 0) {
       UnitTest.failTest
-        ("badly formed branches with calls.length="+calls.length+
+        ("badly formed branches with calls.size()="+calls.size()+
          " and alternatives.length="+alternatives.length);
     }
   }
 
-  public void execute(Set<Call> allCalls,
-                      Set<Call> blockedCalls,
+  public void execute(Set<Call<?>> allCalls,
+                      Set<Call<?>> blockedCalls,
                       Object controller,
                       String trace,
                       String configurationDescription) {
-    Set<Call> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
+    Set<Call<?>> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
     trace = Util.extendTrace(calls, newUnblocked, trace);
 
     // Check that there exists an alternative that explains the execution result
@@ -59,7 +60,7 @@ public class Branches implements TestStmt {
     alternative.continuation().execute(allCalls,blockedCalls,controller,trace,configurationDescription);
   }
 
-  public Call[] calls() {
+  public List<Call<?>> calls() {
     return calls;
   }
 
@@ -67,7 +68,7 @@ public class Branches implements TestStmt {
     return alternatives;
   }
 
-  public static Branches branches(Call[] calls, Alternative... alternatives) {
+  public static Branches branches(List<Call<?>> calls, Alternative... alternatives) {
     return new Branches(calls,alternatives);
   }
 

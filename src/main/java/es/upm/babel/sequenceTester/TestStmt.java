@@ -11,8 +11,8 @@ public interface TestStmt {
   /**
    * Executes a test statement.
    */
-  void execute(Set<Call> allCalls,
-               Set<Call> blockedCalls,
+  void execute(Set<Call<?>> allCalls,
+               Set<Call<?>> blockedCalls,
                Object controller,
                String trace,
                String configurationDescription);

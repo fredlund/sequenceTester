@@ -17,31 +17,31 @@ import java.io.PrintWriter;
  */
 
 public class Unblocks {
-  private Map<String,Oracle> mustUnblock;
-  private Map<String,Oracle> mayUnblock;
+  private Map<String,Oracle<?>> mustUnblock;
+  private Map<String,Oracle<?>> mayUnblock;
 
   /**
    * Creates an ublocks specification.
    * The mustUnblock parameter specifies which calls must unblock, and the mayUnblock parameter
    * specifies which calls may unblock.
    */
-  public Unblocks(Map<String,Oracle> mustUnblock,
-                  Map<String,Oracle> mayUnblock) {
-    this.mustUnblock =  mustUnblock == null ? new HashMap<String,Oracle>() : mustUnblock;
-    this.mayUnblock = mayUnblock == null ? new HashMap<String,Oracle>() : mayUnblock;
+  public Unblocks(Map<String,Oracle<?>> mustUnblock,
+                  Map<String,Oracle<?>> mayUnblock) {
+    this.mustUnblock =  mustUnblock == null ? new HashMap<String,Oracle<?>>() : mustUnblock;
+    this.mayUnblock = mayUnblock == null ? new HashMap<String,Oracle<?>>() : mayUnblock;
   }
 
 
   //////////////////////////////////////////////////////////////////////
 
-  boolean checkCalls(Call[] calls, Set<Call> newUnblocked, Set<Call> allCalls, Set<Call> blockedCalls, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
+  boolean checkCalls(List<Call<?>> calls, Set<Call<?>> newUnblocked, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
 
     boolean isOk = true;
     
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration,
     // and check that the value (or exception) is correct
-    for (Call unblockedCall : newUnblocked) {
+    for (Call<?> unblockedCall : newUnblocked) {
       if (!mustUnblock.containsKey(unblockedCall.getSymbolicName()) &&
           !mayUnblock.containsKey(unblockedCall.getSymbolicName())) {
         isOk = false;
@@ -70,12 +70,12 @@ public class Unblocks {
       // Check that each call that must have been unblocked,
       // is no longer blocked
       for (String key : mustUnblock.keySet()) {
-        Call shouldBeUnblockedCall = Call.lookupCall(key);
+        Call<?> shouldBeUnblockedCall = Call.lookupCall(key);
         if (blockedCalls.contains(shouldBeUnblockedCall)) {
           isOk = false;
           if (doFail || doPrint) {
             String llamadas;
-            if (calls.length > 1)
+            if (calls.size() > 1)
               llamadas =
                 "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
             else
@@ -95,8 +95,7 @@ public class Unblocks {
     return isOk;
   }
   
-
-  boolean checkOracle(Call unblockedCall, Oracle o, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
+ boolean checkOracle(Call<?> unblockedCall, Oracle<?> o, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
     boolean isOk = true;
 
     if (o != null) {
@@ -214,7 +213,7 @@ public class Unblocks {
     else return "con la configuration "+configurationDescription+",\n";
   }
     
-  private void print_reason_for_unblocking_incorrectly(Call call, Call[] calls, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
+  private void print_reason_for_unblocking_incorrectly(Call<?> call, List<Call<?>> calls, String trace, String configurationDescription, boolean doFail, boolean doPrint) {
     if (call.raisedException()) {
       Throwable exc = call.getException();
       StringWriter errors = new StringWriter();
@@ -229,7 +228,7 @@ public class Unblocks {
          "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace),doFail,doPrint);
     } else {
       boolean justExecuted = false;
-      for (Call executingCall : calls)
+      for (Call<?> executingCall : calls)
         if (executingCall == call)
           justExecuted = true;
       
@@ -250,29 +249,29 @@ public class Unblocks {
   /**
    * Returns the list of calls (and associated oracles) which must unblock.
    */
-  public Map<String,Oracle> mustUnblock() {
+  public Map<String,Oracle<?>> mustUnblock() {
     return mustUnblock;
   }
   
   /**
    * Returns the list of calls (and associated oracles) which may unblock.
    */
-  public Map<String,Oracle> mayUnblock() {
+  public Map<String,Oracle<?>> mayUnblock() {
     return mayUnblock;
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  static Map<String,Oracle> unblocksMap(String... unblocks) {
-    Map<String,Oracle> unblockMap = new HashMap<>();
+  static Map<String,Oracle<?>> unblocksMap(String... unblocks) {
+    Map<String,Oracle<?>> unblockMap = new HashMap<>();
     for (String unblock : unblocks)
       unblockMap.put(unblock,null);
     return unblockMap;
   }
 
-  static Map<String,Oracle> unblocksMap(List<Pair<String,Oracle>> unblocks) {
-    Map<String,Oracle> unblockMap = new HashMap<>();
-    for (Pair<String,Oracle> pair : unblocks)
+  static Map<String,Oracle<?>> unblocksMap(List<Pair<String,Oracle<?>>> unblocks) {
+    Map<String,Oracle<?>> unblockMap = new HashMap<>();
+    for (Pair<String,Oracle<?>> pair : unblocks)
       unblockMap.put(pair.getLeft(),pair.getRight());
     return unblockMap;
   }

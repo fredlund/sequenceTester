@@ -3,8 +3,8 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Dec extends CounterCall {
-  private Object returnValue;
+public class Dec extends CounterCall<Integer> {
+  private Integer returnValue;
 
   Dec() {
     setUser("dec");
@@ -14,7 +14,7 @@ public class Dec extends CounterCall {
     returnValue = controller.dec();
   }
 
-  public Object returnValue() {
+  public Integer returnValue() {
     return returnValue;
   }
 

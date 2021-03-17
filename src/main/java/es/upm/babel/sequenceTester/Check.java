@@ -1,5 +1,6 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 
@@ -7,12 +8,12 @@ import java.util.function.Predicate;
  * A Class implementing common oracles (methods which decide if the execution
  * of a call was successfull). 
  */
-public class Check implements Oracle {
+public class Check<V> implements Oracle<V> {
   boolean returnsNormally;
   boolean checksValue = false;
-  Object values[] = null;
+  List<V> values = null;
   Class exceptionClass = null;
-  Predicate<Object> pred = null;
+  Predicate<V> pred = null;
   
   Check() { }
   
@@ -20,8 +21,8 @@ public class Check implements Oracle {
    * Factory method to create an oracle which checks that
    * the call returns normally, without an exception.
    */
-  static public Check returns() {
-    Check r = new Check();
+  public static <V> Check<V> returns() {
+    Check<V> r = new Check<>();
     r.returnsNormally = true;
     r.checksValue = false;
     return r;
@@ -32,12 +33,12 @@ public class Check implements Oracle {
    * the call returns normally, without an exception, 
    * and that the value returned is included in the parameter values.
    */
-  static public Check returns(Object... values) {
-    if (values.length < 1) {
+  public static <V> Check<V> returns(List<V> values) {
+    if (values.size() < 1) {
       UnitTest.failTestSyntax("Call.returns(...) needs at least one argument value");
       throw new RuntimeException();
     }
-    Check r = new Check();
+    Check<V> r = new Check<>();
     r.returnsNormally = true;
     r.checksValue = true;
     r.values = values;
@@ -49,8 +50,8 @@ public class Check implements Oracle {
    * the call raises an exception where the exception class
    * is equal to the method parameter.
    */
-  static public Check raisesException(Class exceptionClass) {
-    Check r = new Check();
+  public static <V> Check<V> raisesException(Class exceptionClass) {
+    Check<V> r = new Check<V>();
     r.returnsNormally = false;
     if (!(exceptionClass instanceof Class)) {
       UnitTest.failTestSyntax("Call.exceptionClass(class) needs a Class as argument");
@@ -64,14 +65,23 @@ public class Check implements Oracle {
     return returnsNormally;
   }
   
+  @SuppressWarnings("unchecked")
   public boolean correctReturnValue(Object result) {
+    V returnValue = null;
+
+    try {
+      returnValue = (V) result;
+    } catch (ClassCastException exc) {
+      UnitTest.failTestSyntax("cannot convert return value to the correct type");
+    }
+
     if (!checksValue) return true;
     
     if (pred != null)
-      return pred.test(result);
+      return pred.test(returnValue);
 
-    for (Object element : values) {
-      if (element.equals(result)) return true;
+    for (V element : values) {
+      if (element.equals(returnValue)) return true;
     }
 
     return false;
@@ -82,11 +92,11 @@ public class Check implements Oracle {
   }
   
   public boolean hasUniqueReturnValue() {
-    return checksValue && values != null && values.length == 1;
+    return checksValue && values != null && values.size() == 1;
   }
   
-  public Object uniqueReturnValue() {
-    return values[0];
+  public V uniqueReturnValue() {
+    return values.get(0);
   }
   
   public Class correctExceptionClass() {
@@ -97,8 +107,8 @@ public class Check implements Oracle {
     return null;
   }
 
-  public static Oracle lambda(Predicate<Object> pred) {
-    Check r = new Check();
+  public static <V> Oracle<V> lambda(Predicate<V> pred) {
+    Check<V> r = new Check<>();
     r.pred = pred;
     r.returnsNormally = true;
     r.checksValue = true;

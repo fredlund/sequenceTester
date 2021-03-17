@@ -4,7 +4,7 @@ package es.upm.babel.sequenceTester;
 /**
  * The type of oracles, i.e., classes which checks the result of the call.
  */
-public interface Oracle {
+public interface Oracle<V> {
   
   /**
    * Does the oracle specify that the method should return normally,
@@ -42,7 +42,7 @@ public interface Oracle {
   /**
    * Returns the single return value accepted by the oracle (if hasUniqueReturnValue returned true).
    */
-  public Object uniqueReturnValue();
+  public V uniqueReturnValue();
 
   /**
    * Return a class corresponding to the exception accepted by

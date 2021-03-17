@@ -2,6 +2,7 @@ package es.upm.babel.sequenceTester;
 
 import es.upm.babel.cclib.Tryer;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.Set;
  * Represents a BasicCall together with an oracle for deciding if the call
  * executed correctly.
  */
-public abstract class Call extends Tryer {
+public abstract class Call<V> extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> names = null;
 
@@ -19,10 +20,10 @@ public abstract class Call extends Tryer {
 
   String name;
   boolean hasSymbolicName = false;
-  Oracle oracle;
+  Oracle<V> oracle;
   boolean started = false;
   private Object user = null;
-  private Object returnValue;
+  private Return<V> returner;
   private Object controller;
   private int waitTime;
 
@@ -37,6 +38,7 @@ public abstract class Call extends Tryer {
     // By default we check that the call returns normally.
     this.oracle = Check.returns();
     this.waitTime = ESPERA_MIN_MS;
+    this.returner = new Return<>();
     addName(this.name,this);
   }
 
@@ -44,7 +46,7 @@ public abstract class Call extends Tryer {
    * Associates an oracle with a call.
    * @param oracle an oracle which decides if the call returned the correct value.
    */
-  public Call oracle(Oracle oracle) {
+  public Call oracle(Oracle<V> oracle) {
     this.oracle = oracle;
     return this;
   }
@@ -52,14 +54,14 @@ public abstract class Call extends Tryer {
   /**
    * Provides a short name for the oracle method.
    */
-  public Call o(Oracle oracle) {
+  public Call o(Oracle<V> oracle) {
     return oracle(oracle);
   }
 
   /**
    * Returns the oracle of the call (otherwise null).
    */
-  public Oracle getOracle() {
+  public Oracle<V> getOracle() {
     return oracle;
   }
 
@@ -139,17 +141,33 @@ public abstract class Call extends Tryer {
   }
 
   /**
+   * Sets the returner for the call.
+   */
+  public Call returner(Return<V> returner) {
+    this.returner = returner;
+    return this;
+  }
+
+  /**
+   * A short name for the returner method.
+   */
+  public Call r(Return<V> returner) {
+    this.returner = returner;
+    return this;
+  }
+
+  /**
    * Returns the return value of the call (if any).
    */
-  public Object returnValue() {
-    return returnValue;
+  public V returnValue() {
+    return returner.getReturnValue();
   }
 
   /**
    * Sets the return value of the call (if any).
    */
-  public void setReturnValue(Object returnValue) {
-    this.returnValue = returnValue;
+  public void setReturnValue(V returnValue) {
+    returner.setReturnValue(returnValue);
   }
 
   /**
@@ -175,14 +193,14 @@ public abstract class Call extends Tryer {
     catch (InterruptedException exc) { };
   }
 
-  static Set<Call> execute(Call[] calls, Object controller, Set<Call> allCalls, Set<Call> blockedCalls) {
+  static Set<Call<?>> execute(List<Call<?>> calls, Object controller, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls) {
     int maxWaitTime = 0;
 
-    for (Call call : calls) {
+    for (Call<?> call : calls) {
       maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
     }
 
-    for (Call call : calls) {
+    for (Call<?> call : calls) {
       call.setController(controller);
       allCalls.add(call);
       call.makeCall();
@@ -193,7 +211,7 @@ public abstract class Call extends Tryer {
     catch (InterruptedException exc) { };
 
     // Compute unblocked (and change blockedCalls)
-    Set<Call> newUnblocked = Util.newUnblocked(calls, blockedCalls);
+    Set<Call<?>> newUnblocked = Util.newUnblocked(calls, blockedCalls);
     return newUnblocked;
   }
 
@@ -230,9 +248,9 @@ public abstract class Call extends Tryer {
     start();
   }
 
-  public static String printCalls(Call[] calls) {
-    if (calls.length == 1)
-      return calls[0].toString();
+  public static String printCalls(List<Call<?>> calls) {
+    if (calls.size() == 1)
+      return calls.get(0).toString();
     else {
       String callsString="";
       for (Call call : calls) {

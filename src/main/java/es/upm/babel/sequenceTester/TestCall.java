@@ -15,29 +15,29 @@ import es.upm.babel.cclib.Tryer;
  * were unblocked and blocked.
  */
 public class TestCall {
-  private Call[] calls;
+  private List<Call<?>> calls;
   private Unblocks unblocks;
   
-  public TestCall(Call[] calls, Unblocks unblocks) {
+  public TestCall(List<Call<?>> calls, Unblocks unblocks) {
     this.calls = calls;
     this.unblocks = unblocks;
   }
   
-  public String execute(Set<Call> allCalls,
-                        Set<Call> blockedCalls,
+  public String execute(Set<Call<?>> allCalls,
+                        Set<Call<?>> blockedCalls,
                         Object controller,
                         String trace,
                         String configurationDescription) {
 
     // Issue parallel calls
-    Set<Call> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
+    Set<Call<?>> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
     trace = Util.extendTrace(calls,newUnblocked,trace);
     // Check blocking behaviour
     unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,configurationDescription,true,false);
     return trace;
   }
   
-  public Call[] calls() {
+  public List<Call<?>> calls() {
     return calls;
   }
   
@@ -49,41 +49,47 @@ public class TestCall {
   //
   // Convenience factory methods.
 
-  public static TestCall unblocks(Call[] calls, String... unblocks) {
-    Map<String,Oracle> unblocksMap = Unblocks.unblocksMap(unblocks);
+  public static TestCall unblocks(List<Call<?>> calls, String... unblocks) {
+    Map<String,Oracle<?>> unblocksMap = Unblocks.unblocksMap(unblocks);
     for (Call call : calls)
       unblocksMap.put(call.getSymbolicName(),null);
     return new TestCall(calls, new Unblocks(unblocksMap,null));
   }
   
-  public static TestCall unblocks(Call call, String... unblocks) {
-    return unblocks(new Call[] { call }, unblocks);
+  public static TestCall unblocks(Call<?> call, String... unblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return unblocks(list, unblocks);
   }
   
-  public static TestCall unblocks(Call[] calls, List<Pair<String,Oracle>> mustUnblocks) {
-    Map<String,Oracle> unblocksMap = Unblocks.unblocksMap(mustUnblocks);
-    for (Call call : calls)
+  public static TestCall unblocks(List<Call<?>> calls, List<Pair<String,Oracle<?>>> mustUnblocks) {
+    Map<String,Oracle<?>> unblocksMap = Unblocks.unblocksMap(mustUnblocks);
+    for (Call<?> call : calls)
       unblocksMap.put(call.getSymbolicName(),null);
     return new TestCall(calls, new Unblocks(unblocksMap,null));
   }
   
-  public static TestCall unblocks(Call call, List<Pair<String,Oracle>> mustUnblocks) {
-    return unblocks(new Call[] { call }, mustUnblocks);
+  public static TestCall unblocks(Call call, List<Pair<String,Oracle<?>>> mustUnblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return unblocks(list, mustUnblocks);
   }
   
-  public static TestCall blocks(Call[] calls, String... unblocks) {
+  public static TestCall blocks(List<Call<?>> calls, String... unblocks) {
     return new TestCall(calls, Unblocks.must(unblocks));
   }
 
-  public static TestCall blocks(Call call, String... unblocks) {
-    return blocks(new Call[] {call}, unblocks);
+  public static TestCall blocks(Call<?> call, String... unblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return blocks(list, unblocks);
   }
   
-  public static TestCall unblocks(Call call) {
+  public static TestCall unblocks(Call<?> call) {
     return unblocks(call, new String[] {});
   }
   
-  public static TestCall blocks(Call call) {
+  public static TestCall blocks(Call<?> call) {
     return blocks(call, new String[] {});
   }
 

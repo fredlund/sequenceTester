@@ -37,7 +37,7 @@ public class Alternative {
     return alternative(parms, continuation);
   }
 
-  public static Alternative alternative(TestStmt continuation, List<Pair<String,Oracle>> mustUnblocks) {
+  public static Alternative alternative(TestStmt continuation, List<Pair<String,Oracle<?>>> mustUnblocks) {
     return new Alternative(new Unblocks(Unblocks.unblocksMap(mustUnblocks),null),continuation);
   }
 

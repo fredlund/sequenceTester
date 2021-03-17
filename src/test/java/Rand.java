@@ -4,8 +4,8 @@ import es.upm.babel.sequenceTester.*;
 import java.util.Random;
 
 
-public class Rand extends CounterCall {
-  private Object returnValue;
+public class Rand extends CounterCall<Integer> {
+  private Integer returnValue;
 
   Rand() {
     setUser("rand");
@@ -15,7 +15,7 @@ public class Rand extends CounterCall {
     returnValue = new Random().nextInt();
   }
 
-  public Object returnValue() {
+  public Integer returnValue() {
     return returnValue;
   }
 
