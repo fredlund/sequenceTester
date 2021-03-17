@@ -16,6 +16,7 @@ javadoc {
   options.memberLevel = JavadocMemberLevel.PUBLIC
   options.overview = "overview.html"
   options.encoding = 'UTF-8'
+  options.links 'https://docs.oracle.com/javase/8/docs/api/'
 }
 
 dependencies {
