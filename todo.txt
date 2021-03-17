@@ -1,0 +1,3 @@
+- Typechecked return values
+- Continue documenting, e.g., document alternatives properly.
+
