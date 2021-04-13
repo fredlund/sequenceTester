@@ -16,7 +16,7 @@ public abstract class Call<V> extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> names = null;
 
-  final static protected int ESPERA_MIN_MS = 150;
+  final static protected int ESPERA_MIN_MS = 250;
 
   String name;
   boolean hasSymbolicName = false;
