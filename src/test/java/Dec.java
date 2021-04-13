@@ -3,19 +3,13 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Dec extends CounterCall {
-  private Object returnValue;
-
+public class Dec extends CounterCall<Integer> {
   Dec() {
     setUser("dec");
   }
 
   public void toTry() {
-    returnValue = controller.dec();
-  }
-
-  public Object returnValue() {
-    return returnValue;
+    setReturnValue(controller.dec());
   }
 
   public String toString() {

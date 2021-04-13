@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Print extends CounterCall {
+public class Print extends CounterCall<Integer> {
   private String msg;
 
   Print(String msg) {
@@ -12,10 +12,7 @@ public class Print extends CounterCall {
 
   public void toTry() {
     System.out.println(msg);
-  }
-
-  public Object returnValue() {
-    return 2;
+    setReturnValue(2); 
   }
 
   public String toString() {

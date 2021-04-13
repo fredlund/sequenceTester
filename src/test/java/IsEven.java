@@ -3,9 +3,8 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class IsEven extends CounterCall {
+public class IsEven extends CounterCall<Boolean> {
   private int n;
-  private boolean returnValue;
 
   IsEven(int n) {
     this.n = n;
@@ -13,11 +12,7 @@ public class IsEven extends CounterCall {
   }
 
   public void toTry() {
-    returnValue = (n % 2) == 0;
-  }
-
-  public Object returnValue() {
-    return returnValue;
+    setReturnValue((n % 2) == 0);
   }
 
   public String toString() {

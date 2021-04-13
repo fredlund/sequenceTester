@@ -9,11 +9,11 @@ import java.util.Set;
 public class Nil implements TestStmt {
     public Nil() { }
 
-    public void execute(Set<Call> allCalls,
-                        Set<Call> blockedCalls,
-                        Object controller,
-                        String trace,
-                        String configurationDescription) {
+  public void execute(Set<Call<?>> allCalls,
+                      Set<Call<?>> blockedCalls,
+                      Object controller,
+                      String trace,
+                      String configurationDescription) {
     }
 
     public String toString() {

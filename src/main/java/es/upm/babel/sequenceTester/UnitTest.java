@@ -1,5 +1,6 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
@@ -24,8 +25,8 @@ public class UnitTest {
   Object controller;
   String configurationDescription;
   
-  Set<Call> allCalls=null;
-  Set<Call> blockedCalls=null;
+  Set<Call<?>> allCalls=null;
+  Set<Call<?>> blockedCalls=null;
   
   /**
    * Constructs a call sequence
@@ -89,8 +90,8 @@ public class UnitTest {
     testName = name;
     checkSoundNess(name,stmt);
 
-    allCalls = new HashSet<Call>();
-    blockedCalls = new HashSet<Call>();
+    allCalls = new HashSet<>();
+    blockedCalls = new HashSet<>();
     
     if (name.equals("desarollo")) {
       System.out.println
@@ -176,7 +177,7 @@ public class UnitTest {
     }
   }
   
-  private void checkUnblocksActive(Call[] calls, Unblocks unblocks, Set<Object> blockedUsers, Set<String> active) {
+  private void checkUnblocksActive(List<Call<?>> calls, Unblocks unblocks, Set<Object> blockedUsers, Set<String> active) {
     for (String unblocked : unblocks.mustUnblock().keySet()) {
       if (!active.contains(unblocked)) {
         failTestSyntax
@@ -185,7 +186,7 @@ public class UnitTest {
            " unblocks "+unblocked+
            " which is not in the active set "+active+"\n");
       }
-      Call call = Call.lookupCall(unblocked);
+      Call<?> call = Call.lookupCall(unblocked);
       Object user = call.getUser();
       if (user != null)
         blockedUsers.remove(user);
@@ -203,8 +204,8 @@ public class UnitTest {
   }
       
 
-  private void checkAndUpdateActiveBlocked(String name, Call[] calls, Set<String> active, Set<Object> blockedUsers) {
-    for (Call call : calls) {
+  private void checkAndUpdateActiveBlocked(String name, List<Call<?>> calls, Set<String> active, Set<Object> blockedUsers) {
+    for (Call<?> call : calls) {
       Object user = call.getUser();
       if (user != null && blockedUsers.contains(user)) {
         failTestSyntax
@@ -215,7 +216,7 @@ public class UnitTest {
       blockedUsers.add(user);
     }
     
-    for (Call call : calls) {
+    for (Call<?> call : calls) {
       active.add(call.getSymbolicName());
     }
   }
@@ -264,7 +265,7 @@ public class UnitTest {
   /**
    * Starts a controller with a given name and the call to create it.
    */
-  public static Object startController(String name, Call call) {
+  public static <V> V startController(String name, Call<V> call) {
     // For now we have to reset the call counter since startController actions are not counted
     // This is ugly and should be changed to a more flexible policy for action naming...
     Call.reset();

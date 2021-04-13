@@ -12,3 +12,8 @@ Provide a method in Tryer to check whether a call has started -- boolean started
 - Clean up documentation.
 
 - Use a getter/setter style uniformly.
+
+- A way to specify a default timeout value for a test.
+
+- Timeout quicker if no calls are blocked.
+

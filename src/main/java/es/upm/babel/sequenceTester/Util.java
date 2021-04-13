@@ -1,5 +1,6 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.List;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashSet;
@@ -11,25 +12,25 @@ import java.util.HashSet;
  */
 public class Util {
   
-  public static Set<Call> newUnblocked(Call[] calls, Set<Call> blockedCalls)
+  public static Set<Call<?>> newUnblocked(List<Call<?>> calls, Set<Call<?>> blockedCalls)
   {
-    for (Call call : calls) {
+    for (Call<?> call : calls) {
       blockedCalls.add(call);
     }
 
     // Checks which previously blocked calls have become unblocked
     // and remove these unblocked calls from the list of blocked calls
-    Set<Call> newUnblocked = computeUnblocked(blockedCalls);
-    for (Call unblockedCall : newUnblocked)
+    Set<Call<?>> newUnblocked = computeUnblocked(blockedCalls);
+    for (Call<?> unblockedCall : newUnblocked)
       blockedCalls.remove(unblockedCall);
     
     return newUnblocked;
   }
   
-  public static String extendTrace(Call[] calls, Set<Call> newUnblocked, String trace) {
+  public static String extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked, String trace) {
     // Compute a new trace
     String unblocksString="";
-    for (Call unblockedCall : newUnblocked) {
+    for (Call<?> unblockedCall : newUnblocked) {
       String callString = unblockedCall.printCallWithReturn();
       if (unblocksString=="") unblocksString=callString;
       else unblocksString+=", "+callString;
@@ -38,13 +39,13 @@ public class Util {
       unblocksString = " -- unblocked "+unblocksString;
     
     String callsString="";
-    for (Call call : calls) {
+    for (Call<?> call : calls) {
       if (callsString != "") callsString += "\n  "+call;
       else callsString = call.toString();
     }
     
     String callPlusUnblock;
-    if (calls.length > 1)
+    if (calls.size() > 1)
       callPlusUnblock = "parallel\n  {\n  "+callsString+"\n  }"+unblocksString;
     else
       callPlusUnblock = callsString+unblocksString;
@@ -57,10 +58,10 @@ public class Util {
     return trace;
   }
   
-  static Set<Call> computeUnblocked(Set<Call> blockedCalls) {
-    Set<Call> unblocked = new HashSet<Call>();
+  static Set<Call<?>> computeUnblocked(Set<Call<?>> blockedCalls) {
+    Set<Call<?>> unblocked = new HashSet<Call<?>>();
     
-    for (Call blockedCall : blockedCalls) {
+    for (Call<?> blockedCall : blockedCalls) {
       if (!blockedCall.hasBlocked())
         unblocked.add(blockedCall);
     }

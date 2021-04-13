@@ -16,8 +16,8 @@ public class Prefix implements TestStmt {
 	this.testStmt = testStmt;
     }
 
-    public void execute(Set<Call> allCalls,
-			Set<Call> blockedCalls,
+    public void execute(Set<Call<?>> allCalls,
+			Set<Call<?>> blockedCalls,
 			Object controller,
 			String trace,
 			String configurationDescription) {
