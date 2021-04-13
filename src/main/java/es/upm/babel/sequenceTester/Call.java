@@ -46,7 +46,7 @@ public abstract class Call<V> extends Tryer {
    * Associates an oracle with a call.
    * @param oracle an oracle which decides if the call returned the correct value.
    */
-  public Call oracle(Oracle<V> oracle) {
+  public Call<V> oracle(Oracle<V> oracle) {
     this.oracle = oracle;
     return this;
   }
@@ -54,7 +54,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Provides a short name for the oracle method.
    */
-  public Call o(Oracle<V> oracle) {
+  public Call<V> o(Oracle<V> oracle) {
     return oracle(oracle);
   }
 
@@ -70,14 +70,14 @@ public abstract class Call<V> extends Tryer {
    * The library enforces that if a call from a user is blocked,
    * another call from the same user cannot be made.
    */
-  public Call user(Object user) {
+  public Call<V> user(Object user) {
     return this;
   }
 
   /**
    * A short name for the user method.
    */
-  public Call u(Object user) {
+  public Call<V> u(Object user) {
     return user(user);
   }
 
@@ -103,7 +103,7 @@ public abstract class Call<V> extends Tryer {
    * may be used in a continuation (in the TestStmt where the call resides)
    * to specify that this call was unblocked by a later call.
    */
-  public Call name(String name) {
+  public Call<V> name(String name) {
     this.name = name;
     deleteName(this.name);
     addName(this.name,this);
@@ -114,14 +114,14 @@ public abstract class Call<V> extends Tryer {
   /**
    * A short name for the name method.
    */
-  public Call n(String name) {
+  public Call<V> n(String name) {
     return name(name);
   }
 
   /**
    * Sets wait time for calls until deciding they have blocked (in milliseconds)
    */
-  public Call waitTime(int milliSecs) {
+  public Call<V> waitTime(int milliSecs) {
     this.waitTime = milliSecs;
     return this;
   }
@@ -129,7 +129,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets wait time for calls until deciding they have blocked (in milliseconds)
    */
-  public Call w(int milliSecs) {
+  public Call<V> w(int milliSecs) {
     return waitTime(milliSecs);
   }
 
@@ -143,7 +143,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the returner for the call.
    */
-  public Call returnsTo(Return<V> returner) {
+  public Call<V> returnsTo(Return<V> returner) {
     this.returner = returner;
     return this;
   }
@@ -151,7 +151,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * A short name for the returner method.
    */
-  public Call r(Return<V> returner) {
+  public Call<V> r(Return<V> returner) {
     return returnsTo(returner);
   }
 
