@@ -260,12 +260,16 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
+  public boolean hasReturnValue() {
+    return returner.hasReturnValue();
+  }
+
   public String printCallWithReturn() {
     String callString = this.toString();
     if (raisedException())
       return callString + " raised " + getException();
     else {
-      if (returner.hasReturnValue())
+      if (hasReturnValue())
         return callString + " returned " + returner.getReturnValue();
       else
         return callString;

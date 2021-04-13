@@ -237,10 +237,12 @@ public class Unblocks {
       else
         blockStr = "deberia todavía estar bloqueada después las llamadas "+Call.printCalls(calls);
       
+      String returnString = "";
+      if (call.hasReturnValue()) returnString = "pero "+returned(call.returnValue());
+
       doFailOrPrint
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call+" "+blockStr+"\n"+
-         "pero "+returned(call.returnValue())+
+         "la llamada "+call+" "+blockStr+"\n"+returnString+
          "\n"+Util.mkTrace(trace),doFail,doPrint);
     }
   }
