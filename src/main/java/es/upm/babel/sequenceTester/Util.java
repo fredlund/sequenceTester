@@ -12,12 +12,8 @@ import java.util.HashSet;
  */
 public class Util {
   
-  public static Set<Call<?>> newUnblocked(List<Call<?>> calls, Set<Call<?>> blockedCalls)
+  public static Set<Call<?>> newUnblocked(Set<Call<?>> blockedCalls)
   {
-    for (Call<?> call : calls) {
-      blockedCalls.add(call);
-    }
-
     // Checks which previously blocked calls have become unblocked
     // and remove these unblocked calls from the list of blocked calls
     Set<Call<?>> newUnblocked = computeUnblocked(blockedCalls);
