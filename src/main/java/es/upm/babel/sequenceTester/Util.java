@@ -2,9 +2,8 @@ package es.upm.babel.sequenceTester;
 
 import java.util.List;
 import java.util.Set;
-import java.util.Map;
 import java.util.HashSet;
-
+import java.util.Map;
 
 /**
  * Various support methods, e.g., for defining
@@ -12,15 +11,17 @@ import java.util.HashSet;
  */
 public class Util {
   
-  public static Set<Call<?>> newUnblocked(Set<Call<?>> blockedCalls)
+  public static void unblocked(Set<Call<?>> blockedCalls, Set<Call<?>> unblocked)
   {
-    // Checks which previously blocked calls have become unblocked
-    // and remove these unblocked calls from the list of blocked calls
-    Set<Call<?>> newUnblocked = computeUnblocked(blockedCalls);
-    for (Call<?> unblockedCall : newUnblocked)
-      blockedCalls.remove(unblockedCall);
-    
-    return newUnblocked;
+    Set<Call<?>> newUnblocked = new HashSet<Call<?>>();
+
+    for (Call<?> blockedCall : blockedCalls) {
+      if (!blockedCall.hasBlocked()) {
+        newUnblocked.add(blockedCall);
+      }
+    }
+    blockedCalls.removeAll(newUnblocked);
+    unblocked.addAll(newUnblocked);
   }
   
   public static String extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked, String trace) {
@@ -52,16 +53,6 @@ public class Util {
       trace = "  "+callPlusUnblock;
     
     return trace;
-  }
-  
-  static Set<Call<?>> computeUnblocked(Set<Call<?>> blockedCalls) {
-    Set<Call<?>> unblocked = new HashSet<Call<?>>();
-    
-    for (Call<?> blockedCall : blockedCalls) {
-      if (!blockedCall.hasBlocked())
-        unblocked.add(blockedCall);
-    }
-    return unblocked;
   }
   
   public static String mkTrace(String trace) {

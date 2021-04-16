@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.HashSet;
 
 
 /**
@@ -187,9 +188,14 @@ public abstract class Call<V> extends Tryer {
   public void execute() {
     makeCall();
 
-    // Wait a while before checking which calls blocked
-    try { Thread.sleep(waitTime); }
-    catch (InterruptedException exc) { };
+    // Busywait a while until either we wait the maxWaitTime, or the calls has been unblocked
+    long remainingTime = getWaitTime();;
+    do {
+      long waitTime = Math.min(remainingTime, 10);
+      try { Thread.sleep(waitTime); }
+      catch (InterruptedException exc) { };
+      remainingTime -= waitTime;
+    } while (hasBlocked() && remainingTime > 0);
   }
 
   static Set<Call<?>> execute(List<Call<?>> calls, Object controller, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls) {
@@ -206,20 +212,20 @@ public abstract class Call<V> extends Tryer {
       call.makeCall();
     }
 
-    Set<Call<?>> newUnblocked = null;
+    Set<Call<?>> unblocked = new HashSet<Call<?>>();
     
     // Busywait a while until either we wait the maxWaitTime, or all active
     // calls have been unblocked
     long remainingTime = maxWaitTime;
     do {
-      long waitTime = Math.min(remainingTime, 50);
+      long waitTime = Math.min(remainingTime, 10);
       try { Thread.sleep(waitTime); }
       catch (InterruptedException exc) { };
       // Compute unblocked (and change blockedCalls)
-      newUnblocked = Util.newUnblocked(blockedCalls);
+      Util.unblocked(blockedCalls,unblocked);
       remainingTime -= waitTime;
-    } while (newUnblocked.size() > 0 && remainingTime > 0);
-    return newUnblocked;
+    } while (blockedCalls.size() > 0 && remainingTime > 0);
+    return unblocked;
   }
 
   /**
