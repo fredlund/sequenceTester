@@ -202,15 +202,23 @@ public abstract class Call<V> extends Tryer {
     for (Call<?> call : calls) {
       call.setController(controller);
       allCalls.add(call);
+      blockedCalls.add(call);
       call.makeCall();
     }
 
-    // Wait a while before checking which calls blocked
-    try { Thread.sleep(maxWaitTime); }
-    catch (InterruptedException exc) { };
-
-    // Compute unblocked (and change blockedCalls)
-    Set<Call<?>> newUnblocked = Util.newUnblocked(calls, blockedCalls);
+    Set<Call<?>> newUnblocked = null;
+    
+    // Busywait a while until either we wait the maxWaitTime, or all active
+    // calls have been unblocked
+    long remainingTime = maxWaitTime;
+    do {
+      long waitTime = Math.min(remainingTime, 50);
+      try { Thread.sleep(waitTime); }
+      catch (InterruptedException exc) { };
+      // Compute unblocked (and change blockedCalls)
+      newUnblocked = Util.newUnblocked(blockedCalls);
+      remainingTime -= waitTime;
+    } while (newUnblocked.size() > 0 && remainingTime > 0);
     return newUnblocked;
   }
 
