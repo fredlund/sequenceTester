@@ -1,70 +1,26 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-public class Lambda<V> extends Call<V> {
+public class Lambda implements TestStmt {
+  private Supplier<TestStmt> stmtSupplier;
 
-  private Supplier<Call<V>> call;
-  private Call<V> called;
-
-  /**
-   * Constructors a call that is suspended.
-   * @param call a Java supplier returning an call.
-   */
-  public Lambda(Supplier<Call<V>> call) {
-    super();
-    this.call = call;
-    this.called = null;
-    this.oracle = null;
+  public Lambda(Supplier<TestStmt> stmtSupplier) {
+    this.stmtSupplier = stmtSupplier;
   }
 
-  public void makeCall() {
-    Call<V> resolvedCall = resolveCommand();
-    started = true;
-    resolvedCall.makeCall();
+  public void execute(Set<Call<?>> allCalls,
+                      Set<Call<?>> blockedCalls,
+                      UnitTest unitTest,
+                      String trace) {
+
+    stmtSupplier.get().execute(allCalls, blockedCalls, unitTest, trace);
   }
 
-  Call<V> resolveCommand() {
-    this.called = call.get();
-    called.setUnitTest(getUnitTest());
-    if (oracle == null) oracle = called.getOracle();
-    return called;
-  }
-
-  public void toTry() throws Throwable {
-    UnitTest.failTestFramework("trying to executing a command abstraction "+this);
-  }
-
-  public boolean hasStarted() {
-    return called != null && called.hasStarted();
-  }
-
- public boolean returned() {
-    return called != null && called.returned();
-  }
-
-  public boolean raisedException() {
-    return called != null & called.raisedException();
-  }
-
-  public Throwable getException() {
-    return called.getException();
-  }
-
-  public boolean hasBlocked() {
-    return called != null && called.hasBlocked();
-  }
-  
-  public V returnValue() {
-    return called.returnValue();
-  }
-  
   public String toString() {
-    if (called != null)
-      return called.toString();
-    else
-      return "() -> "+call;
+    return "Lambda ... ";
   }
 }
