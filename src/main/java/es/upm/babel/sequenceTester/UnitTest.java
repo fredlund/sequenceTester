@@ -58,6 +58,11 @@ public class UnitTest {
     return t;
   }
 
+  public static UnitTest test(String name, TestCall... calls) {
+    UnitTest t = new UnitTest(name, Util.seq(calls));
+    return t;
+  }
+  
   public static UnitTest repeatTest(String name, int n, TestStmt stmt) {
     if (n < 1) {
       System.out.println("It does not make sense to run a test less than 1 time: "+n);
