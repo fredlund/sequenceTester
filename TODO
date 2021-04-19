@@ -15,5 +15,15 @@ Provide a method in Tryer to check whether a call has started -- boolean started
 
 - A way to specify a default timeout value for a test.
 
-- Timeout quicker if no calls are blocked.
+- Randomize the ordering of starting commands in a parallel tests,
+and maybe introduce some random delays too
+
+- Maybe by default re-run parallel commands a number of times,
+or rather, provide a syntax for repeating them (with good diagnostics).
+(an option).
+
+
+
+
+
 

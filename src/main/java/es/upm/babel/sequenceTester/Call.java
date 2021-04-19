@@ -2,7 +2,9 @@ package es.upm.babel.sequenceTester;
 
 import es.upm.babel.cclib.Tryer;
 
+import java.util.Random;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -16,8 +18,7 @@ import java.util.HashSet;
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
   private static Map<String,Call> names = null;
-
-  final static protected int ESPERA_MIN_MS = 250;
+  private static Random rand = new Random();
 
   String name;
   boolean hasSymbolicName = false;
@@ -38,7 +39,7 @@ public abstract class Call<V> extends Tryer {
     this.user = getUser();
     // By default we check that the call returns normally.
     this.oracle = Check.returns();
-    this.waitTime = ESPERA_MIN_MS;
+    this.waitTime = Config.getTestWaitTime();;
     this.returner = new Return<>();
     addName(this.name,this);
   }
@@ -209,8 +210,9 @@ public abstract class Call<V> extends Tryer {
       call.setController(controller);
       allCalls.add(call);
       blockedCalls.add(call);
-      call.makeCall();
     }
+
+    runCalls(calls);
 
     Set<Call<?>> unblocked = new HashSet<Call<?>>();
     
@@ -226,6 +228,28 @@ public abstract class Call<V> extends Tryer {
       remainingTime -= waitTime;
     } while (blockedCalls.size() > 0 && remainingTime > 0);
     return unblocked;
+  }
+
+  static void runCalls(List<Call<?>> calls) {
+    boolean randomize = Config.getTestRandomize();
+    List<Call<?>> callsInOrder = calls;
+
+    // Check if the starting order of calls should be randomized
+    if (randomize) {
+      callsInOrder = new ArrayList<>();
+      ArrayList<Call<?>> copiedCalls = new ArrayList<>(calls);
+      int remaining = copiedCalls.size();
+      while (remaining > 0) {
+        int nextToTake = rand.nextInt(remaining);
+        callsInOrder.add(copiedCalls.get(nextToTake));
+        copiedCalls.remove(nextToTake);
+        --remaining;
+      }
+    }
+
+    for (Call<?> call : callsInOrder) {
+      call.makeCall();
+    }
   }
 
   /**

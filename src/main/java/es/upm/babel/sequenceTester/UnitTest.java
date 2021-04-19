@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,54 +20,88 @@ public class UnitTest {
   static TestCaseChecker checker = null;
   static String testName;
 
-  TestStmt stmt;
+  int n;
+  TestStmt stmt = null;
+  Supplier<TestStmt> stmtRecipe;
   String trace="\nCall trace:\n";
   String name;
   Object controller;
+  Supplier<Object> controllerRecipe;
   String configurationDescription;
   
   Set<Call<?>> allCalls=null;
   Set<Call<?>> blockedCalls=null;
   
+  UnitTest(String name, String configurationDescription, int n) {
+    this.name = name;
+    this.configurationDescription = configurationDescription;
+    this.n = n;
+  }
+  
   /**
-   * Constructs a call sequence
+   * Constructs a unit test.
    * 
    * @param name the name of the call sequence.
-   * @param controller an object that is communicated to every call using the method
-   * {@link Call#setController(Object)}.
-   * @param stmt a test statement
    * @param configurationDescription a string describing the configuration
+   * @param controller an object that is communicated to every call using the method
+   * {@link Call#setController(Object)} -- can be null.
+   * @param stmt a test statement
    * @throws RuntimeException if the test statement is syntactically
    * invalid (e.g., unblocks calls that have already been unblocked).
    * @see TestStmt
    * @see Call
    */
-  public UnitTest(String name, String configurationDescription, Object controller, TestStmt stmt) {
-    this.name = name;
-    this.configurationDescription = configurationDescription;
-    this.controller = controller;
-    this.stmt = stmt;
+  public static UnitTest test(String name, String configurationDescription, Object controller, TestStmt stmt) {
+    UnitTest t = new UnitTest(name, configurationDescription, 1);
+    t.stmt = stmt;
+    t.controller = controller;
+    return t;
   }
-  
+
   /**
-   * Constructs a call sequence.
+   * Constructs a unit test.
    * 
    * @param name the name of the call sequence.
-   * @param controller an object that is communicated to every call using the method
-   * {@link Call#setController(Object)}.
-   * @param testCalls an array of test calls
    * @param configurationDescription a string describing the configuration
-   * @throws RuntimeException if the call sequence is syntactically
+   * @param controller an object that is communicated to every call using the method
+   * {@link Call#setController(Object)} -- can be null.
+   * @param stmt a test statement
+   * @throws RuntimeException if the test statement is syntactically
    * invalid (e.g., unblocks calls that have already been unblocked).
+   * @see TestStmt
    * @see Call
    */
-  public UnitTest(String name, String configurationDescription, Object controller, TestCall... testCalls) {
-    this.name = name;
-    this.configurationDescription = configurationDescription;
-    this.controller = controller;
-    this.stmt = Util.sequence(testCalls);
+  public static UnitTest test(String name, String configurationDescription, Object controller, TestCall... stmt) {
+    UnitTest t = new UnitTest(name, configurationDescription, 1);
+    t.stmt = Util.sequence(stmt);
+    t.controller = controller;
+    return t;
   }
-  
+
+  /**
+   * Constructs a unit test.
+   * 
+   * @param name the name of the call sequence.
+   * @param configurationDescription a string describing the configuration
+   * @param controller an object that is communicated to every call using the method
+   * {@link Call#setController(Object)} -- can be null.
+   * @param stmt a test statement
+   * @throws RuntimeException if the test statement is syntactically
+   * invalid (e.g., unblocks calls that have already been unblocked).
+   * @see TestStmt
+   * @see Call
+   */
+  public static UnitTest repeatTest(String name, String configurationDescription, Supplier<Object> controllerRecipe, int n, Supplier<TestStmt> stmtRecipe) {
+    if (n < 1) {
+      System.out.println("It does not make sense to run a test less than 1 time: "+n);
+      throw new RuntimeException();
+    }
+    UnitTest t = new UnitTest(name, configurationDescription, n);
+    t.stmtRecipe = stmtRecipe;
+    t.controllerRecipe = controllerRecipe;
+    return t;
+  }
+
   /**
    * Defines the test name and does other internal bookkeeping that is required before
    * the arguments of the UnitTest constructor is called in the tests.
@@ -79,6 +114,9 @@ public class UnitTest {
     
     // This creates a new map for the symbolic variables.
     Call.reset();
+
+    // Setup a test configuration
+    Config.installTestConfig();
   }
 
   /**
@@ -88,16 +126,31 @@ public class UnitTest {
    */
   public void run() {
     testName = name;
+    if (n > 1) stmt = stmtRecipe.get();
     checkSoundNess(name,stmt);
 
-    allCalls = new HashSet<>();
-    blockedCalls = new HashSet<>();
-    
     if (name.equals("desarollo")) {
       System.out.println
         ("\n*** Error: el sistema de entrega todavia esta en desarollo.");
       throw new RuntimeException();
     }
+
+    if (n == 1) {
+      runInt();
+    } else {
+      for (int i=0; i<n; i++) {
+        if (controllerRecipe != null) controller = controllerRecipe.get();
+        stmt = stmtRecipe.get();
+        runInt();
+      }
+    }
+
+    System.out.println("\nFinished testing "+name+"\n");
+  }
+
+  private void runInt() {
+    allCalls = new HashSet<>();
+    blockedCalls = new HashSet<>();
     
     stmt.execute
       (allCalls,
@@ -105,8 +158,6 @@ public class UnitTest {
        controller,
        "",
        configurationDescription);
-
-    System.out.println("\nFinished testing "+name+"\n");
   }
   
   boolean contains(int i, int[] calls) {

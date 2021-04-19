@@ -7,9 +7,10 @@ import java.time.Duration;
 
 
 class Tests {
+
   @Test
   public void test_01() {
-    new UnitTest
+    UnitTest.test
       ("test_01",
        "",
        new Counter(),
@@ -21,7 +22,7 @@ class Tests {
 
   @Test
   public void test_02() {
-    new UnitTest
+    UnitTest.test
       ("test_02",
        "",
        new Counter(),
@@ -33,7 +34,7 @@ class Tests {
 
   @Test
   public void test_03() {
-    new UnitTest
+    UnitTest.test
       ("test_03",
        "",
        new Counter(),
@@ -45,7 +46,7 @@ class Tests {
 
   @Test
   public void test_04() {
-    new UnitTest
+    UnitTest.test
       ("test_04",
        "",
        new Counter(),
@@ -62,7 +63,7 @@ class Tests {
   public void test_05() {
     Return<Integer> randR = new Return<>();
     
-    new UnitTest
+    UnitTest.test
       ("test_04",
        "",
        new Counter(),
@@ -72,6 +73,23 @@ class Tests {
                                       int rndInt = randR.getReturnValue();
                                       return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
                                     }))
+       ).run();
+  }
+
+  @Test
+  public void test_repeat() {
+    UnitTest.repeatTest
+      ("test_01",
+       "",
+       () -> {  return new Counter(); },
+       5,
+       () -> {
+         return
+         Util.sequence
+           (TestCall.unblocks(new Set(3))
+            ,TestCall.blocks(new Await(4).n("await"))
+            ,TestCall.unblocks(new Dec().o(Check.returns(2))));
+           }
        ).run();
   }
 
