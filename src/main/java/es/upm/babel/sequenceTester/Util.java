@@ -63,14 +63,21 @@ public class Util {
    * Returns a test statement composed of a sequence of calls.
    */
   public static TestStmt sequence(TestCall... testCalls) {
-    return sequenceEndsWith(testCalls, new Nil());
+    return sequenceEndsWith(new Nil(), testCalls);
+  }
+  
+  /**
+   * Returns a test statement composed of a sequence of calls.
+   */
+  public static TestStmt seq(TestCall... testCalls) {
+    return sequence(testCalls);
   }
   
   /**
    * Returns a test statement composed of a sequence of calls,
    * and ending with test statement parameter.
    */
-  public static TestStmt sequenceEndsWith(TestCall[] testCalls, TestStmt endStmt) {
+  public static TestStmt sequenceEndsWith(TestStmt endStmt, TestCall... testCalls) {
     int index = testCalls.length-1;
     TestStmt stmt = endStmt;
     while (index >= 0) {

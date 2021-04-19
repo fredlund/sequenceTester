@@ -18,11 +18,10 @@ public class Prefix implements TestStmt {
 
     public void execute(Set<Call<?>> allCalls,
 			Set<Call<?>> blockedCalls,
-			Object controller,
-			String trace,
-			String configurationDescription) {
-	trace = testCall.execute(allCalls, blockedCalls, controller, trace, configurationDescription);
-	testStmt.execute(allCalls, blockedCalls, controller, trace, configurationDescription);
+			UnitTest unitTest,
+			String trace) {
+	trace = testCall.execute(allCalls, blockedCalls, unitTest, trace);
+	testStmt.execute(allCalls, blockedCalls, unitTest, trace);
     }
 
     public TestCall testCall() {

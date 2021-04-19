@@ -12,7 +12,7 @@ public class Set extends CounterCall {
   }
 
   public void toTry() {
-    controller.set(value);
+    counter().set(value);
   }
 
   public String toString() {

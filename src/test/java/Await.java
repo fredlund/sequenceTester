@@ -12,7 +12,7 @@ public class Await extends CounterCall {
   }
 
   public void toTry() {
-    controller.await(waitingFor);
+    counter().await(waitingFor);
   }
 
   public String toString() {

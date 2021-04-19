@@ -12,7 +12,7 @@ public class AssertIsEqual extends CounterCall {
   }
 
   public void toTry() {
-    controller.assertIsEqual(value);
+    counter().assertIsEqual(value);
   }
 
   public String toString() {

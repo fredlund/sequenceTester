@@ -12,11 +12,11 @@ class Tests {
   public void test_01() {
     UnitTest.test
       ("test_01",
-       "",
-       new Counter(),
-       TestCall.unblocks(new Set(3))
-       ,TestCall.blocks(new Await(4).n("await"))
-       ,TestCall.unblocks(new Dec().o(Check.returns(2)))
+       Util.seq
+       (TestCall.unblocks(new CreateCounter()),
+        TestCall.unblocks(new Set(3))
+        ,TestCall.blocks(new Await(4).n("await"))
+        ,TestCall.unblocks(new Dec().o(Check.returns(2))))
        ).run();
   }
 
@@ -24,11 +24,11 @@ class Tests {
   public void test_02() {
     UnitTest.test
       ("test_02",
-       "",
-       new Counter(),
-       TestCall.unblocks(new Set(3))
-       ,TestCall.blocks(new WhenEven().n("whenEven").o(Check.returns(2)))
-       ,TestCall.unblocks(new Dec().o(Check.returns(2)),"whenEven")
+       Util.seq
+       (TestCall.unblocks(new CreateCounter()),
+        TestCall.unblocks(new Set(3))
+        ,TestCall.blocks(new WhenEven().n("whenEven").o(Check.returns(2)))
+        ,TestCall.unblocks(new Dec().o(Check.returns(2)),"whenEven"))
        ).run();
   }
 
@@ -36,11 +36,11 @@ class Tests {
   public void test_03() {
     UnitTest.test
       ("test_03",
-       "",
-       new Counter(),
-       TestCall.unblocks(new Set(3))
-       ,TestCall.unblocks(new Dec().o(Check.returns(2)))
-       ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class)))
+       Util.seq
+       (TestCall.unblocks(new CreateCounter()),
+        TestCall.unblocks(new Set(3))
+        ,TestCall.unblocks(new Dec().o(Check.returns(2)))
+        ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class))))
        ).run();
   }
 
@@ -48,14 +48,14 @@ class Tests {
   public void test_04() {
     UnitTest.test
       ("test_04",
-       "",
-       new Counter(),
-       TestCall.unblocks(new Rand().n("rand")),
-       TestCall.unblocks(new Lambda(() ->
-                                    {
-                                      Integer rndInt = (Integer) Call.returnValue("rand");
-                                      return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
-                                    }))
+       Util.sequenceEndsWith
+       (new Lambda(() ->
+                   {
+                     Integer rndInt = (Integer) Call.returnValue("rand");
+                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
+                   }),
+        TestCall.unblocks(new CreateCounter()),
+        TestCall.unblocks(new Rand().n("rand")))
        ).run();
   }
 
@@ -65,14 +65,14 @@ class Tests {
     
     UnitTest.test
       ("test_04",
-       "",
-       new Counter(),
-       TestCall.unblocks(new Rand().n("rand").r(randR)),
-       TestCall.unblocks(new Lambda(() ->
-                                    {
-                                      int rndInt = randR.getReturnValue();
-                                      return new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0));
-                                    }))
+       Util.sequenceEndsWith
+       (new Lambda(() ->
+                   {
+                     int rndInt = randR.getReturnValue();
+                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
+                   }),
+        TestCall.unblocks(new CreateCounter()),
+        TestCall.unblocks(new Rand().n("rand").r(randR)))
        ).run();
   }
 
@@ -80,16 +80,17 @@ class Tests {
   public void test_repeat() {
     UnitTest.repeatTest
       ("test_01",
-       "",
-       () -> {  return new Counter(); },
        5,
-       () -> {
-         return
-         Util.sequence
-           (TestCall.unblocks(new Set(3))
-            ,TestCall.blocks(new Await(4).n("await"))
-            ,TestCall.unblocks(new Dec().o(Check.returns(2))));
-           }
+       new Lambda
+       (
+        () -> {
+          return
+            Util.sequence
+            (TestCall.unblocks(new CreateCounter())
+             ,TestCall.unblocks(new Set(3))
+             ,TestCall.blocks(new Await(4).n("await"))
+             ,TestCall.unblocks(new Dec().o(Check.returns(2))));
+        })
        ).run();
   }
 

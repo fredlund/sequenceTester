@@ -4,13 +4,13 @@ import es.upm.babel.sequenceTester.*;
 
 
 public abstract class CounterCall<E> extends Call<E> {
-  Counter controller;
-
   public CounterCall() { }
 
-  public void setController(Object controller) {
-    if (controller instanceof Counter)
-      this.controller = (Counter) controller;
+  public Counter counter() {
+    Object state = getTestState();
+
+    if (state instanceof Counter)
+      return (Counter) state;
     else
       throw new RuntimeException();
   }

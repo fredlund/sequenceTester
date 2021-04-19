@@ -26,8 +26,8 @@ public abstract class Call<V> extends Tryer {
   boolean started = false;
   private Object user = null;
   private Return<V> returner;
-  private Object controller;
   private int waitTime;
+  private UnitTest unitTest;
 
   /**
    * Constructs a call. A call consists of a recipe for making a call,
@@ -186,7 +186,8 @@ public abstract class Call<V> extends Tryer {
     return this.name;
   }
 
-  public void execute() {
+  public void execute(UnitTest unitTest) {
+    this.unitTest = unitTest;
     makeCall();
 
     // Busywait a while until either we wait the maxWaitTime, or the calls has been unblocked
@@ -199,7 +200,7 @@ public abstract class Call<V> extends Tryer {
     } while (hasBlocked() && remainingTime > 0);
   }
 
-  static Set<Call<?>> execute(List<Call<?>> calls, Object controller, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls) {
+  static Set<Call<?>> execute(List<Call<?>> calls, UnitTest unitTest, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls) {
     int maxWaitTime = 0;
 
     for (Call<?> call : calls) {
@@ -207,7 +208,7 @@ public abstract class Call<V> extends Tryer {
     }
 
     for (Call<?> call : calls) {
-      call.setController(controller);
+      call.setUnitTest(unitTest);
       allCalls.add(call);
       blockedCalls.add(call);
     }
@@ -252,22 +253,12 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-  /**
-   * Invoked by the call sequence in which the call resides.
-   * This method is invoked before a call is made, thus
-   * enabling an object to be passed from the call sequence to the actual call.
-   *
-   * @param controller The object passed from the call sequence to the call.
-   */
-  public void setController(Object controller) {
-    this.controller = controller;
+  public void setTestState(Object state) {
+    this.unitTest.setTestState(state);
   }
 
-  /**
-   * Returns the controller.
-   */
-  public Object getController() {
-    return controller;
+  public Object getTestState() {
+    return this.unitTest.getTestState();
   }
 
   /**
@@ -377,6 +368,14 @@ public abstract class Call<V> extends Tryer {
     return call.returnValue();
   }
   
+  public void setUnitTest(UnitTest unitTest) {
+    this.unitTest = unitTest;
+  }
+
+  public UnitTest getUnitTest() {
+    return unitTest;
+  }
+
   public static Object v(String callName) {
     return returnValue(callName);
   }

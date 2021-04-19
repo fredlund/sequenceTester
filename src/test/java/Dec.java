@@ -9,7 +9,7 @@ public class Dec extends CounterCall<Integer> {
   }
 
   public void toTry() {
-    setReturnValue(controller.dec());
+    setReturnValue(counter().dec());
   }
 
   public String toString() {

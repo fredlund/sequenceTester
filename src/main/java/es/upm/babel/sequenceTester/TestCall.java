@@ -25,15 +25,14 @@ public class TestCall {
   
   public String execute(Set<Call<?>> allCalls,
                         Set<Call<?>> blockedCalls,
-                        Object controller,
-                        String trace,
-                        String configurationDescription) {
+                        UnitTest unitTest,
+                        String trace) {
 
     // Issue parallel calls
-    Set<Call<?>> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
+    Set<Call<?>> newUnblocked = Call.execute(calls,unitTest,allCalls,blockedCalls);
     trace = Util.extendTrace(calls,newUnblocked,trace);
     // Check blocking behaviour
-    unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,configurationDescription,true,false);
+    unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,unitTest.getConfigurationDescription(),true,false);
     return trace;
   }
   

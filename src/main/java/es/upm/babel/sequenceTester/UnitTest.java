@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,85 +19,61 @@ public class UnitTest {
   static TestCaseChecker checker = null;
   static String testName;
 
-  int n;
+  int n = 1;
   TestStmt stmt = null;
-  Supplier<TestStmt> stmtRecipe;
   String trace="\nCall trace:\n";
   String name;
-  Object controller;
-  Supplier<Object> controllerRecipe;
+  private Object state = null;
   String configurationDescription;
   
   Set<Call<?>> allCalls=null;
   Set<Call<?>> blockedCalls=null;
   
-  UnitTest(String name, String configurationDescription, int n) {
+  /**
+   * Constructs a unit test.
+   * 
+   * @param name the name of the call sequence.
+   * @param stmt a test statement
+   * @throws RuntimeException if the test statement is syntactically
+   * invalid (e.g., unblocks calls that have already been unblocked).
+   * @see TestStmt
+   * @see Call
+   */
+  UnitTest(String name, TestStmt stmt) {
     this.name = name;
-    this.configurationDescription = configurationDescription;
-    this.n = n;
+    this.stmt = stmt;
   }
   
-  /**
-   * Constructs a unit test.
-   * 
-   * @param name the name of the call sequence.
-   * @param configurationDescription a string describing the configuration
-   * @param controller an object that is communicated to every call using the method
-   * {@link Call#setController(Object)} -- can be null.
-   * @param stmt a test statement
-   * @throws RuntimeException if the test statement is syntactically
-   * invalid (e.g., unblocks calls that have already been unblocked).
-   * @see TestStmt
-   * @see Call
-   */
-  public static UnitTest test(String name, String configurationDescription, Object controller, TestStmt stmt) {
-    UnitTest t = new UnitTest(name, configurationDescription, 1);
-    t.stmt = stmt;
-    t.controller = controller;
+  public UnitTest setConfigurationDescription(String desc) {
+    configurationDescription = desc;
+    return this;
+  }
+
+  public String getConfigurationDescription(String desc) {
+    return configurationDescription;
+  }
+
+  public static UnitTest test(String name, TestStmt stmt) {
+    UnitTest t = new UnitTest(name, stmt);
     return t;
   }
 
-  /**
-   * Constructs a unit test.
-   * 
-   * @param name the name of the call sequence.
-   * @param configurationDescription a string describing the configuration
-   * @param controller an object that is communicated to every call using the method
-   * {@link Call#setController(Object)} -- can be null.
-   * @param stmt a test statement
-   * @throws RuntimeException if the test statement is syntactically
-   * invalid (e.g., unblocks calls that have already been unblocked).
-   * @see TestStmt
-   * @see Call
-   */
-  public static UnitTest test(String name, String configurationDescription, Object controller, TestCall... stmt) {
-    UnitTest t = new UnitTest(name, configurationDescription, 1);
-    t.stmt = Util.sequence(stmt);
-    t.controller = controller;
+  public static UnitTest test(String name, TestCall... calls) {
+    UnitTest t = new UnitTest(name, Util.seq(calls));
     return t;
   }
-
-  /**
-   * Constructs a unit test.
-   * 
-   * @param name the name of the call sequence.
-   * @param configurationDescription a string describing the configuration
-   * @param controller an object that is communicated to every call using the method
-   * {@link Call#setController(Object)} -- can be null.
-   * @param stmt a test statement
-   * @throws RuntimeException if the test statement is syntactically
-   * invalid (e.g., unblocks calls that have already been unblocked).
-   * @see TestStmt
-   * @see Call
-   */
-  public static UnitTest repeatTest(String name, String configurationDescription, Supplier<Object> controllerRecipe, int n, Supplier<TestStmt> stmtRecipe) {
+  
+  public static UnitTest repeatTest(String name, int n, TestStmt stmt) {
     if (n < 1) {
       System.out.println("It does not make sense to run a test less than 1 time: "+n);
       throw new RuntimeException();
     }
-    UnitTest t = new UnitTest(name, configurationDescription, n);
-    t.stmtRecipe = stmtRecipe;
-    t.controllerRecipe = controllerRecipe;
+    if (!(stmt instanceof Lambda)) {
+      System.out.println("Can only repeat a test which is abstracted (a lambda statement)");
+      throw new RuntimeException();
+    }
+    UnitTest t = new UnitTest(name, stmt);
+    t.n = n;
     return t;
   }
 
@@ -126,7 +101,6 @@ public class UnitTest {
    */
   public void run() {
     testName = name;
-    if (n > 1) stmt = stmtRecipe.get();
     checkSoundNess(name,stmt);
 
     if (name.equals("desarollo")) {
@@ -135,14 +109,8 @@ public class UnitTest {
       throw new RuntimeException();
     }
 
-    if (n == 1) {
+    for (int i=0; i<n; i++) {
       runInt();
-    } else {
-      for (int i=0; i<n; i++) {
-        if (controllerRecipe != null) controller = controllerRecipe.get();
-        stmt = stmtRecipe.get();
-        runInt();
-      }
     }
 
     System.out.println("\nFinished testing "+name+"\n");
@@ -155,9 +123,8 @@ public class UnitTest {
     stmt.execute
       (allCalls,
        blockedCalls,
-       controller,
-       "",
-       configurationDescription);
+       this,
+       "");
   }
   
   boolean contains(int i, int[] calls) {
@@ -313,22 +280,12 @@ public class UnitTest {
     failTest(message);
   }
   
-  /**
-   * Starts a controller with a given name and the call to create it.
-   */
-  public static <V> V startController(String name, Call<V> call) {
-    // For now we have to reset the call counter since startController actions are not counted
-    // This is ugly and should be changed to a more flexible policy for action naming...
-    Call.reset();
+  public Object getTestState() {
+    return state;
+  }
 
-    call.execute();
-    if (call.hasBlocked())
-      UnitTest.failTest("creating an instance of "+name+" blocks");
-    if (call.raisedException())
-      UnitTest.failTest
-        ("when creating an instance of "+name+
-         " the exception "+call.getException()+" was raised");
-    return call.returnValue();
+  public void setTestState(Object state) {
+    this.state = state;
   }
 }
 

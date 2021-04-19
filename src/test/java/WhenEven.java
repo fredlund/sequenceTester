@@ -10,7 +10,7 @@ public class WhenEven extends CounterCall<Integer> {
   }
 
   public void toTry() {
-    setReturnValue(controller.whenEven());
+    setReturnValue(counter().whenEven());
   }
 
   public String toString() {
