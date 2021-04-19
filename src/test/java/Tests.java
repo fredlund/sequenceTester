@@ -81,14 +81,16 @@ class Tests {
     UnitTest.repeatTest
       ("test_01",
        5,
-       () -> {
-         return
-         Util.sequence
-           (TestCall.unblocks(new CreateCounter())
-            ,TestCall.unblocks(new Set(3))
-            ,TestCall.blocks(new Await(4).n("await"))
-            ,TestCall.unblocks(new Dec().o(Check.returns(2))));
-           }
+       new Lambda
+       (
+        () -> {
+          return
+            Util.sequence
+            (TestCall.unblocks(new CreateCounter())
+             ,TestCall.unblocks(new Set(3))
+             ,TestCall.blocks(new Await(4).n("await"))
+             ,TestCall.unblocks(new Dec().o(Check.returns(2))));
+        })
        ).run();
   }
 

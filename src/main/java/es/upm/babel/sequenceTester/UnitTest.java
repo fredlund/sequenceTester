@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +21,6 @@ public class UnitTest {
 
   int n = 1;
   TestStmt stmt = null;
-  Supplier<TestStmt> stmtRecipe;
   String trace="\nCall trace:\n";
   String name;
   private Object state = null;
@@ -41,8 +39,9 @@ public class UnitTest {
    * @see TestStmt
    * @see Call
    */
-  UnitTest(String name) {
+  UnitTest(String name, TestStmt stmt) {
     this.name = name;
+    this.stmt = stmt;
   }
   
   public UnitTest setConfigurationDescription(String desc) {
@@ -55,18 +54,20 @@ public class UnitTest {
   }
 
   public static UnitTest test(String name, TestStmt stmt) {
-    UnitTest t = new UnitTest(name);
-    t.stmt = stmt;
+    UnitTest t = new UnitTest(name, stmt);
     return t;
   }
 
-  public static UnitTest repeatTest(String name, int n, Supplier<TestStmt> stmtRecipe) {
+  public static UnitTest repeatTest(String name, int n, TestStmt stmt) {
     if (n < 1) {
       System.out.println("It does not make sense to run a test less than 1 time: "+n);
       throw new RuntimeException();
     }
-    UnitTest t = new UnitTest(name);
-    t.stmtRecipe = stmtRecipe;
+    if (!(stmt instanceof Lambda)) {
+      System.out.println("Can only repeat a test which is abstracted (a lambda statement)");
+      throw new RuntimeException();
+    }
+    UnitTest t = new UnitTest(name, stmt);
     t.n = n;
     return t;
   }
@@ -95,7 +96,6 @@ public class UnitTest {
    */
   public void run() {
     testName = name;
-    if (n > 1) stmt = stmtRecipe.get();
     checkSoundNess(name,stmt);
 
     if (name.equals("desarollo")) {
@@ -104,13 +104,8 @@ public class UnitTest {
       throw new RuntimeException();
     }
 
-    if (n == 1) {
+    for (int i=0; i<n; i++) {
       runInt();
-    } else {
-      for (int i=0; i<n; i++) {
-        stmt = stmtRecipe.get();
-        runInt();
-      }
     }
 
     System.out.println("\nFinished testing "+name+"\n");
