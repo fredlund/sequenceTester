@@ -67,6 +67,13 @@ public class Util {
   }
   
   /**
+   * Returns a test statement composed of a sequence of calls.
+   */
+  public static TestStmt seq(TestCall... testCalls) {
+    return sequence(testCalls);
+  }
+  
+  /**
    * Returns a test statement composed of a sequence of calls,
    * and ending with test statement parameter.
    */

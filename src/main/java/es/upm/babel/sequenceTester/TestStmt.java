@@ -13,7 +13,6 @@ public interface TestStmt {
    */
   void execute(Set<Call<?>> allCalls,
                Set<Call<?>> blockedCalls,
-               Object controller,
-               String trace,
-               String configurationDescription);
+               UnitTest unitTest,
+               String trace);
 }

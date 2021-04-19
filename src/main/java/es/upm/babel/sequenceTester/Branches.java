@@ -25,10 +25,9 @@ public class Branches implements TestStmt {
 
   public void execute(Set<Call<?>> allCalls,
                       Set<Call<?>> blockedCalls,
-                      Object controller,
-                      String trace,
-                      String configurationDescription) {
-    Set<Call<?>> newUnblocked = Call.execute(calls,controller,allCalls,blockedCalls);
+                      UnitTest unitTest,
+                      String trace) {
+    Set<Call<?>> newUnblocked = Call.execute(calls,unitTest,allCalls,blockedCalls);
     trace = Util.extendTrace(calls, newUnblocked, trace);
 
     // Check that there exists an alternative that explains the execution result
@@ -37,7 +36,7 @@ public class Branches implements TestStmt {
     while (index < alternatives.length && !found) {
       alternative = alternatives[index];
       Unblocks unblocks = alternative.unblocks();
-      if (unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,configurationDescription,false,false))
+      if (unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,unitTest.getConfigurationDescription(),false,false))
         found = true;
       else 
         ++index;
@@ -57,7 +56,7 @@ public class Branches implements TestStmt {
          "\n"+Util.mkTrace(trace));
     }
 
-    alternative.continuation().execute(allCalls,blockedCalls,controller,trace,configurationDescription);
+    alternative.continuation().execute(allCalls,blockedCalls,unitTest,trace);
   }
 
   public List<Call<?>> calls() {

@@ -28,7 +28,7 @@ public class Lambda<V> extends Call<V> {
 
   Call<V> resolveCommand() {
     this.called = call.get();
-    called.setController(getController());
+    called.setUnitTest(getUnitTest());
     if (oracle == null) oracle = called.getOracle();
     return called;
   }
