@@ -15,17 +15,6 @@ Provide a method in Tryer to check whether a call has started -- boolean started
 
 - Implement sequentialization test.
 
-- Get rid of the controller (it is not type-checked at just not very nice).
-
-- Add a Lambda test statement, and get rid of the lambda test call.
-
-- Controller handling:
-  instead of a separate argument for controller we keep a test state
-  which can be modified by a call.
-  A call belongs to a UnitTest, so we can find the state. And set the state.
-
-- Get rid of configurationDescription also, and move it to a setter.
-
 
 
 

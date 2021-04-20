@@ -21,6 +21,6 @@ public class Lambda implements TestStmt {
   }
 
   public String toString() {
-    return "Lambda ... ";
+    return stmtSupplier.get().toString();
   }
 }
