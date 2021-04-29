@@ -208,7 +208,7 @@ public class Unblocks {
   }
   
   private String prefixConfigurationDescription(String configurationDescription) {
-    if (configurationDescription == "") return "";
+    if (configurationDescription == null || configurationDescription.equals("")) return "";
     else return "con la configuration "+configurationDescription+",\n";
   }
     
