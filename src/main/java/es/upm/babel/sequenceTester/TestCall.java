@@ -68,7 +68,7 @@ public class TestCall {
     return new TestCall(calls, new Unblocks(unblocksMap,null));
   }
   
-  public static TestCall unblocks(Call call, List<Pair<String,Oracle<?>>> mustUnblocks) {
+  public static TestCall unblocks(Call<?> call, List<Pair<String,Oracle<?>>> mustUnblocks) {
     List<Call<?>> list = new ArrayList<>();
     list.add(call);
     return unblocks(list, mustUnblocks);
