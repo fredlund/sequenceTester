@@ -71,6 +71,7 @@ public class Unblocks {
       // is no longer blocked
       for (String key : mustUnblock.keySet()) {
         Call<?> shouldBeUnblockedCall = Call.lookupCall(key);
+        System.out.println("checking key "+key+" has call "+shouldBeUnblockedCall.printCall());
         if (blockedCalls.contains(shouldBeUnblockedCall)) {
           isOk = false;
           if (doFail || doPrint) {

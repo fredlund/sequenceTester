@@ -284,7 +284,7 @@ public abstract class Call<V> extends Tryer {
 
   public static String printCalls(List<Call<?>> calls) {
     if (calls.size() == 1)
-      return calls.get(0).toString();
+      return calls.get(0).printCall();
     else {
       String callsString="";
       for (Call call : calls) {
@@ -327,13 +327,15 @@ public abstract class Call<V> extends Tryer {
   }
 
   public int hashCode() {
-    return getSymbolicName().hashCode();
+    return id;
+    //return getSymbolicName().hashCode();
   }
 
   public boolean equals(Object obj) {
     if (obj instanceof Call) {
       Call otherCall = (Call) obj;
-      return getSymbolicName().equals(otherCall.getSymbolicName());
+      return id == otherCall.id;
+      //return getSymbolicName().equals(otherCall.getSymbolicName());
     } else return false;
   }
 
