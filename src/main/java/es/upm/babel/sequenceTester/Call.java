@@ -21,6 +21,7 @@ public abstract class Call<V> extends Tryer {
   private static Random rand = new Random();
 
   String name;
+  int id;
   boolean hasSymbolicName = false;
   Oracle<V> oracle;
   boolean started = false;
@@ -35,6 +36,7 @@ public abstract class Call<V> extends Tryer {
    * correct result, and optionally a symbolic name for the call.
    */
   public Call() {
+    this.id = counter++;
     this.name = newName();
     this.user = getUser();
     // By default we check that the call returns normally.
@@ -276,14 +278,18 @@ public abstract class Call<V> extends Tryer {
     start();
   }
 
+  public String printCall() {
+    return id+":"+this.toString();
+  }
+
   public static String printCalls(List<Call<?>> calls) {
     if (calls.size() == 1)
       return calls.get(0).toString();
     else {
       String callsString="";
       for (Call call : calls) {
-        if (callsString != "") callsString += "\n  "+call;
-        else callsString = call.toString();
+        if (callsString != "") callsString += "\n  "+call.printCall();
+        else callsString = call.printCall();
       }
       return callsString;
     }
@@ -294,7 +300,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public String printCallWithReturn() {
-    String callString = this.toString();
+    String callString = printCall();
     if (raisedException())
       return callString + " raised " + getException();
     else {
@@ -381,6 +387,6 @@ public abstract class Call<V> extends Tryer {
   }
 
   private String newName() {
-    return "$call_"+Integer.valueOf(counter++).toString();
+    return "$call_"+Integer.valueOf(this.id).toString();
   }
 }

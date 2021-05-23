@@ -82,7 +82,7 @@ public class Unblocks {
               llamadas = "la llamada "+Call.printCalls(calls);
             doFailOrPrint
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+shouldBeUnblockedCall+
+               "la llamada "+shouldBeUnblockedCall.printCall()+
                " todavia es bloqueado aunque deberia haber sido"+
                " desbloqueado por "+llamadas+
                "\n"+Util.mkTrace(trace),
@@ -116,7 +116,7 @@ public class Unblocks {
           
             doFailOrPrint
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
+               "la llamada "+unblockedCall.printCall()+
                " deberia haber terminado normalmente "+
                "pero lanzó la excepción "+exc+
                "\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace), doFail, doPrint);
@@ -134,7 +134,7 @@ public class Unblocks {
             
             doFailOrPrint
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
+               "la llamada "+unblockedCall.printCall()+
                " lanzo la excepcion "+
                "incorrecto: "+exc+
                "; debería haber lanzado la exception "+
@@ -151,7 +151,7 @@ public class Unblocks {
           if (doFail || doPrint)
             doFailOrPrint
               (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+unblockedCall+
+               "la llamada "+unblockedCall.printCall()+
                " deberia haber lanzado "+
                "la excepcion "+o.correctExceptionClass()+
                "pero terminó normalmente"+
@@ -174,7 +174,7 @@ public class Unblocks {
                 Object uniqueReturnValue = o.uniqueReturnValue();
                 doFailOrPrint
                   (prefixConfigurationDescription(configurationDescription)+
-                   "la llamada "+unblockedCall+
+                   "la llamada "+unblockedCall.printCall()+
                    " devolvió el valor "+
                    "incorrecto: "+result+
                    "; debería haber devuelto el valor "+
@@ -186,7 +186,7 @@ public class Unblocks {
 
                 doFailOrPrint
                   (prefixConfigurationDescription(configurationDescription)+
-                   "la llamada "+unblockedCall+
+                   "la llamada "+unblockedCall.printCall()+
                    " devolvió el valor "+
                    "incorrecto: "+result+
                    (errorStr != null ? " "+errorStr : "")+
@@ -221,7 +221,7 @@ public class Unblocks {
       
       doFailOrPrint
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call+
+         "la llamada "+call.printCall()+
          " deberia bloquear\n"+
          "pero lanzó la excepción "+exc+
          "\n\nStacktrace:\n"+StackTrace+"\n"+Util.mkTrace(trace),doFail,doPrint);
@@ -242,7 +242,7 @@ public class Unblocks {
 
       doFailOrPrint
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call+" "+blockStr+"\n"+returnString+
+         "la llamada "+call.printCall()+" "+blockStr+"\n"+returnString+
          "\n"+Util.mkTrace(trace),doFail,doPrint);
     }
   }

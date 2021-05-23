@@ -37,8 +37,8 @@ public class Util {
     
     String callsString="";
     for (Call<?> call : calls) {
-      if (callsString != "") callsString += "\n  "+call;
-      else callsString = call.toString();
+      if (callsString != "") callsString += "\n  "+call.printCall();
+      else callsString = call.printCall();
     }
     
     String callPlusUnblock;
