@@ -1,6 +1,7 @@
 package es.upm.babel.sequenceTester;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnitTest {
   static TestCaseChecker checker = null;
   static String testName;
+  static Map<String,Boolean> testResults;
 
   int n = 1;
   TestStmt stmt = null;
@@ -42,6 +44,8 @@ public class UnitTest {
   UnitTest(String name, TestStmt stmt) {
     this.name = name;
     this.stmt = stmt;
+    if (testResults == null)
+      testResults = new HashMap<>();
   }
   
   public UnitTest setConfigurationDescription(String desc) {
@@ -109,9 +113,16 @@ public class UnitTest {
       throw new RuntimeException();
     }
 
+    if (testResults.containsKey(name)) {
+      failTestSyntax
+        ("*** Test "+name+" is used twice\n");
+    } else testResults.put(name,false);
+
     for (int i=0; i<n; i++) {
       runInt();
     }
+
+    testResults.put(name,true);
 
     System.out.println("\nFinished testing "+name+"\n");
   }
@@ -280,6 +291,33 @@ public class UnitTest {
     failTest(message);
   }
   
+  public static void reportTestResults() {
+    ArrayList<String> successes = new ArrayList<>();
+    ArrayList<String> failures = new ArrayList<>();
+    boolean hasErrors = false;
+    
+    for (Map.Entry<String,Boolean> entry : testResults.entrySet()) {
+      String name = entry.getKey();
+      Boolean result = entry.getValue();
+      if (result) successes.add(name);
+      else {
+        failures.add(name);
+        hasErrors = true;
+      }
+    }
+
+    System.out.println("\n\n========================================\n");
+    if (!hasErrors) System.out.println("All tests successful.\n");
+    else System.out.println("Some tests failed.\n");
+    
+    System.out.print("Successes: ");
+    for (String testName : successes) System.out.print(testName+" ");
+    System.out.println();
+    System.out.print("\nFailures: ");
+    for (String testName : failures) System.out.print(testName+" ");
+    System.out.println("\n\n========================================");
+  }
+
   public Object getTestState() {
     return state;
   }
