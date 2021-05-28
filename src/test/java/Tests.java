@@ -64,7 +64,7 @@ class Tests {
     Return<Integer> randR = new Return<>();
     
     UnitTest.test
-      ("test_04",
+      ("test_05",
        Util.sequenceEndsWith
        (new Lambda(() ->
                    {
@@ -79,7 +79,7 @@ class Tests {
   @Test
   public void test_repeat() {
     UnitTest.repeatTest
-      ("test_01",
+      ("test_repeat",
        5,
        new Lambda
        (

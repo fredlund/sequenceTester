@@ -1,8 +1,6 @@
 TOOD list
 =========
 
-- Check that UnitTest tests have unique names.
-
 - Clean up documentation.
 
 - Use a getter/setter style uniformly.
