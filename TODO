@@ -3,19 +3,13 @@ TOOD list
 
 - Check that UnitTest tests have unique names.
 
-- cclib:
-
-Provide a method in Tryer to check whether a call has started -- boolean started().
-
-- Make call numbering less fragile.
-
 - Clean up documentation.
 
 - Use a getter/setter style uniformly.
 
 - Implement sequentialization test.
 
-- Print counter for calls as well: callId:name()
+
 
 
 

@@ -1,10 +1,11 @@
-# For building the aedlib.jar jar file the normal way
+# For building the sequencetester.jar jar file the normal way
 
 
-all: 
+all: 	gradle/wrapper/gradle-wrapper.properties
 	sh ./gradlew build
 
-
+gradle/wrapper/gradle-wrapper.properties:
+	gradle wrapper
 
 # For building the javadocs
 
