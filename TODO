@@ -7,6 +7,7 @@ TOOD list
 
 - Implement sequentialization test.
 
+- Bad test error message: for a call with deterministic unblocking results, report ALL calls that were not unblocked. It seems that currently (alertar_4, TestCall.unblocks(new Transferir("cuenta_0","cuenta_1",10).w(500),"t_1_2","t_2_3","alertar_2","alertar_1","alertar_0")) we only report only non-unblocked call.
 
 
 
