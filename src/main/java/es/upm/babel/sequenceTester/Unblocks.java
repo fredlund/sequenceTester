@@ -66,32 +66,37 @@ public class Unblocks {
       if (!isOk) break;
     }
 
+    Set<Call<?>> wronglyUnblocked = new HashSet<>();
     if (isOk) {
       // Check that each call that must have been unblocked,
       // is no longer blocked
       for (String key : mustUnblock.keySet()) {
         Call<?> shouldBeUnblockedCall = Call.lookupCall(key);
         if (blockedCalls.contains(shouldBeUnblockedCall)) {
+          wronglyUnblocked.add(shouldBeUnblockedCall);
           isOk = false;
-          if (doFail || doPrint) {
-            String llamadas;
-            if (calls.size() > 1)
-              llamadas =
-                "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
-            else
-              llamadas = "la llamada "+Call.printCalls(calls);
-            doFailOrPrint
-              (prefixConfigurationDescription(configurationDescription)+
-               "la llamada "+shouldBeUnblockedCall.printCall()+
-               " todavia es bloqueado aunque deberia haber sido"+
-               " desbloqueado por "+llamadas+
-               "\n"+Util.mkTrace(trace),
-               doFail, doPrint);
-          }
-          break;
         }
       }
     }
+
+    if (wronglyUnblocked.size() > 0) {
+      if (doFail || doPrint) {
+        String llamadas;
+        if (calls.size() > 1)
+          llamadas =
+            "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
+        else
+          llamadas = "la llamada "+Call.printCalls(calls);
+        doFailOrPrint
+          (prefixConfigurationDescription(configurationDescription)+
+           "la llamadas "+Call.printCalls(wronglyUnblocked)+
+           " todavia son bloqueadas aunque deberian haber sido"+
+           " desbloqueadas por "+llamadas+
+           "\n"+Util.mkTrace(trace),
+           doFail, doPrint);
+      }
+    }
+  
     return isOk;
   }
   

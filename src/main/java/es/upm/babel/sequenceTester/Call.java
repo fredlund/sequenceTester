@@ -2,6 +2,7 @@ package es.upm.babel.sequenceTester;
 
 import es.upm.babel.cclib.Tryer;
 
+import java.util.Collection;
 import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
@@ -282,17 +283,13 @@ public abstract class Call<V> extends Tryer {
     return id+":"+this.toString();
   }
 
-  public static String printCalls(List<Call<?>> calls) {
-    if (calls.size() == 1)
-      return calls.get(0).printCall();
-    else {
-      String callsString="";
-      for (Call call : calls) {
-        if (callsString != "") callsString += "\n  "+call.printCall();
-        else callsString = call.printCall();
-      }
-      return callsString;
+  public static String printCalls(Collection<Call<?>> calls) {
+    String callsString="";
+    for (Call<?> call : calls) {
+      if (callsString != "") callsString += "\n  "+call.printCall();
+      else callsString = call.printCall();
     }
+    return callsString;
   }
 
   public boolean hasReturnValue() {
