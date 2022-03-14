@@ -49,7 +49,7 @@ public class Pair<X,Y> {
   
   /**
    * Equality for pairs. Note that the method handles 
-   * the case when the left or right tuple component is <code>null</null>.
+   * the case when the left or right tuple component is <code>null</code>.
    */
   public boolean equals(Object obj) {
     if (obj instanceof Pair<?,?>) {
