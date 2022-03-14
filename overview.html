@@ -92,7 +92,9 @@ TestCall(List<Call> calls, Unblocks unblocks)
 
   <h1>An Example</h1>
 <p>
-  Suppose we have an API with three methods: {@code set(int)},
+  Suppose we have an API with three methods and a constructor:
+  {@code Counter()} which creates a new counter,
+  {@code set(int)},
   {@code dec()}, and {@code whenZero()} such that {@code set(int)} sets the value of a counter
   to the argument and always unblocks immediately,
   {@code dec()} decrements the value of the
@@ -103,21 +105,24 @@ TestCall(List<Call> calls, Unblocks unblocks)
 </p>
 <pre>{@code
 Prefix
-(TestCall.unblocks(new Set(3)),
+(TestCall.unblocks(new CreateCounter()),
  Prefix
- (TestCall.unblocks(new Dec()),
+ (TestCall.unblocks(new Set(3)),
   Prefix
-  (TestCall.blocks(new WhenZero().name("whenZero")),
+  (TestCall.unblocks(new Dec()),
    Prefix
-   (TestCall.unblocks(new Dec()),
+   (TestCall.blocks(new WhenZero().name("whenZero")),
     Prefix
-    (TestCall.unblocks(new Dec(),"whenZero"),
-     Nil)))))
+    (TestCall.unblocks(new Dec()),
+     Prefix
+     (TestCall.unblocks(new Dec(),"whenZero"),
+      Nil))))))
 }</pre>
 <p>
-  Given constructors Set(int), Dec() and WhenZero() which creates
+  Given constructors CreateCounter(), Set(int), Dec() and WhenZero() which creates
   instances of a Call (sub)class,
-  the test expresses that if we first set the counter to 3
+  the test expresses that if we first create a counter, and sets the value
+  of the new counter to 3
   (a call which immediately returns, i.e., "unblocks"),
   and then decrement the counter
   (a call which immediately returns),
@@ -132,6 +137,7 @@ Prefix
 <p>Using the library API we can write this test more compactly as a sequence:
 <pre>
 {@code
+TestCall.unblocks(new CreateCounter()),
 TestCall.unblocks(new Set(3)),
 TestCall.unblocks(new Dec()),
 TestCall.blocks(new WhenZero().name("whenZero")),
@@ -147,6 +153,7 @@ TestCall.unblocks(new Dec(), "whenZero")
   </p>
 <pre>
 {@code
+TestCall.unblocks(new CreateCounter()),
 TestCall.unblocks(new Set(3)),
 TestCall.unblocks(new Dec().oracle(Check.returns(2))),
 TestCall.blocks(new WhenZero().name("whenZero")),
