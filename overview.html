@@ -173,7 +173,7 @@ public class Dec extends CounterCall<Integer> {
   Dec() { setUser("dec"); }
 
   // Executes the call
-  public void toTry() { setReturnValue(controller.dec());  }
+  public void toTry() { setReturnValue(counter().dec());  }
 
   // Prints the call
   public String toString() { return "dec()"; }
@@ -196,9 +196,9 @@ public class Dec extends CounterCall<Integer> {
   </p>
 <p>
 In fact the Dec class does not subclass Call directly, but CounterCall, which
-provides access to the controller object -- a convenient mechanism
-for passing an object to several such subclasses of Call which implement
-object methods:</p>
+provides access to the counter via the method call counter(). The counter() method is implemented
+using the setTestState and getTestState methods which
+provide a context for the execution of a test:</p>
   <pre>
     {@code
 public abstract class CounterCall<E> extends Call<E> {
@@ -206,11 +206,34 @@ public abstract class CounterCall<E> extends Call<E> {
 
   public CounterCall() { }
 
-  public void setController(Object controller) {
-    if (controller instanceof Counter)
-      this.controller = (Counter) controller;
+  public Counter counter() {
+    Object state = getTestState(); // access remembered counter
+
+    if (state instanceof Counter)
+      return (Counter) state;
     else
       throw new RuntimeException();
+  }
+}
+    }
+  </pre>
+  <p>
+  Moreover, the CreateCounter class creates a counter:</p>
+  <pre>
+    {@code
+public class CreateCounter extends CounterCall<Counter> {
+  CreateCounter() {
+    setUser("createCounter");
+  }
+
+  public void toTry() {
+    Counter counter = new Counter();
+    setTestState(counter); // remember counter
+    setReturnValue(counter); // return a value
+  }
+
+  public String toString() {
+    return "createCounter()";
   }
 }
     }
@@ -233,7 +256,9 @@ public abstract class CounterCall<E> extends Call<E> {
     method.
     An example: suppose that we have a call {@code IsEven(int n)} that returns true
     if n is even. Then we can write make a call and check its return value in the following way:
-    {@code new IsEven(n).oracle(Check.lambda(x -> (x % 2) == 0))}.
+  {@code new IsEven(n).oracle(Check.lambda(x -> ((n % 2) == 0) == x)}. The function inside
+  the call to lambda receives the return value of IsEven as a parameter, and returns true of false depending
+  on whether the return value agrees with whether n is even or not.
 </p>
 </li>
 
