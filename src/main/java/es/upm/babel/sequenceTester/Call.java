@@ -256,10 +256,16 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
+  /**
+   * Sets the test (context) state.
+   */
   public void setTestState(Object state) {
     this.unitTest.setTestState(state);
   }
 
+  /**
+   * Return the test (context) state.
+   */
   public Object getTestState() {
     return this.unitTest.getTestState();
   }

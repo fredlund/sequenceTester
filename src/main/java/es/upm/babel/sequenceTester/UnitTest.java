@@ -318,10 +318,16 @@ public class UnitTest {
     System.out.println("\n\n========================================");
   }
 
+  /**
+   * Return the test (context) state.
+   */
   public Object getTestState() {
     return state;
   }
 
+  /**
+   * Sets the test (context) state.
+   */
   public void setTestState(Object state) {
     this.state = state;
   }
