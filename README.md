@@ -12,16 +12,17 @@ A Java library for testing sequences of possibly blocking Java commands
   The sequenceTester library is a Java library
   used for writing and testing unit tests
   for a possibly non-sequential APIs, i.e.,
-  were calls may block. The library has been used to test
+  were multiple calls may be active concurrently, 
+  and where calls may block. The library has been used to test
   exercises in the undergraduate
   course "Concurrencia" at the Escuela Tecnica Superior
   de Ingenieros Informaticos at the Universidad Politecnica de Madrid, Spain.
 
-  The main idea is to write test cases as sequences of API calls,
+  The main idea is to write test cases as sequences of (sets of) API calls,
   and to provide excellent diagnostics of why a test case failed, i.e.,
   showing a complete trace of the calls of a failed test case, and
   indicating clearly the reason for failure. For example, that the call
-  is blocked although it should have been unblocked by a call,
+  is blocked although it should have been unblocked by another call,
   or that it returned an incorrect value.
  
 ## Library Functionality 

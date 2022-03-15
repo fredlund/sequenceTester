@@ -13,10 +13,10 @@ class Tests {
     UnitTest.test
       ("test_01",
        Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.blocks(new Await(4).n("await"))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2))))
+       (Calls.unblocks(new CreateCounter()),
+        Calls.unblocks(new Set(3))
+        ,Calls.blocks(new Await(4).n("await"))
+        ,Calls.unblocks(new Dec().o(Check.returns(2))))
        ).run();
   }
 
@@ -25,10 +25,10 @@ class Tests {
     UnitTest.test
       ("test_02",
        Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.blocks(new WhenEven().n("whenEven").o(Check.returns(2)))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2)),"whenEven"))
+       (Calls.unblocks(new CreateCounter()),
+        Calls.unblocks(new Set(3))
+        ,Calls.blocks(new WhenEven().n("whenEven").o(Check.returns(2)))
+        ,Calls.unblocks(new Dec().o(Check.returns(2)),"whenEven"))
        ).run();
   }
 
@@ -37,10 +37,10 @@ class Tests {
     UnitTest.test
       ("test_03",
        Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2)))
-        ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class))))
+       (Calls.unblocks(new CreateCounter()),
+        Calls.unblocks(new Set(3))
+        ,Calls.unblocks(new Dec().o(Check.returns(2)))
+        ,Calls.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class))))
        ).run();
   }
 
@@ -48,14 +48,14 @@ class Tests {
   public void test_04() {
     UnitTest.test
       ("test_04",
-       Util.sequenceEndsWith
+       Util.seqEndsWith
        (new Lambda(() ->
                    {
                      Integer rndInt = (Integer) Call.returnValue("rand");
-                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
+                     return Util.seq(Calls.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
                    }),
-        TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Rand().n("rand")))
+        Calls.unblocks(new CreateCounter()),
+        Calls.unblocks(new Rand().n("rand")))
        ).run();
   }
 
@@ -65,14 +65,14 @@ class Tests {
     
     UnitTest.test
       ("test_05",
-       Util.sequenceEndsWith
+       Util.seqEndsWith
        (new Lambda(() ->
                    {
                      int rndInt = randR.getReturnValue();
-                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
+                     return Util.seq(Calls.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
                    }),
-        TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Rand().n("rand").r(randR)))
+        Calls.unblocks(new CreateCounter()),
+        Calls.unblocks(new Rand().n("rand").r(randR)))
        ).run();
   }
 
@@ -85,11 +85,11 @@ class Tests {
        (
         () -> {
           return
-            Util.sequence
-            (TestCall.unblocks(new CreateCounter())
-             ,TestCall.unblocks(new Set(3))
-             ,TestCall.blocks(new Await(4).n("await"))
-             ,TestCall.unblocks(new Dec().o(Check.returns(2))));
+            Util.seq
+            (Calls.unblocks(new CreateCounter())
+             ,Calls.unblocks(new Set(3))
+             ,Calls.blocks(new Await(4).n("await"))
+             ,Calls.unblocks(new Dec().o(Check.returns(2))));
         })
        ).run();
   }

@@ -62,39 +62,34 @@ public class Util {
   /**
    * Returns a test statement composed of a sequence of calls.
    */
-  public static TestStmt sequence(TestCall... testCalls) {
-    return sequenceEndsWith(new Nil(), testCalls);
-  }
-  
-  /**
-   * Returns a test statement composed of a sequence of calls.
-   */
-  public static TestStmt seq(TestCall... testCalls) {
-    return sequence(testCalls);
+  public static TestStmt seq(Calls... callsSeq) {
+    return seqEndsWith(new Nil(), callsSeq);
   }
   
   /**
    * Returns a test statement composed of a sequence of calls,
    * and ending with test statement parameter.
    */
-  public static TestStmt sequenceEndsWith(TestStmt endStmt, TestCall... testCalls) {
-    int index = testCalls.length-1;
+  public static TestStmt seqEndsWith(TestStmt endStmt, Calls... callsSeq) {
+    int index = callsSeq.length-1;
     TestStmt stmt = endStmt;
     while (index >= 0) {
-      stmt = new Prefix(testCalls[index--],stmt);
+      Calls calls = callsSeq[index--];
+      stmt = new Prefix(calls.calls(),calls.unblocks(),stmt);
     }
     return stmt;
   }
-  
+
   /**
    * Sequential composition of two test statements.
    */
   public static TestStmt compose(TestStmt stmt1, TestStmt stmt2) {
     if (stmt1 instanceof Prefix) {
       Prefix prefix = (Prefix) stmt1;
-      TestCall testCall = prefix.testCall();
+      List<Call<?>> calls = prefix.calls();
+      Unblocks unblocks = prefix.unblocks();
       TestStmt stmt = prefix.stmt();
-      return new Prefix(testCall,compose(stmt,stmt2));
+      return new Prefix(calls,unblocks,compose(stmt,stmt2));
     } else if (stmt1 instanceof Nil) {
       return stmt2;
     } else {

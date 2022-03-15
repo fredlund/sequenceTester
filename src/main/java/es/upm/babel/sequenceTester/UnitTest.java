@@ -62,11 +62,6 @@ public class UnitTest {
     return t;
   }
 
-  public static UnitTest test(String name, TestCall... calls) {
-    UnitTest t = new UnitTest(name, Util.seq(calls));
-    return t;
-  }
-  
   public static UnitTest repeatTest(String name, int n, TestStmt stmt) {
     if (n < 1) {
       System.out.println("It does not make sense to run a test less than 1 time: "+n);
@@ -169,20 +164,18 @@ public class UnitTest {
 
     if (stmt instanceof Prefix) {
       Prefix prefix = (Prefix) stmt;
-      TestCall testCall = prefix.testCall();
-      TestStmt continuation = prefix.stmt();
       
       // Update blocked users and active calls
-      checkAndUpdateActiveBlocked(name,testCall.calls(),active,blockedUsers);
+      checkAndUpdateActiveBlocked(name,prefix.calls(),active,blockedUsers);
 
       // Check that unblocks only refers to active calls and update blocked users
-      checkUnblocksActive(testCall.calls(), testCall.unblocks(), blockedUsers, active);
+      checkUnblocksActive(prefix.calls(), prefix.unblocks(), blockedUsers, active);
 
       // Remove unblocked calls from active
-      for (String unblocked : testCall.unblocks().mustUnblock().keySet()) {
+      for (String unblocked : prefix.unblocks().mustUnblock().keySet()) {
         active.remove(unblocked);
       }
-      checkSoundNess(name,continuation,active,blockedUsers);
+      checkSoundNess(name,prefix.stmt(),active,blockedUsers);
     }
 
     else if (stmt instanceof Branches) {
@@ -191,17 +184,19 @@ public class UnitTest {
       // Update blocked and active calls
       checkAndUpdateActiveBlocked(name,b.calls(),active,blockedUsers);
       
-      for (Alternative alt : b.alternatives()) {
+      for (Pair<Unblocks,TestStmt> alt : b.alternatives()) {
         Set<String> newActive = new HashSet<>(active);
         Set<Object> newBlockedUsers = new HashSet<Object>(blockedUsers);
+        Unblocks unblocks = alt.getLeft();
+        TestStmt continuation = alt.getRight();
 
         // Check that unblocks only refers to active calls and update blocked users
-        checkUnblocksActive(b.calls(), alt.unblocks(), newBlockedUsers, newActive);
+        checkUnblocksActive(b.calls(), unblocks, newBlockedUsers, newActive);
 
-        for (String unblocked : alt.unblocks().mustUnblock().keySet()) {
+        for (String unblocked : unblocks.mustUnblock().keySet()) {
           newActive.remove(unblocked);
         }
-        checkSoundNess(name,alt.continuation(),newActive,newBlockedUsers);
+        checkSoundNess(name,continuation,newActive,newBlockedUsers);
       }
     }
   }

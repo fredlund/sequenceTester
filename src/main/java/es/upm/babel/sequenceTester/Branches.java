@@ -11,15 +11,15 @@ import java.util.Arrays;
  */
 public class Branches implements TestStmt {
   private List<Call<?>> calls;
-  private Alternative[] alternatives;
+  private List<Pair<Unblocks,TestStmt>> alternatives;
 
-  public Branches(List<Call<?>> calls, Alternative[] alternatives) {
+  public Branches(List<Call<?>> calls, List<Pair<Unblocks,TestStmt>> alternatives) {
     this.calls = calls;
     this.alternatives = alternatives;
-    if (calls.size() <= 0 || alternatives.length < 0) {
+    if (calls.size() <= 0 || alternatives.size() < 0) {
       UnitTest.failTest
         ("badly formed branches with calls.size()="+calls.size()+
-         " and alternatives.length="+alternatives.length);
+         " and alternatives.size()="+alternatives.size());
     }
   }
 
@@ -31,11 +31,10 @@ public class Branches implements TestStmt {
     trace = Util.extendTrace(calls, newUnblocked, trace);
 
     // Check that there exists an alternative that explains the execution result
-    int index = 0; boolean found=false; Alternative alternative = null;
+    int index = 0; boolean found=false; 
 
-    while (index < alternatives.length && !found) {
-      alternative = alternatives[index];
-      Unblocks unblocks = alternative.unblocks();
+    while (index < alternatives.size() && !found) {
+      Unblocks unblocks = alternatives.get(index).getLeft();
       if (unblocks.checkCalls(calls,newUnblocked,allCalls,blockedCalls,trace,unitTest.getConfigurationDescription(),false,false))
         found = true;
       else 
@@ -56,24 +55,20 @@ public class Branches implements TestStmt {
          "\n"+Util.mkTrace(trace));
     }
 
-    alternative.continuation().execute(allCalls,blockedCalls,unitTest,trace);
+    alternatives.get(index).getRight().execute(allCalls,blockedCalls,unitTest,trace);
   }
 
   public List<Call<?>> calls() {
     return calls;
   }
 
-  public Alternative[] alternatives() {
+  public List<Pair<Unblocks,TestStmt>> alternatives() {
     return alternatives;
-  }
-
-  public static Branches branches(List<Call<?>> calls, Alternative... alternatives) {
-    return new Branches(calls,alternatives);
   }
 
   public String toString() {
     return
       "Branches (" + Call.printCalls(calls) +
-      ")\n [" + Arrays.toString(alternatives) + "]";
+      ")\n [" + alternatives + "]";
   }
 }

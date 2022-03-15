@@ -309,6 +309,52 @@ public class Unblocks {
   public String toString() {
     return "<must = "+mustUnblock+", may="+mayUnblock+">";
   }
+
+  //////////////////////////////////////////////////////////////////////
+  
+  public static Pair<List<Call<?>>,Unblocks> unblocks(List<Call<?>> calls, String... unblocks) {
+    Map<String,Oracle<?>> unblocksMap = Unblocks.unblocksMap(unblocks);
+    for (Call call : calls)
+      unblocksMap.put(call.getSymbolicName(),null);
+    return new Pair<List<Call<?>>,Unblocks>(calls, new Unblocks(unblocksMap,null));
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> unblocks(Call<?> call, String... unblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return unblocks(list, unblocks);
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> unblocks(List<Call<?>> calls, List<Pair<String,Oracle<?>>> mustUnblocks) {
+    Map<String,Oracle<?>> unblocksMap = Unblocks.unblocksMap(mustUnblocks);
+    for (Call<?> call : calls)
+      unblocksMap.put(call.getSymbolicName(),null);
+    return new Pair<List<Call<?>>,Unblocks>(calls, new Unblocks(unblocksMap,null));
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> unblocks(Call<?> call, List<Pair<String,Oracle<?>>> mustUnblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return unblocks(list, mustUnblocks);
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> blocks(List<Call<?>> calls, String... unblocks) {
+    return new Pair<List<Call<?>>,Unblocks>(calls, Unblocks.must(unblocks));
+  }
+
+  public static Pair<List<Call<?>>,Unblocks> blocks(Call<?> call, String... unblocks) {
+    List<Call<?>> list = new ArrayList<>();
+    list.add(call);
+    return blocks(list, unblocks);
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> unblocks(Call<?> call) {
+    return unblocks(call, new String[] {});
+  }
+  
+  public static Pair<List<Call<?>>,Unblocks> blocks(Call<?> call) {
+    return blocks(call, new String[] {});
+  }
 }
 
 
