@@ -3,16 +3,18 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
 import static es.upm.babel.sequenceTester.Assertions.*;
 
 class Tests {
+  UnitTest test;
   public Counter counter;
 
   @Test
-  public void test_01(TestInfo testInfo) {
-    new UnitTest(testInfo.getDisplayName());
+  public void test_01() {
+
     Counter counter = new CreateCounter().unblocks().getReturnValue();
     new Set(counter,3).unblocks();
     new Await(counter,4).blocks();
@@ -20,8 +22,7 @@ class Tests {
   }
 
   @Test
-  public void test_02(TestInfo testInfo) {
-    new UnitTest(testInfo.getDisplayName());
+  public void test_02() {
     Counter counter = new CreateCounter().unblocks().getReturnValue();
     new Set(counter,3).unblocks();
     Call<Integer> whenEven = new WhenEven(counter).n("whenEven").blocks();
@@ -90,6 +91,16 @@ class Tests {
   //       })
   //      ).run();
   // }
+
+  @BeforeEach
+  public void start(TestInfo testInfo) {
+    test = new UnitTest(testInfo.getDisplayName());
+  }
+
+  @AfterEach
+  public void finish(TestInfo testInfo) {
+    test.finish();
+  }
 
 }
 

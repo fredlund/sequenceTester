@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 
 /**
@@ -30,6 +32,7 @@ public abstract class Call<V> extends Tryer {
   private UnitTest unitTest;
   private boolean hasReturnValue = false;
   private V returnValue = null;
+  private boolean checkedForException = false;
 
   /**
    * Constructs a call. A call consists of a recipe for making a call,
@@ -156,8 +159,22 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
+  public static void checkExceptions(Set<Call<?>> calls) {
+    for (Call<?> call : calls) {
+      if (call.raisedException() && !call.checkedForException) {
+        Throwable exc = call.getException();
+        StringWriter errors = new StringWriter();
+        exc.printStackTrace(new PrintWriter(errors));
+        String StackTrace = errors.toString();
+        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n");
+      }
+    }
+  }
+
   static void execute(List<Call<?>> calls) {
     UnitTest t = calls.get(0).unitTest;
+    // First check if any previous calls raised an exception which has not been handled
+    if (t.calls != null) checkExceptions(t.calls);
 
     int maxWaitTime = 0;
 

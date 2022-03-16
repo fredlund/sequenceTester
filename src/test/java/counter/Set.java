@@ -14,6 +14,7 @@ public class Set extends Call<Void> {
   }
 
   public void toTry() {
+    if (2 < 3) throw new RuntimeException();
     counter.set(value);
   }
 

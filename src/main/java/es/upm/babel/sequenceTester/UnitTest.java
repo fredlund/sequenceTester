@@ -197,6 +197,11 @@ public class UnitTest {
     return "\nTrace (error detectado en la ultima linea):\n"+currentTest.trace+"\n\n";
   }
 
+  public void finish() {
+    if (calls != null && calls.size() > 0)
+      Call.checkExceptions(calls);
+  }
+
   /**
    * Return the test (context) state.
    */
