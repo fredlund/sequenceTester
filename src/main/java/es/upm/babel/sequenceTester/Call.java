@@ -27,6 +27,7 @@ public abstract class Call<V> extends Tryer {
   int id;
   boolean hasSymbolicName = false;
   boolean started = false;
+  boolean executing = false;
   private Object user = null;
   private int waitTime;
   private UnitTest unitTest;
@@ -136,27 +137,43 @@ public abstract class Call<V> extends Tryer {
   }
 
   public Call<V> unblocks() {
-    execute(Arrays.asList(this));
+    if (!executing)
+      exec();
     Assertions.assertUnblocks(this);
     return this;
   }
 
   public Call<V> unblocks(Call... calls) {
-    execute(Arrays.asList(this));    
+    if (!executing)
+      exec();
     Assertions.assertUnblocks(calls);
     return this;
   }
 
   public Call<V> blocks() {
-    execute(Arrays.asList(this));
+    if (!executing)
+      exec();
     Assertions.assertBlocks();
     return this;
   }
 
   public Call<V> blocks(Call... calls) {
-    execute(Arrays.asList(this));    
+    if (!executing)
+      exec();
     Assertions.assertBlocks(calls);
     return this;
+  }
+
+  public boolean raisedException() {
+    if (!executing)
+      exec();
+    return super.raisedException();
+  }
+
+  public Throwable getException() {
+    if (!raisedException())
+      UnitTest.failTest(this+" did not raise an exception");
+    return super.getException();
   }
 
   public void checkedForException() {
@@ -188,6 +205,7 @@ public abstract class Call<V> extends Tryer {
 
     for (Call<?> call : calls) {
       maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
+      call.executing = true;
     }
 
     t.addCalls(calls);
@@ -266,10 +284,26 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
+  public Call<V> raises() {
+    if (!raisedException())
+      UnitTest.failTest(this+" did not raise an exception");
+    return this;
+  }
+
+  public Call<V> returns() {
+    if (!returned())
+      UnitTest.failTest(this+" did not return normally");
+    return this;
+  }
+
   /**
    * Returns the return value of the call (if any).
    */
   public V getReturnValue() {
+    if (!executing)
+      exec();
+    if (!hasReturnValue)
+      UnitTest.failTest(this+" did not return a value");
     return returnValue;
   }
 
@@ -286,6 +320,8 @@ public abstract class Call<V> extends Tryer {
    * and the call did not raise an exception.
    */
   public boolean returned() {
+    if (!executing)
+      exec();
     return hasStarted() && !hasBlocked() && !raisedException();
   }
 
@@ -312,8 +348,8 @@ public abstract class Call<V> extends Tryer {
      * if the call truly blocked AND it did not raise an
      * exception.
      **/
-    if (!hasStarted())
-        UnitTest.failTestSyntax("cannot check if call "+this+" is blocked because it has not started yet");
+    if (!executing)
+      exec();
     return isBlocked() && !raisedException();
   }
 
