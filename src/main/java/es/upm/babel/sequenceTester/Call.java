@@ -175,7 +175,11 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-  static void execute(List<Call<?>> calls) {
+  public static void execute(Call... calls) {
+    execute(Arrays.asList(calls));
+  }
+
+  public static void execute(List<Call<?>> calls) {
     UnitTest t = calls.get(0).unitTest;
     // First check if any previous completed calls raised an exception which has not been handled
     if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls);

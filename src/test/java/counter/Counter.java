@@ -18,6 +18,10 @@ public class Counter {
     counter = value;
   }
 
+  public synchronized int inc() {
+    return ++counter;
+  }
+
   public synchronized int dec() {
     return --counter;
   }
