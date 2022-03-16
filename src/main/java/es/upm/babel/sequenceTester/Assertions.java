@@ -28,4 +28,18 @@ public class Assertions {
     assertBlocking(Arrays.asList(mustCalls), Arrays.asList());
   }
 
+  public static <V> void assertThrows(Class<?> excClass, Call<V> call) {
+    if (!call.raisedException()) {
+      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass);
+    }
+
+    Class<?> exceptionClass = call.getException().getClass();
+    if (!excClass.isAssignableFrom(exceptionClass)) {
+      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass+
+                        " pero lanzo una excepcion "+exceptionClass);
+    }
+    
+    call.checkedForException();
+  }
+  
 }

@@ -30,17 +30,13 @@ class Tests {
     assertEquals(2,whenEven);
   }
 
-  // @Test
-  // public void test_03() {
-  //   UnitTest.test
-  //     ("test_03",
-  //      Util.seq
-  //      (TestCall.unblocks(new CreateCounter()),
-  //       TestCall.unblocks(new Set(3))
-  //       ,TestCall.unblocks(new Dec().o(Check.returns(2)))
-  //       ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class))))
-  //      ).run();
-  // }
+  @Test
+  public void test_03() {
+    Counter counter = new CreateCounter().unblocks().getReturnValue();
+    new Set(counter,3).unblocks();
+    assertEquals(2,new Dec(counter).unblocks());
+    assertThrows(RuntimeException.class,new AssertIsEqual(counter,3).unblocks());
+  }
 
   // @Test
   // public void test_04() {

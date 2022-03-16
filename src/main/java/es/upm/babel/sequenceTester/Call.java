@@ -159,6 +159,10 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
+  public void checkedForException() {
+    checkedForException = true;
+  }
+
   public static void checkExceptions(Set<Call<?>> calls) {
     for (Call<?> call : calls) {
       if (call.raisedException() && !call.checkedForException) {
@@ -173,8 +177,8 @@ public abstract class Call<V> extends Tryer {
 
   static void execute(List<Call<?>> calls) {
     UnitTest t = calls.get(0).unitTest;
-    // First check if any previous calls raised an exception which has not been handled
-    if (t.calls != null) checkExceptions(t.calls);
+    // First check if any previous completed calls raised an exception which has not been handled
+    if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls);
 
     int maxWaitTime = 0;
 
