@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Assertions {
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
@@ -40,6 +39,16 @@ public class Assertions {
     }
     
     call.checkedForException();
+  }
+
+  public static void junitAssertion(Runnable assertion) {
+    try {
+      assertion.run();
+    } catch (org.opentest4j.AssertionFailedError exc) {
+      String msg = exc.getMessage();
+      if (msg != null) UnitTest.failTest(msg);
+      else UnitTest.failTest("failed the test");
+    }
   }
   
 }

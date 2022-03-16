@@ -53,6 +53,14 @@ class Tests {
   }
 
   @Test
+  public void test_05() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).returns();
+    new Await(counter,4).blocks();
+    junitAssertion(() -> { org.junit.jupiter.api.Assertions.assertEquals(3,new Dec(counter).getReturnValue()); });
+  }
+
+  @Test
   public void test_par_1() {
     Counter counter = new CreateCounter().getReturnValue();
     new Set(counter,3).returns();

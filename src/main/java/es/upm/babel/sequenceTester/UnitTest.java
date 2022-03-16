@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -198,8 +197,8 @@ public class UnitTest {
   }
 
   public void finish() {
-    if (calls != null && calls.size() > 0)
-      Call.checkExceptions(calls);
+    if (unblockedCalls != null && unblockedCalls.size() > 0)
+      Call.checkExceptions(unblockedCalls);
   }
 
   /**
