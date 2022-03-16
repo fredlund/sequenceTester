@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class IsEven extends CounterCall<Boolean> {
+public class IsEven extends Call<Boolean> {
   private int n;
 
   IsEven(int n) {

@@ -3,16 +3,18 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class AssertIsEqual extends CounterCall {
+public class AssertIsEqual extends Call<Void> {
   private int value;
+  private Counter counter;
 
-  AssertIsEqual(int value) {
+  AssertIsEqual(Counter counter, int value) {
+    this.counter = counter;
     this.value = value;
     setUser("assertIsEqual");
   }
 
   public void toTry() {
-    counter().assertIsEqual(value);
+    counter.assertIsEqual(value);
   }
 
   public String toString() {

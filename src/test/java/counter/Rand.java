@@ -4,7 +4,8 @@ import es.upm.babel.sequenceTester.*;
 import java.util.Random;
 
 
-public class Rand extends CounterCall<Integer> {
+public class Rand extends Call<Integer> {
+
   Rand() {
     setUser("rand");
   }

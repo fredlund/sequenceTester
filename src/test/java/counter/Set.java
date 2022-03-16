@@ -3,16 +3,18 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Set extends CounterCall {
+public class Set extends Call<Void> {
   private int value;
+  private Counter counter;
 
-  Set(int value) {
+  Set(Counter counter, int value) {
+    this.counter = counter;
     this.value = value;
     setUser("set");
   }
 
   public void toTry() {
-    counter().set(value);
+    counter.set(value);
   }
 
   public String toString() {

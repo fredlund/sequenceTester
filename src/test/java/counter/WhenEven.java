@@ -3,14 +3,16 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class WhenEven extends CounterCall<Integer> {
+public class WhenEven extends Call<Integer> {
+  private Counter counter;
 
-  WhenEven() {
+  WhenEven(Counter counter) {
+    this.counter = counter;
     setUser("whenEven");
   }
 
   public void toTry() {
-    setReturnValue(counter().whenEven());
+    setReturnValue(counter.whenEven());
   }
 
   public String toString() {

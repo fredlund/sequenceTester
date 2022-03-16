@@ -5,6 +5,7 @@ import es.upm.babel.cclib.Tryer;
 import java.util.Collection;
 import java.util.Random;
 import java.util.List;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -13,8 +14,7 @@ import java.util.HashSet;
 
 
 /**
- * Represents a BasicCall together with an oracle for deciding if the call
- * executed correctly.
+ * A Call.
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
@@ -24,50 +24,25 @@ public abstract class Call<V> extends Tryer {
   String name;
   int id;
   boolean hasSymbolicName = false;
-  Oracle<V> oracle;
   boolean started = false;
   private Object user = null;
-  private Return<V> returner;
   private int waitTime;
   private UnitTest unitTest;
+  private boolean hasReturnValue = false;
+  private V returnValue = null;
 
   /**
    * Constructs a call. A call consists of a recipe for making a call,
-   * and optionally a oracle that decides if an invocation of the call returned the
-   * correct result, and optionally a symbolic name for the call.
+   * and optionally a symbolic name for the call.
    */
   public Call() {
     this.id = counter++;
     this.name = newName();
     this.user = getUser();
     // By default we check that the call returns normally.
-    this.oracle = Check.returns();
     this.waitTime = Config.getTestWaitTime();;
-    this.returner = new Return<>();
     addName(this.name,this);
-  }
-
-  /**
-   * Associates an oracle with a call.
-   * @param oracle an oracle which decides if the call returned the correct value.
-   */
-  public Call<V> oracle(Oracle<V> oracle) {
-    this.oracle = oracle;
-    return this;
-  }
-
-  /**
-   * Provides a short name for the oracle method.
-   */
-  public Call<V> o(Oracle<V> oracle) {
-    return oracle(oracle);
-  }
-
-  /**
-   * Returns the oracle of the call (otherwise null).
-   */
-  public Oracle<V> getOracle() {
-    return oracle;
+    unitTest = UnitTest.currentTest;
   }
 
   /**
@@ -146,80 +121,31 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Sets the returner for the call.
-   */
-  public Call<V> returnsTo(Return<V> returner) {
-    this.returner = returner;
-    return this;
-  }
-
-  /**
-   * A short name for the returner method.
-   */
-  public Call<V> r(Return<V> returner) {
-    return returnsTo(returner);
-  }
-
-  /**
-   * Returns the return value of the call (if any).
-   */
-  public V returnValue() {
-    return returner.getReturnValue();
-  }
-
-  /**
-   * Sets the return value of the call (if any).
-   */
-  public void setReturnValue(V returnValue) {
-    returner.setReturnValue(returnValue);
-  }
-
-  /**
-   * Checks whether the call returned normally. That is, it is not blocked
-   * and the call did not raise an exception.
-   */
-  public boolean returned() {
-    return hasStarted() && !hasBlocked() && !raisedException();
-  }
-
-  /**
    * Returns the symbolic name of the call
    */
   String getSymbolicName() {
     return this.name;
   }
 
-  public void execute(UnitTest unitTest) {
-    this.unitTest = unitTest;
-    makeCall();
-
-    // Busywait a while until either we wait the maxWaitTime, or the calls has been unblocked
-    long remainingTime = getWaitTime();;
-    do {
-      long waitTime = Math.min(remainingTime, 10);
-      try { Thread.sleep(waitTime); }
-      catch (InterruptedException exc) { };
-      remainingTime -= waitTime;
-    } while (hasBlocked() && remainingTime > 0);
+  public Call<V> exec() {
+    execute(Arrays.asList(this));
+    return this;
   }
 
-  static Set<Call<?>> execute(List<Call<?>> calls, UnitTest unitTest, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls) {
+  static void execute(List<Call<?>> calls) {
+    UnitTest t = calls.get(0).unitTest;
+
     int maxWaitTime = 0;
 
     for (Call<?> call : calls) {
       maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
     }
 
-    for (Call<?> call : calls) {
-      call.setUnitTest(unitTest);
-      allCalls.add(call);
-      blockedCalls.add(call);
-    }
+    t.addCalls(calls);
+    t.resetUnblocked();
 
     runCalls(calls);
 
-    Set<Call<?>> unblocked = new HashSet<Call<?>>();
-    
     // Busywait a while until either we wait the maxWaitTime, or all active
     // calls have been unblocked
     long remainingTime = maxWaitTime;
@@ -228,10 +154,11 @@ public abstract class Call<V> extends Tryer {
       try { Thread.sleep(waitTime); }
       catch (InterruptedException exc) { };
       // Compute unblocked (and change blockedCalls)
-      Util.unblocked(blockedCalls,unblocked);
+      t.calculateUnblocked();
       remainingTime -= waitTime;
-    } while (blockedCalls.size() > 0 && remainingTime > 0);
-    return unblocked;
+    } while (t.hasBlockedCalls() && remainingTime > 0);
+
+    t.extendTrace(calls, t.unblockedCalls());
   }
 
   static void runCalls(List<Call<?>> calls) {
@@ -257,27 +184,6 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Sets the test (context) state.
-   */
-  public void setTestState(Object state) {
-    this.unitTest.setTestState(state);
-  }
-
-  /**
-   * Return the test (context) state.
-   */
-  public Object getTestState() {
-    return this.unitTest.getTestState();
-  }
-
-  /**
-   * Returns true if the execution of the call has started.
-   */
-  public boolean hasStarted() {
-    return started;
-  }
-
-  /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
    void makeCall() {
@@ -298,20 +204,50 @@ public abstract class Call<V> extends Tryer {
     return callsString;
   }
 
-  public boolean hasReturnValue() {
-    return returner.hasReturnValue();
-  }
-
   public String printCallWithReturn() {
     String callString = printCall();
     if (raisedException())
       return callString + " raised " + getException();
     else {
       if (hasReturnValue())
-        return callString + " returned " + returner.getReturnValue();
+        return callString + " returned " + getReturnValue();
       else
         return callString;
     }
+  }
+
+  /**
+   * Returns the return value of the call (if any).
+   */
+  public V getReturnValue() {
+    return returnValue;
+  }
+
+  /**
+   * Sets the return value of the call (if any).
+   */
+  public void setReturnValue(V returnValue) {
+    this.hasReturnValue = true;
+    this.returnValue = returnValue;
+  }
+
+  /**
+   * Checks whether the call returned normally. That is, it is not blocked
+   * and the call did not raise an exception.
+   */
+  public boolean returned() {
+    return hasStarted() && !hasBlocked() && !raisedException();
+  }
+
+  /**
+   * Returns true if the execution of the call has started.
+   */
+  public boolean hasStarted() {
+    return started;
+  }
+
+  public boolean hasReturnValue() {
+    return hasReturnValue;
   }
 
   public boolean hasBlocked() {
@@ -326,6 +262,8 @@ public abstract class Call<V> extends Tryer {
      * if the call truly blocked AND it did not raise an
      * exception.
      **/
+    if (!hasStarted())
+        UnitTest.failTestSyntax("cannot check if call "+this+" is blocked because it has not started yet");
     return isBlocked() && !raisedException();
   }
 
@@ -355,7 +293,7 @@ public abstract class Call<V> extends Tryer {
     names.put(name,call);
   }
 
-  static Call lookupCall(String name) {
+  static Call<?> byName(String name) {
     Call result = names.get(name);
     if (result == null) {
       UnitTest.failTestFramework("no call named "+name+" exists in\nmap="+names);
@@ -363,7 +301,7 @@ public abstract class Call<V> extends Tryer {
     return result;
   }
 
-  public static Object returnValue(String callName) {
+  public static Object getReturnValue(String callName) {
     Call call = names.get(callName);
     
     if (call == null) {
@@ -376,7 +314,7 @@ public abstract class Call<V> extends Tryer {
       return null;
     }
 
-    return call.returnValue();
+    return call.getReturnValue();
   }
   
   public void setUnitTest(UnitTest unitTest) {
@@ -388,7 +326,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public static Object v(String callName) {
-    return returnValue(callName);
+    return getReturnValue(callName);
   }
 
   private String newName() {
