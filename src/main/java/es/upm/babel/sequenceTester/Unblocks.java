@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.HashMap;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
@@ -17,35 +14,46 @@ import java.io.PrintWriter;
  */
 
 public class Unblocks {
-  private Set<String> mustUnblock;
-  private Set<String> mayUnblock;
+  private Set<Call<?>> mustUnblock;
+  private Set<Call<?>> mayUnblock;
 
   /**
    * Creates an ublocks specification.
    * The mustUnblock parameter specifies which calls must unblock, and the mayUnblock parameter
    * specifies which calls may unblock.
    */
-  public Unblocks(Set<String> mustUnblock,
-                  Set<String> mayUnblock) {
-    this.mustUnblock =  mustUnblock == null ? new HashSet<String>() : mustUnblock;
-    this.mayUnblock = mayUnblock == null ? new HashSet<String>() : mayUnblock;
+  public Unblocks(Set<Call<?>> mustUnblock, Set<Call<?>> mayUnblock) {
+    this.mustUnblock =  mustUnblock == null ? new HashSet<Call<?>>() : mustUnblock;
+    this.mayUnblock = mayUnblock == null ? new HashSet<Call<?>>() : mayUnblock;
   }
 
+  public Unblocks() {
+    this(new HashSet<Call<?>>(), new HashSet<Call<?>>());
+  }
+
+  public Unblocks(List<Call<?>> mayCalls) {
+    this(new HashSet<Call<?>>(mayCalls), new HashSet<Call<?>>());
+  }
+
+  public Unblocks(List<Call<?>> mayCalls, List<Call<?>> mustCalls) {
+    this(new HashSet<Call<?>>(mayCalls), new HashSet<Call<?>>(mustCalls));
+  }
 
   //////////////////////////////////////////////////////////////////////
 
-  boolean checkCalls(List<Call<?>> calls, Set<Call<?>> newUnblocked, Set<Call<?>> allCalls, Set<Call<?>> blockedCalls, String configurationDescription, boolean doFail, boolean doPrint) {
-
+  boolean checkCalls(boolean doFail, boolean doPrint) {
     boolean isOk = true;
+    UnitTest t = UnitTest.currentTest;
+    Set<Call<?>> calls = t.calls;
     
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration.
-    for (Call<?> unblockedCall : newUnblocked) {
-      if (!mustUnblock.contains(unblockedCall.getSymbolicName()) &&
-          !mayUnblock.contains(unblockedCall.getSymbolicName())) {
+    for (Call<?> unblockedCall : t.unblockedCalls()) {
+      if (!mustUnblock.contains(unblockedCall) &&
+          !mayUnblock.contains(unblockedCall)) {
         isOk = false;
         if (doFail || doPrint)
-          print_reason_for_unblocking_incorrectly(unblockedCall,calls,configurationDescription, doFail, doPrint);
+          printReasonForUnblockingIncorrectly(unblockedCall,calls,t.getConfigurationDescription(), doFail, doPrint);
       }
       if (!isOk) break;
     }
@@ -54,9 +62,8 @@ public class Unblocks {
     if (isOk) {
       // Check that each call that must have been unblocked,
       // is no longer blocked
-      for (String key : mustUnblock) {
-        Call<?> shouldBeUnblockedCall = Call.byName(key);
-        if (blockedCalls.contains(shouldBeUnblockedCall)) {
+      for (Call shouldBeUnblockedCall : mustUnblock) {
+        if (t.blockedCalls.contains(shouldBeUnblockedCall)) {
           wronglyUnblocked.add(shouldBeUnblockedCall);
           isOk = false;
         }
@@ -72,7 +79,7 @@ public class Unblocks {
         else
           llamadas = "la llamada "+Call.printCalls(calls);
         doFailOrPrint
-          (prefixConfigurationDescription(configurationDescription)+
+          (prefixConfigurationDescription(t.getConfigurationDescription())+
            "la llamadas "+Call.printCalls(wronglyUnblocked)+
            " todavia son bloqueadas aunque deberian haber sido"+
            " desbloqueadas por "+llamadas+
@@ -95,7 +102,7 @@ public class Unblocks {
     else return "con la configuration "+configurationDescription+",\n";
   }
     
-  private void print_reason_for_unblocking_incorrectly(Call<?> call, List<Call<?>> calls, String configurationDescription, boolean doFail, boolean doPrint) {
+  private void printReasonForUnblockingIncorrectly(Call<?> call, Set<Call<?>> calls, String configurationDescription, boolean doFail, boolean doPrint) {
     if (call.raisedException()) {
       Throwable exc = call.getException();
       StringWriter errors = new StringWriter();
@@ -131,50 +138,26 @@ public class Unblocks {
   }
 
   /**
-   * Returns the list of calls (and associated oracles) which must unblock.
+   * Returns the set of calls (and associated oracles) which must unblock.
    */
-  public Set<String> mustUnblock() {
+  public Set<Call<?>> mustUnblock() {
     return mustUnblock;
   }
   
   /**
-   * Returns the list of calls (and associated oracles) which may unblock.
+   * Returns the set of calls (and associated oracles) which may unblock.
    */
-  public Set<String> mayUnblock() {
+  public Set<Call<?>> mayUnblock() {
     return mayUnblock;
   }
 
   //////////////////////////////////////////////////////////////////////
-
-  static Set<String> unblocksMap(String... unblocks) {
-    Set<String> unblockMap = new HashSet<>();
-    for (String unblock : unblocks)
-      unblockMap.add(unblock);
-    return unblockMap;
-  }
 
   private void doFailOrPrint(String msg, boolean doFail, boolean doPrint) {
     if (doFail)
       UnitTest.failTest(msg);
     else if (doPrint)
       System.out.println(msg);
-  }
-
-  //////////////////////////////////////////////////////////////////////
-
-
-  /**
-   * Factory method which specifies that the call parameters must unblock.
-   */
-  public static Unblocks must(String... unblocks) {
-    return  new Unblocks(unblocksMap(unblocks),null);
-  }
-  
-  /**
-   * Factory method which specifies that the call parameters may unblock.
-   */
-  public static Unblocks may(String... unblocks) {
-    return  new Unblocks(null, unblocksMap(unblocks));
   }
 
   public String toString() {

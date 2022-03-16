@@ -29,6 +29,7 @@ public class UnitTest {
   protected Set<Call<?>> blockedCalls = null;
   protected Set<Call<?>> unblockedCalls = null;
   protected Call<?> lastCalls = null;
+  protected Set<Call<?>> calls = null;
   
   /**
    * Constructs a unit test.

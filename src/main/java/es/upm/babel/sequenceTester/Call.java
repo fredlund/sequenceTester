@@ -123,12 +123,36 @@ public abstract class Call<V> extends Tryer {
   /**
    * Returns the symbolic name of the call
    */
-  String getSymbolicName() {
+  String getCallName() {
     return this.name;
   }
 
   public Call<V> exec() {
     execute(Arrays.asList(this));
+    return this;
+  }
+
+  public Call<V> unblocks() {
+    execute(Arrays.asList(this));
+    Assertions.assertUnblocks(this);
+    return this;
+  }
+
+  public Call<V> unblocks(Call... calls) {
+    execute(Arrays.asList(this));    
+    Assertions.assertUnblocks(calls);
+    return this;
+  }
+
+  public Call<V> blocks() {
+    execute(Arrays.asList(this));
+    Assertions.assertBlocks();
+    return this;
+  }
+
+  public Call<V> blocks(Call... calls) {
+    execute(Arrays.asList(this));    
+    Assertions.assertBlocks(calls);
     return this;
   }
 
@@ -143,6 +167,7 @@ public abstract class Call<V> extends Tryer {
 
     t.addCalls(calls);
     t.resetUnblocked();
+    t.calls = new HashSet<Call<?>>(calls);
 
     runCalls(calls);
 

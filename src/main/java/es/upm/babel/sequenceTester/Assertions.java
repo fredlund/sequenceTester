@@ -1,5 +1,10 @@
 package es.upm.babel.sequenceTester;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class Assertions {
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
@@ -8,7 +13,19 @@ public class Assertions {
                         " pero devolvió "+actual); 
   }
 
-  public static <V> void assertUnblocks(Call<V> call, String[] mayUnblock, String[] mustUnblock) {
-    // UnitTest t = call.unitTest();
+  public static void assertBlocking(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    new Unblocks(mustCalls,mayCalls).checkCalls(true,true);
   }
+  
+  public static void assertUnblocks(Call... mustCalls) {
+    List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
+    for (Call<?> call : UnitTest.currentTest.calls) mustCallsList.add(call);
+    for (Call<?> call : mustCalls) mustCallsList.add(call);
+    assertBlocking(mustCallsList, Arrays.asList());
+  }
+
+  public static void assertBlocks(Call... mustCalls) {
+    assertBlocking(Arrays.asList(mustCalls), Arrays.asList());
+  }
+
 }
