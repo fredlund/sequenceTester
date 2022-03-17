@@ -76,7 +76,7 @@ public class UnitTest {
    */
   public static void failTest(String msg) {
     if (currentTest.shortFailureMessages)
-      org.junit.jupiter.api.Assertions.assertTrue(false,msg);
+      org.junit.jupiter.api.Assertions.fail(msg);
     else {
       String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg+currentTest.trace+"\n";
       System.out.println(failMessage);
