@@ -151,7 +151,9 @@ public abstract class Call<V> extends Tryer {
         StringWriter errors = new StringWriter();
         exc.printStackTrace(new PrintWriter(errors));
         String StackTrace = errors.toString();
-        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n");
+        // Note that we have to fill in the execution trace here since this
+        // fail (in @AfterEach) does not seem to be handled by the exceptionhandler.
+        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n"+UnitTest.currentTest.mkTrace());
       }
     }
   }

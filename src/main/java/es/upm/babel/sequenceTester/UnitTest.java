@@ -176,15 +176,17 @@ public class UnitTest {
     if (unblocksString!="")
       unblocksString = " -- unblocked "+unblocksString;
     
-    String callsString="";
+    String callsString = "";
+    String indent = calls.size() > 1 ? "      " : "";
+
     for (Call<?> call : calls) {
-      if (callsString != "") callsString += "\n  "+call.printCall();
-      else callsString = call.printCall();
+      if (callsString != "") callsString += "\n"+indent+call.printCall();
+      else callsString = indent+call.printCall();
     }
     
     String callPlusUnblock;
     if (calls.size() > 1)
-      callPlusUnblock = "parallel\n  {\n  "+callsString+"\n  }"+unblocksString;
+      callPlusUnblock = "  calls executed in parallel: \n"+callsString+"\n"+unblocksString;
     else
       callPlusUnblock = callsString+unblocksString;
     

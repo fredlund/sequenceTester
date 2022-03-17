@@ -74,6 +74,15 @@ class Tests {
   }
 
   @Test
+  public void test_06() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).returns();
+    new Await(counter,4).blocks();
+    Assertions.assertEquals(2,new Dec(counter).getReturnValue());
+    new Fail().unblocks();
+  }
+
+  @Test
   public void test_par_1() {
     Counter counter = new CreateCounter().getReturnValue();
     new Set(counter,3).returns();
