@@ -24,6 +24,7 @@ public class UnitTest {
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
+  private boolean shortFailureMessages = false;
   protected Set<Call<?>> allCalls = null;
   protected Set<Call<?>> blockedCalls = null;
   protected Set<Call<?>> unblockedCalls = null;
@@ -74,12 +75,20 @@ public class UnitTest {
    * Indicate a unit test failer.
    */
   public static void failTest(String msg) {
-    String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg;
-    System.out.println(failMessage);
-    System.out.println(currentTest.trace);
-    org.junit.jupiter.api.Assertions.assertTrue(false,failMessage);
+    if (currentTest.shortFailureMessages)
+      org.junit.jupiter.api.Assertions.assertTrue(false,msg);
+    else {
+      String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg;
+      System.out.println(failMessage);
+      System.out.println(currentTest.trace);
+      org.junit.jupiter.api.Assertions.assertTrue(false,failMessage);
+    }
   }
   
+  void setShortFailureMessages(boolean mode) {
+    shortFailureMessages = mode;
+  }
+
   /**
    * Indicate a failure in the testing framework (i.e., not an error
    * in the tested program but rather in the test system).

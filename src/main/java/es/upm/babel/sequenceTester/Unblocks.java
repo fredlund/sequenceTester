@@ -41,24 +41,18 @@ public class Unblocks {
 
   //////////////////////////////////////////////////////////////////////
 
-  boolean checkCalls(boolean doFail, boolean doPrint) {
+  void checkCalls() {
     boolean isOk = true;
     UnitTest t = UnitTest.currentTest;
     Set<Call<?>> calls = t.calls;
     
-    System.out.println
-      ("checkCalls: mustUnblock="+mustUnblock+
-       " mayUnblock="+mayUnblock+
-       " calls="+Call.printCalls(calls)+" unblocked="+t.unblockedCalls);
-
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration.
     for (Call<?> unblockedCall : t.unblockedCalls()) {
       if (!mustUnblock.contains(unblockedCall) &&
           !mayUnblock.contains(unblockedCall)) {
         isOk = false;
-        if (doFail || doPrint)
-          printReasonForUnblockingIncorrectly(unblockedCall,calls,t.getConfigurationDescription(), doFail, doPrint);
+        printReasonForUnblockingIncorrectly(unblockedCall,calls,t.getConfigurationDescription());
       }
       if (!isOk) break;
     }
@@ -76,23 +70,18 @@ public class Unblocks {
     }
 
     if (wronglyUnblocked.size() > 0) {
-      if (doFail || doPrint) {
-        String llamadas;
-        if (calls.size() > 1)
-          llamadas =
-            "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
-        else
-          llamadas = "la llamada "+Call.printCalls(calls);
-        doFailOrPrint
-          (prefixConfigurationDescription(t.getConfigurationDescription())+
-           "la llamadas "+Call.printCalls(wronglyUnblocked)+
-           " todavia son bloqueadas aunque deberian haber sido"+
-           " desbloqueadas por "+llamadas+
-           "\n"+UnitTest.mkTrace(),
-           doFail, doPrint);
-      }
+      String llamadas;
+      if (calls.size() > 1)
+        llamadas =
+          "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
+      else
+        llamadas = "la llamada "+Call.printCalls(calls);
+      UnitTest.failTest
+        (prefixConfigurationDescription(t.getConfigurationDescription())+
+         "la llamadas "+Call.printCalls(wronglyUnblocked)+
+         " todavia son bloqueadas aunque deberian haber sido"+
+         " desbloqueadas\n");
     }
-    return isOk;
   }
     
   private String returned(Object value) {
@@ -107,19 +96,19 @@ public class Unblocks {
     else return "con la configuration "+configurationDescription+",\n";
   }
     
-  private void printReasonForUnblockingIncorrectly(Call<?> call, Set<Call<?>> calls, String configurationDescription, boolean doFail, boolean doPrint) {
+  private void printReasonForUnblockingIncorrectly(Call<?> call, Set<Call<?>> calls, String configurationDescription) {
     if (call.raisedException()) {
       Throwable exc = call.getException();
       StringWriter errors = new StringWriter();
       exc.printStackTrace(new PrintWriter(errors));
       String StackTrace = errors.toString();
       
-      doFailOrPrint
+      UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
          "la llamada "+call.printCall()+
          " deberia bloquear\n"+
          "pero lanzó la excepción "+exc+
-         "\n\nStacktrace:\n"+StackTrace+"\n"+UnitTest.mkTrace(),doFail,doPrint);
+         "\n\nStacktrace:\n"+StackTrace+"\n");
     } else {
       boolean justExecuted = false;
       for (Call<?> executingCall : calls)
@@ -135,10 +124,9 @@ public class Unblocks {
       String returnString = "";
       if (call.hasReturnValue()) returnString = "pero "+returned(call.getReturnValue());
 
-      doFailOrPrint
+      UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+" "+blockStr+"\n"+returnString+
-         "\n"+UnitTest.mkTrace(),doFail,doPrint);
+         "la llamada "+call.printCall()+" "+blockStr+"\n"+returnString+"\n");
     }
   }
 
@@ -154,15 +142,6 @@ public class Unblocks {
    */
   public Set<Call<?>> mayUnblock() {
     return mayUnblock;
-  }
-
-  //////////////////////////////////////////////////////////////////////
-
-  private void doFailOrPrint(String msg, boolean doFail, boolean doPrint) {
-    if (doFail)
-      UnitTest.failTest(msg);
-    else if (doPrint)
-      System.out.println(msg);
   }
 
   public String toString() {

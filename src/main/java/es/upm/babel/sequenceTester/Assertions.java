@@ -15,7 +15,7 @@ public class Assertions {
   }
 
   public static void assertBlocking(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    new Unblocks(mustCalls,mayCalls).checkCalls(true,true);
+    new Unblocks(mustCalls,mayCalls).checkCalls();
   }
   
   public static void assertUnblocks(Call... mustCalls) {
@@ -53,17 +53,16 @@ public class Assertions {
   }
   
   public static void checkAlternatives() {
+    UnitTest.currentTest.setShortFailureMessages(true);
     alternatives = new ArrayList<String>();
   }
 
   public static boolean checkAlternative(Runnable assertions) {
-    System.out.println("checking alternative "+alternatives.size());
     try {
       assertions.run();
-      System.out.println("succeeded");
+      UnitTest.currentTest.setShortFailureMessages(true);
       return true;
     } catch (org.opentest4j.AssertionFailedError exc) {
-      System.out.println("failed");
       String msg = exc.getMessage();
       alternatives.add(msg);
       return false;
@@ -76,6 +75,7 @@ public class Assertions {
       if (alternatives.get(i) != null)
         msg += "Alternative "+(i+1)+":\n  "+alternatives.get(i)+"\n";
     }
+    UnitTest.currentTest.setShortFailureMessages(true);
     UnitTest.failTest(msg+"\n");
   }
 
