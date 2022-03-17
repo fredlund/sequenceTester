@@ -20,6 +20,9 @@ import static es.upm.babel.sequenceTester.Assertions.*;
 // Possibly check that all created Calls have been executed when the
 // test ends; we have to remember all Calls in this way.
 
+// Check that we do not try to run a command from a user that is blocked;
+// if so fail. If no user is specified let every command use a new one.
+
 class Tests {
   UnitTest test;
   public Counter counter;
