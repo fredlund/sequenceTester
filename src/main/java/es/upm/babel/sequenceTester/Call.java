@@ -32,6 +32,7 @@ public abstract class Call<V> extends Tryer {
   private boolean hasReturnValue = false;
   private V returnValue = null;
   private boolean checkedForException = false;
+  private Set<Call<?>> unblocked;
 
   /**
    * Constructs a call. A call consists of a recipe for making a call,
@@ -152,8 +153,8 @@ public abstract class Call<V> extends Tryer {
         exc.printStackTrace(new PrintWriter(errors));
         String StackTrace = errors.toString();
         // Note that we have to fill in the execution trace here since this
-        // fail (in @AfterEach) does not seem to be handled by the exceptionhandler.
-        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n"+UnitTest.currentTest.mkTrace());
+        // fail (in @AfterEach) does not seem to be handled by the exception
+        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n"+UnitTest.currentTest.mkErrorTrace());
       }
     }
   }
@@ -192,6 +193,9 @@ public abstract class Call<V> extends Tryer {
       remainingTime -= waitTime;
     } while (t.hasBlockedCalls() && remainingTime > 0);
 
+    for (Call<?> call : calls) {
+      call.unblocked = new HashSet<>(t.unblockedCalls);
+    }
     t.extendTrace(calls, t.unblockedCalls());
   }
 
@@ -226,7 +230,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public String printCall() {
-    return id+":"+ this;
+    return id+": "+ this;
   }
 
   public static String printCalls(Collection<Call<?>> calls) {
@@ -270,6 +274,11 @@ public abstract class Call<V> extends Tryer {
     if (!hasReturnValue)
       UnitTest.failTest(this+" did not return a value");
     return returnValue;
+  }
+
+  public Set<Call<?>> getUnblockedCalls() {
+    forceExecute();
+    return unblocked;
   }
 
   /**

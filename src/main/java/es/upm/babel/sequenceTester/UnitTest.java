@@ -25,6 +25,7 @@ public class UnitTest {
   private Object state = null;
   private String configurationDescription;
   private boolean shortFailureMessages = false;
+  private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history;
   protected Set<Call<?>> allCalls = null;
   protected Set<Call<?>> blockedCalls = null;
   protected Set<Call<?>> unblockedCalls = null;
@@ -48,6 +49,7 @@ public class UnitTest {
     allCalls = new HashSet<Call<?>>();
     blockedCalls = new HashSet<Call<?>>();
     unblockedCalls = new HashSet<Call<?>>();
+    history = new ArrayList<Pair<List<Call<?>>,Set<Call<?>>>>();
     currentTest = this;
     Call.reset();
     Config.installTestConfig();
@@ -166,38 +168,45 @@ public class UnitTest {
   }
   
   public void extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked) {
-    // Compute a new trace
-    String unblocksString="";
-    for (Call<?> unblockedCall : newUnblocked) {
-      String callString = unblockedCall.printCallWithReturn();
-      if (unblocksString=="") unblocksString=callString;
-      else unblocksString+=", "+callString;
-    }
-    if (unblocksString!="")
-      unblocksString = " -- unblocked "+unblocksString;
-    
-    String callsString = "";
-    String indent = calls.size() > 1 ? "      " : "";
+    history.add(new Pair<List<Call<?>>,Set<Call<?>>>(calls,newUnblocked));
+  }
 
-    for (Call<?> call : calls) {
-      if (callsString != "") callsString += "\n"+indent+call.printCall();
-      else callsString = indent+call.printCall();
+  public static String mkTrace() {
+    StringBuffer trace = new StringBuffer();
+    for (Pair<List<Call<?>>,Set<Call<?>>> historyPair : currentTest.history) {
+      List<Call<?>> calls = historyPair.getLeft();
+      Set<Call<?>> newUnblocked = historyPair.getRight();
+      
+      String unblocksString="";
+      for (Call<?> unblockedCall : newUnblocked) {
+        String callString = unblockedCall.printCallWithReturn();
+        if (unblocksString=="") unblocksString=callString;
+        else unblocksString+=", "+callString;
+      }
+      if (unblocksString!="")
+        unblocksString = " --> unblocked "+unblocksString;
+    
+      String callsString = "";
+      String indent = calls.size() > 1 ? "  " : "";
+      
+      for (Call<?> call : calls) {
+        if (callsString != "") callsString += "\n"+indent+call.printCall();
+        else callsString = indent+call.printCall();
+      }
+      
+      String callPlusUnblock;
+      if (calls.size() > 1)
+        callPlusUnblock = "===  calls executed in parallel: \n"+callsString+unblocksString;
+      else
+        callPlusUnblock = callsString+unblocksString;
+      
+      trace.append(callPlusUnblock+"\n");
     }
-    
-    String callPlusUnblock;
-    if (calls.size() > 1)
-      callPlusUnblock = "  calls executed in parallel: \n"+callsString+"\n"+unblocksString;
-    else
-      callPlusUnblock = callsString+unblocksString;
-    
-    if (trace != "") 
-      trace += "\n  "+callPlusUnblock;
-    else
-      trace = "  "+callPlusUnblock;
+    return trace.toString();
   }
   
-  public static String mkTrace() {
-    return "\nTrace (error detectado en la ultima linea):\n"+currentTest.trace+"\n\n";
+  public static String mkErrorTrace() {
+    return "\nTrace (error detectado en la ultima linea):\n\n"+mkTrace()+"\n\n";
   }
 
   public void finish() {
