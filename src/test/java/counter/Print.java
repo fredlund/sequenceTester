@@ -4,7 +4,7 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class Print extends Call<Integer> {
-  private String msg;
+  private final String msg;
 
   Print(String msg) {
     this.msg = msg;

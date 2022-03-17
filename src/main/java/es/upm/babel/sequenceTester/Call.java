@@ -20,7 +20,7 @@ import java.io.PrintWriter;
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
-  private static Random rand = new Random();
+  private static final Random rand = new Random();
 
   int id;
   boolean hasSymbolicName = false;
@@ -41,7 +41,7 @@ public abstract class Call<V> extends Tryer {
     this.id = counter++;
     this.user = getUser();
     // By default we check that the call returns normally.
-    this.waitTime = Config.getTestWaitTime();;
+    this.waitTime = Config.getTestWaitTime();
     unitTest = UnitTest.currentTest;
   }
 
@@ -99,7 +99,7 @@ public abstract class Call<V> extends Tryer {
 
   public Call<V> unblocks() {
     forceExecute();
-    Assertions.assertUnblocks(this);
+    SeqAssertions.assertUnblocks(this);
     return this;
   }
 
@@ -112,19 +112,19 @@ public abstract class Call<V> extends Tryer {
       addedThis = addedThis || call==this;
     }
     if (!addedThis) mustBlocks.add(this);
-    Assertions.assertBlocking(mustBlocks,Arrays.asList());
+    SeqAssertions.assertBlocking(mustBlocks,Arrays.asList());
     return this;
   }
 
   public Call<V> blocks() {
     forceExecute();
-    Assertions.assertBlocks();
+    SeqAssertions.assertBlocks();
     return this;
   }
 
   public Call<V> blocks(Call... calls) {
     forceExecute();
-    Assertions.assertBlocks(calls);
+    SeqAssertions.assertBlocks(calls);
     return this;
   }
 
@@ -184,7 +184,7 @@ public abstract class Call<V> extends Tryer {
     do {
       long waitTime = Math.min(remainingTime, 10);
       try { Thread.sleep(waitTime); }
-      catch (InterruptedException exc) { };
+      catch (InterruptedException exc) { }
       // Compute unblocked (and change blockedCalls)
       t.calculateUnblocked();
       remainingTime -= waitTime;
@@ -224,7 +224,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public String printCall() {
-    return id+":"+this.toString();
+    return id+":"+ this;
   }
 
   public static String printCalls(Collection<Call<?>> calls) {

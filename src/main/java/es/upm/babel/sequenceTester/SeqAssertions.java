@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Assertions {
+public class SeqAssertions {
   private static ArrayList<String> alternatives;
 
   public static <V> void assertEquals(V expected, Call<V> call) {
@@ -42,16 +42,6 @@ public class Assertions {
     call.checkedForException();
   }
 
-  public static void junitAssertion(Runnable assertion) {
-    try {
-      assertion.run();
-    } catch (org.opentest4j.AssertionFailedError exc) {
-      String msg = exc.getMessage();
-      if (msg != null) UnitTest.failTest(msg);
-      else UnitTest.failTest("failed the test");
-    }
-  }
-  
   public static void checkAlternatives() {
     UnitTest.currentTest.setShortFailureMessages(true);
     alternatives = new ArrayList<String>();

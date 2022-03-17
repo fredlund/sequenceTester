@@ -20,7 +20,7 @@ public class UnitTest {
   static Map<String,Boolean> testResults;
   static UnitTest currentTest = null;
   
-  private int n = 1;
+  private final int n = 1;
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
@@ -42,7 +42,7 @@ public class UnitTest {
    * @see Call
    */
   public UnitTest(String name) {
-    this.testName = name;
+    testName = name;
     if (testResults == null)
       testResults = new HashMap<>();
     allCalls = new HashSet<Call<?>>();
@@ -75,13 +75,7 @@ public class UnitTest {
    * Indicate a unit test failer.
    */
   public static void failTest(String msg) {
-    if (currentTest.shortFailureMessages)
-      org.junit.jupiter.api.Assertions.fail(msg);
-    else {
-      String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg+currentTest.trace+"\n";
-      System.out.println(failMessage);
-      org.junit.jupiter.api.Assertions.fail(failMessage+"\n");
-    }
+    org.junit.jupiter.api.Assertions.fail(msg);
   }
   
   void setShortFailureMessages(boolean mode) {

@@ -4,7 +4,7 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class Dec extends Call<Integer> {
-  private Counter counter;
+  private final Counter counter;
 
   Dec(Counter counter) {
     this.counter = counter;

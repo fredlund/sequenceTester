@@ -4,7 +4,7 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class IsEven extends Call<Boolean> {
-  private int n;
+  private final int n;
 
   IsEven(int n) {
     this.n = n;

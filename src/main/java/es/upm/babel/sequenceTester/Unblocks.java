@@ -14,8 +14,8 @@ import java.io.PrintWriter;
  */
 
 public class Unblocks {
-  private Set<Call<?>> mustUnblock;
-  private Set<Call<?>> mayUnblock;
+  private final Set<Call<?>> mustUnblock;
+  private final Set<Call<?>> mayUnblock;
 
   /**
    * Creates an ublocks specification.

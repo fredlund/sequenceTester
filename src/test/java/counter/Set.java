@@ -4,8 +4,8 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class Set extends Call<Void> {
-  private int value;
-  private Counter counter;
+  private final int value;
+  private final Counter counter;
 
   Set(Counter counter, int value) {
     this.counter = counter;

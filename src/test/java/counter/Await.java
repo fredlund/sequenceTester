@@ -5,7 +5,7 @@ import es.upm.babel.sequenceTester.*;
 
 public class Await extends Call<Void> {
   private int waitingFor;
-  private Counter counter;
+  private final Counter counter;
 
   Await(Counter counter, int waitingFor) {
     this.counter = counter;

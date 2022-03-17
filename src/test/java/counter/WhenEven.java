@@ -4,7 +4,7 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class WhenEven extends Call<Integer> {
-  private Counter counter;
+  private final Counter counter;
 
   WhenEven(Counter counter) {
     this.counter = counter;
