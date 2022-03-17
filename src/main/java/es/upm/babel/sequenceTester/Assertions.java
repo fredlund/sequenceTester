@@ -75,7 +75,7 @@ public class Assertions {
       if (alternatives.get(i) != null)
         msg += "Alternative "+(i+1)+":\n  "+alternatives.get(i)+"\n";
     }
-    UnitTest.currentTest.setShortFailureMessages(true);
+    UnitTest.currentTest.setShortFailureMessages(false);
     UnitTest.failTest(msg+"\n");
   }
 

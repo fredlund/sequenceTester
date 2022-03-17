@@ -84,7 +84,6 @@ class Tests {
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
     Call.execute(inc,dec); 
-    System.out.println("before checking alternatives...");
     checkAlternatives();
     if (checkAlternative(() -> { inc.unblocks(); }))
       ;
