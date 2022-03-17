@@ -10,7 +10,6 @@ public class Set extends Call<Void> {
   Set(Counter counter, int value) {
     this.counter = counter;
     this.value = value;
-    setUser("set");
   }
 
   public void toTry() {

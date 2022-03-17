@@ -10,7 +10,6 @@ public class AssertIsEqual extends Call<Void> {
   AssertIsEqual(Counter counter, int value) {
     this.counter = counter;
     this.value = value;
-    setUser("assertIsEqual");
   }
 
   public void toTry() {

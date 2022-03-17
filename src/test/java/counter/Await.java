@@ -9,7 +9,6 @@ public class Await extends Call<Void> {
 
   Await(Counter counter, int waitingFor) {
     this.counter = counter;
-    setUser("await");
   }
 
   public void toTry() {

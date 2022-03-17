@@ -4,9 +4,7 @@ import es.upm.babel.sequenceTester.*;
 
 
 public class CreateCounter extends Call<Counter> {
-  CreateCounter() {
-    setUser("createCounter");
-  }
+  CreateCounter() { }
 
   public void toTry() {
     Counter counter = new Counter();

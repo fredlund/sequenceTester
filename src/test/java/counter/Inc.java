@@ -8,7 +8,6 @@ public class Inc extends Call<Integer> {
 
   Inc(Counter counter) {
     this.counter = counter;
-    setUser("inc");
   }
 
   public void toTry() {

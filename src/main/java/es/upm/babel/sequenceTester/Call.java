@@ -28,7 +28,7 @@ public abstract class Call<V> extends Tryer {
   boolean hasSymbolicName = false;
   boolean started = false;
   boolean executing = false;
-  private Object user = null;
+  private Object user;
   private int waitTime;
   private UnitTest unitTest;
   private boolean hasReturnValue = false;
@@ -137,15 +137,13 @@ public abstract class Call<V> extends Tryer {
   }
 
   public Call<V> unblocks() {
-    if (!executing)
-      exec();
+    forceExecute();
     Assertions.assertUnblocks(this);
     return this;
   }
 
   public Call<V> unblocks(Call... calls) {
-    if (!executing)
-      exec();
+    forceExecute();
     ArrayList<Call<?>> mustBlocks = new ArrayList<>();
     boolean addedThis = false;
     for (Call call : calls) {
@@ -158,26 +156,24 @@ public abstract class Call<V> extends Tryer {
   }
 
   public Call<V> blocks() {
-    if (!executing)
-      exec();
+    forceExecute();
     Assertions.assertBlocks();
     return this;
   }
 
   public Call<V> blocks(Call... calls) {
-    if (!executing)
-      exec();
+    forceExecute();
     Assertions.assertBlocks(calls);
     return this;
   }
 
   public boolean raisedException() {
-    if (!executing)
-      exec();
+    forceExecute();
     return super.raisedException();
   }
 
   public Throwable getException() {
+    forceExecute();
     if (!raisedException())
       UnitTest.failTest(this+" did not raise an exception");
     return super.getException();
@@ -307,8 +303,7 @@ public abstract class Call<V> extends Tryer {
    * Returns the return value of the call (if any).
    */
   public V getReturnValue() {
-    if (!executing)
-      exec();
+    forceExecute();
     if (!hasReturnValue)
       UnitTest.failTest(this+" did not return a value");
     return returnValue;
@@ -327,9 +322,14 @@ public abstract class Call<V> extends Tryer {
    * and the call did not raise an exception.
    */
   public boolean returned() {
+    forceExecute();
+    return hasStarted() && !hasBlocked() && !raisedException();
+  }
+
+  // If a call is not executing force it to execute
+  private void forceExecute() {
     if (!executing)
       exec();
-    return hasStarted() && !hasBlocked() && !raisedException();
   }
 
   /**
@@ -355,8 +355,7 @@ public abstract class Call<V> extends Tryer {
      * if the call truly blocked AND it did not raise an
      * exception.
      **/
-    if (!executing)
-      exec();
+    forceExecute();
     return isBlocked() && !raisedException();
   }
 

@@ -8,7 +8,6 @@ public class IsEven extends Call<Boolean> {
 
   IsEven(int n) {
     this.n = n;
-    setUser("isEven");
   }
 
   public void toTry() {

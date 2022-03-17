@@ -8,7 +8,6 @@ public class WhenEven extends Call<Integer> {
 
   WhenEven(Counter counter) {
     this.counter = counter;
-    setUser("whenEven");
   }
 
   public void toTry() {

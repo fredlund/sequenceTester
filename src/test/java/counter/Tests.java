@@ -8,14 +8,11 @@ import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
 import static es.upm.babel.sequenceTester.Assertions.*;
 
-// getUnblockedCalls() from Call -- check that it was the latest executed command
-// 
+// Runtime checking:
 
-// startAlternatives
-// if (checkAlternative(fn _ -> assertions_code end) then ...
-// else if (checkAlternative(fn _ -> ... end) then ...
-// else failAlternatives
-// -- handle fails inside checkAssertions...
+// getUnblockedCalls() from Call -- check that it was the latest executed command
+
+// Confirm that checking exception failures in after works.
 
 // Possibly check that all created Calls have been executed when the
 // test ends; we have to remember all Calls in this way.

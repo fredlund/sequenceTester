@@ -6,9 +6,7 @@ import java.util.Random;
 
 public class Rand extends Call<Integer> {
 
-  Rand() {
-    setUser("rand");
-  }
+  Rand() { }
 
   public void toTry() {
     setReturnValue(new Random().nextInt());
