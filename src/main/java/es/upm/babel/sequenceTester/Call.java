@@ -146,7 +146,14 @@ public abstract class Call<V> extends Tryer {
   public Call<V> unblocks(Call... calls) {
     if (!executing)
       exec();
-    Assertions.assertUnblocks(calls);
+    ArrayList<Call<?>> mustBlocks = new ArrayList<>();
+    boolean addedThis = false;
+    for (Call call : calls) {
+      mustBlocks.add(call);
+      addedThis = addedThis || call==this;
+    }
+    if (!addedThis) mustBlocks.add(this);
+    Assertions.assertBlocking(mustBlocks,Arrays.asList());
     return this;
   }
 

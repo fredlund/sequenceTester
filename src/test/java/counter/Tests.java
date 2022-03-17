@@ -8,13 +8,17 @@ import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
 import static es.upm.babel.sequenceTester.Assertions.*;
 
-// Permit blocked, unblocked, returned, getReturnValue, raisedException, and getException and other methods in Call to start executing a call if it has not started yet.
-// Let asserts start executing calls to, if they have a call as an argument.
+// getUnblockedCalls() from Call -- check that it was the latest executed command
+// 
 
-// if (checkAssertions(fn _ -> assertions_code end) then ...
-// else if (checkAssertions(fn _ -> ... end) then ...
+// startAlternatives
+// if (checkAlternative(fn _ -> assertions_code end) then ...
+// else if (checkAlternative(fn _ -> ... end) then ...
 // else failAlternatives
 // -- handle fails inside checkAssertions...
+
+// Possibly check that all created Calls have been executed when the
+// test ends; we have to remember all Calls in this way.
 
 class Tests {
   UnitTest test;
@@ -68,6 +72,23 @@ class Tests {
     Call<Integer> dec = new Dec(counter);
     Call.execute(inc,dec); assertUnblocks(inc,dec);
     assertEquals(4,new Inc(counter));
+  }
+
+  @Test
+  public void test_par_2() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).returns();
+    Call<Integer> inc = new Inc(counter);
+    Call<Integer> dec = new Dec(counter);
+    Call.execute(inc,dec); 
+    System.out.println("before checking alternatives...");
+    checkAlternatives();
+    if (checkAlternative(() -> { inc.unblocks(); }))
+      ;
+    else if (checkAlternative(() -> { dec.unblocks(); }))
+      ;
+    else
+      endAlternatives();
   }
 
   @Test

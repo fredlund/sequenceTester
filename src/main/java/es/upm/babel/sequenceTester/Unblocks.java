@@ -46,6 +46,11 @@ public class Unblocks {
     UnitTest t = UnitTest.currentTest;
     Set<Call<?>> calls = t.calls;
     
+    System.out.println
+      ("checkCalls: mustUnblock="+mustUnblock+
+       " mayUnblock="+mayUnblock+
+       " calls="+Call.printCalls(calls)+" unblocked="+t.unblockedCalls);
+
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration.
     for (Call<?> unblockedCall : t.unblockedCalls()) {

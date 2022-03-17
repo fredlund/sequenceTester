@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Assertions {
+  private static ArrayList<String> alternatives;
+
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
     if (!expected.equals(actual))
@@ -18,7 +20,6 @@ public class Assertions {
   
   public static void assertUnblocks(Call... mustCalls) {
     List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
-    for (Call<?> call : UnitTest.currentTest.calls) mustCallsList.add(call);
     for (Call<?> call : mustCalls) mustCallsList.add(call);
     assertBlocking(mustCallsList, Arrays.asList());
   }
@@ -51,4 +52,31 @@ public class Assertions {
     }
   }
   
+  public static void checkAlternatives() {
+    alternatives = new ArrayList<String>();
+  }
+
+  public static boolean checkAlternative(Runnable assertions) {
+    System.out.println("checking alternative "+alternatives.size());
+    try {
+      assertions.run();
+      System.out.println("succeeded");
+      return true;
+    } catch (org.opentest4j.AssertionFailedError exc) {
+      System.out.println("failed");
+      String msg = exc.getMessage();
+      alternatives.add(msg);
+      return false;
+    }
+  }
+
+  public static void endAlternatives() {
+    String msg = "All possible alternative executions failed:\n";
+    for (int i=0; i<alternatives.size(); i++) {
+      if (alternatives.get(i) != null)
+        msg += "Alternative "+(i+1)+":\n  "+alternatives.get(i)+"\n";
+    }
+    UnitTest.failTest(msg+"\n");
+  }
+
 }
