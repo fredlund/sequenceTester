@@ -7,26 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-
-// Please tell the Java people to permit package aliases to get away from this madness
+// Please tell the Java people to permit package aliases
 import org.junit.jupiter.api.Assertions;
-
-
-// Runtime SeqAssertions.checking:
-
-// getUnblockedCalls() from Call -- SeqAssertions.check that it was the latest executed command
-
-// Confirm that SeqAssertions.checking exception failures in after works.
-
-// Possibly SeqAssertions.check that all created Calls have been executed when the
-// test ends; we have to remember all Calls in this way.
-
-// SeqAssertions.Check that we do not try to run a command from a user that is blocked;
-// if so fail. If no user is specified let every command use a new one.
-
-// For each call, keep a list of unblocked calls.
-// In UnitTest keep a history if the execution of the test.
 
 @ExtendWith(HandleExceptions.class)
 class Tests {

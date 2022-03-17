@@ -27,6 +27,7 @@ public class UnitTest {
   private boolean shortFailureMessages = false;
   private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history;
   protected Set<Call<?>> allCalls = null;
+  protected Set<Call<?>> allCreatedCalls = null;
   protected Set<Call<?>> blockedCalls = null;
   protected Set<Call<?>> unblockedCalls = null;
   protected Call<?> lastCalls = null;
@@ -47,6 +48,7 @@ public class UnitTest {
     if (testResults == null)
       testResults = new HashMap<>();
     allCalls = new HashSet<Call<?>>();
+    allCreatedCalls = new HashSet<Call<?>>();
     blockedCalls = new HashSet<Call<?>>();
     unblockedCalls = new HashSet<Call<?>>();
     history = new ArrayList<Pair<List<Call<?>>,Set<Call<?>>>>();
@@ -212,6 +214,11 @@ public class UnitTest {
   public void finish() {
     if (unblockedCalls != null && unblockedCalls.size() > 0)
       Call.checkExceptions(unblockedCalls);
+    for (Call<?> call : allCreatedCalls) {
+      if (!call.executing) {
+        failTestSyntax("call "+call+" was created but never executed");
+      }
+    }
   }
 
   /**

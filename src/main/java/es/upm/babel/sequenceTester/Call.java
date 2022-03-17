@@ -44,6 +44,7 @@ public abstract class Call<V> extends Tryer {
     // By default we check that the call returns normally.
     this.waitTime = Config.getTestWaitTime();
     unitTest = UnitTest.currentTest;
+    unitTest.allCreatedCalls.add(this);
   }
 
   /**
@@ -164,9 +165,24 @@ public abstract class Call<V> extends Tryer {
   }
 
   public static void execute(List<Call<?>> calls) {
+    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls");
     UnitTest t = calls.get(0).unitTest;
+    
     // First check if any previous completed calls raised an exception which has not been handled
     if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls);
+
+    // Next check if there are if a user in the new calls is blocked
+    Set<Object> blockedUsers = new HashSet<>();
+    for (Call<?> call : t.blockedCalls) {
+      Object user = call.getUser();
+      if (user != null) blockedUsers.add(user);
+    }
+    for (Call<?> call : calls) {
+      Object user = call.getUser();
+      if (user != null && blockedUsers.contains(user)) {
+        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call);
+      }
+    }
 
     int maxWaitTime = 0;
 
