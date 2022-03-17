@@ -322,14 +322,12 @@ public abstract class Call<V> extends Tryer {
 
   public int hashCode() {
     return id;
-    //return getSymbolicName().hashCode();
   }
 
   public boolean equals(Object obj) {
     if (obj instanceof Call) {
       Call otherCall = (Call) obj;
       return id == otherCall.id;
-      //return getSymbolicName().equals(otherCall.getSymbolicName());
     } else return false;
   }
 
