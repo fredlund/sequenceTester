@@ -36,7 +36,7 @@ class Tests {
   public void test_02() {
     Counter counter = new CreateCounter().getReturnValue();
     new Set(counter,3).returns();
-    Call<Integer> whenEven = new WhenEven(counter).n("whenEven").blocks();
+    Call<Integer> whenEven = new WhenEven(counter).blocks();
     assertEquals(2,new Dec(counter).unblocks(whenEven));
     assertEquals(2,whenEven);
   }

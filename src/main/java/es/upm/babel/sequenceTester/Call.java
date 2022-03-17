@@ -20,10 +20,8 @@ import java.io.PrintWriter;
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
-  private static Map<String,Call> names = null;
   private static Random rand = new Random();
 
-  String name;
   int id;
   boolean hasSymbolicName = false;
   boolean started = false;
@@ -41,11 +39,9 @@ public abstract class Call<V> extends Tryer {
    */
   public Call() {
     this.id = counter++;
-    this.name = newName();
     this.user = getUser();
     // By default we check that the call returns normally.
     this.waitTime = Config.getTestWaitTime();;
-    addName(this.name,this);
     unitTest = UnitTest.currentTest;
   }
 
@@ -56,13 +52,6 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> user(Object user) {
     return this;
-  }
-
-  /**
-   * A short name for the user method.
-   */
-  public Call<V> u(Object user) {
-    return user(user);
   }
 
   /**
@@ -79,27 +68,6 @@ public abstract class Call<V> extends Tryer {
    */
   public Object getUser() {
     return user;
-  }
-
-  /**
-   * Associates a symbolic name with a call.
-   * The symbolic name
-   * may be used in a continuation (in the TestStmt where the call resides)
-   * to specify that this call was unblocked by a later call.
-   */
-  public Call<V> name(String name) {
-    this.name = name;
-    deleteName(this.name);
-    addName(this.name,this);
-    this.hasSymbolicName = true;
-    return this;
-  }
-
-  /**
-   * A short name for the name method.
-   */
-  public Call<V> n(String name) {
-    return name(name);
   }
 
   /**
@@ -122,13 +90,6 @@ public abstract class Call<V> extends Tryer {
    */
   public int getWaitTime() {
     return this.waitTime;
-  }
-
-  /**
-   * Returns the symbolic name of the call
-   */
-  String getCallName() {
-    return this.name;
   }
 
   public Call<V> exec() {
@@ -374,41 +335,8 @@ public abstract class Call<V> extends Tryer {
 
   static void reset() {
     counter = 1;
-    names = new HashMap<String,Call>();
   }
 
-  static void deleteName(String name) {
-    names.remove(name);
-  }
-
-  static void addName(String name, Call call) {
-    names.put(name,call);
-  }
-
-  static Call<?> byName(String name) {
-    Call result = names.get(name);
-    if (result == null) {
-      UnitTest.failTestFramework("no call named "+name+" exists in\nmap="+names);
-    }
-    return result;
-  }
-
-  public static Object getReturnValue(String callName) {
-    Call call = names.get(callName);
-    
-    if (call == null) {
-      UnitTest.failTestFramework("no call named "+callName+" exists");
-      return null;
-    }
-
-    if (!call.returned()) {
-      UnitTest.failTestFramework("call "+callName+" has not returned");
-      return null;
-    }
-
-    return call.getReturnValue();
-  }
-  
   public void setUnitTest(UnitTest unitTest) {
     this.unitTest = unitTest;
   }
@@ -417,11 +345,4 @@ public abstract class Call<V> extends Tryer {
     return unitTest;
   }
 
-  public static Object v(String callName) {
-    return getReturnValue(callName);
-  }
-
-  private String newName() {
-    return "$call_"+Integer.valueOf(this.id).toString();
-  }
 }
