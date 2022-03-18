@@ -10,7 +10,18 @@ public class HandleExceptions implements TestExecutionExceptionHandler {
       if (throwable instanceof org.opentest4j.AssertionFailedError) {
         String msg = throwable.getMessage();
         if (msg == null) msg = "";
-        msg += UnitTest.currentTest.mkErrorTrace();
+        msg += "\n"+UnitTest.currentTest.errorTrace(UnitTest.ErrorLocation.LASTLINE);
+        // System.out.println(msg);
+        org.opentest4j.AssertionFailedError newThrowable = new org.opentest4j.AssertionFailedError(msg);
+        newThrowable.setStackTrace(throwable.getStackTrace());
+        throw newThrowable;
+      } else if (throwable instanceof InternalException) {
+	InternalException error = (InternalException) throwable;
+        String msg = "*** INTERNAL ERROR *** -- "+error.getMessage();
+	UnitTest.ErrorLocation loc = error.getErrorLocation();
+        if (msg == null) msg = "";
+	if (loc == null) loc = UnitTest.ErrorLocation.LASTLINE;
+        msg += "\n"+UnitTest.currentTest.errorTrace(loc);
         // System.out.println(msg);
         org.opentest4j.AssertionFailedError newThrowable = new org.opentest4j.AssertionFailedError(msg);
         newThrowable.setStackTrace(throwable.getStackTrace());

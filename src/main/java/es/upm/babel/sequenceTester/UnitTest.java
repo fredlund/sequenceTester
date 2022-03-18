@@ -56,6 +56,10 @@ public class UnitTest {
     Config.installTestConfig();
   }
   
+  protected enum ErrorLocation {
+    LASTLINE, INSIDE, AFTER
+  }
+
   public UnitTest setConfigurationDescription(String desc) {
     configurationDescription = desc;
     return this;
@@ -78,31 +82,36 @@ public class UnitTest {
    * Indicates a syntactic error in a particular test (i.e., not an error
    * in the tested program but rather in the test suite).
    */
-  public static void failTestSyntax(String msg, boolean includeTrace) {
-    failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, includeTrace);
+  public static void failTestSyntax(String msg, ErrorLocation loc) {
+    failTestSyntax(msg, loc, false);
+  }
+  
+  public static void failTestSyntax(String msg, ErrorLocation loc, boolean directFail) {
+    if (directFail) {
+      failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, true, loc);
+    } else throw new InternalException("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, loc);
   }
   
   /**
    * Indicate a failure in the testing framework (i.e., not an error
    * in the tested program but rather in the test system).
    */
-  public static void failTestFramework(String msg, boolean includeTrace) {
-    failTest("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg, includeTrace);
+  public static void failTestFramework(String msg, ErrorLocation loc) {
+    throw new InternalException("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg, loc);
   }
   
   /**
    * Indicate a unit test fail.
    */
   protected static void failTest(String msg) {
-    failTest(msg, false);
+    failTest(msg, false, ErrorLocation.LASTLINE);
   }
   
   /**
-   * Indicate a unit test fail,u.
+   * Indicate a unit test fail.
    */
-  protected static void failTest(String msg, boolean includeTrace) {
-    if (includeTrace)
-      msg += "\nCall trace:\n"+mkTrace();
+  protected static void failTest(String msg, boolean includeTrace, ErrorLocation loc) {
+    if (includeTrace) msg += "\n"+errorTrace(loc);
     org.junit.jupiter.api.Assertions.fail(msg);
   }
   
@@ -176,7 +185,7 @@ public class UnitTest {
     history.add(new Pair<List<Call<?>>,Set<Call<?>>>(calls,newUnblocked));
   }
 
-  public static String mkTrace() {
+  protected static String mkTrace() {
     StringBuffer trace = new StringBuffer();
     for (Pair<List<Call<?>>,Set<Call<?>>> historyPair : currentTest.history) {
       List<Call<?>> calls = historyPair.getLeft();
@@ -210,18 +219,28 @@ public class UnitTest {
     return trace.toString();
   }
   
-  public static String mkErrorTrace() {
-    return "\nTrace (error detectado en la ultima linea):\n\n"+mkTrace()+"\n\n";
-  }
-
   public void finish() {
+    // Check if the last call resulted in an exception
     if (unblockedCalls != null && unblockedCalls.size() > 0)
-      Call.checkExceptions(unblockedCalls);
+      Call.checkExceptions(unblockedCalls, true);
+
+    // Check for created calls that were never executed -- a test syntax error
     for (Call<?> call : allCreatedCalls) {
       if (!call.hasStarted()) {
-        failTestSyntax("call "+call+" was created but never executed", true);
+        failTestSyntax("call "+call+" was created but never executed", ErrorLocation.INSIDE, true);
       }
     }
+  }
+
+  protected static String errorTrace(ErrorLocation loc) {
+    String locString = "";
+    if (loc == ErrorLocation.LASTLINE)
+      locString = " (detectado en la ultima linea)";
+    else if (loc == ErrorLocation.INSIDE)
+      locString = " (detectado dentro la traza)";
+    else if (loc == ErrorLocation.AFTER)
+      locString = " (detectado despues de la traza)";
+    return "Call trace"+locString+":\n\n"+mkTrace()+"\n";
   }
 
   /**

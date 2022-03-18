@@ -144,16 +144,20 @@ public abstract class Call<V> extends Tryer {
     checkedForException = true;
   }
 
-  public static void checkExceptions(Set<Call<?>> calls) {
+  protected static void checkExceptions(Set<Call<?>> calls, boolean calledFromAfter) {
     for (Call<?> call : calls) {
       if (call.raisedException() && !call.checkedForException) {
         Throwable exc = call.getException();
         StringWriter errors = new StringWriter();
         exc.printStackTrace(new PrintWriter(errors));
         String StackTrace = errors.toString();
-        // Note that we have to fill in the execution trace here since this
-        // fail (in @AfterEach) does not seem to be handled by the exception
-        UnitTest.failTest("the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n"+UnitTest.currentTest.mkErrorTrace());
+
+	String msg = "the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n";
+	if (calledFromAfter) {
+	  // Note that we have to fill in the execution trace here since this
+	  // fail (in @AfterEach) does not seem to be caught by the exception handler
+	  UnitTest.failTest(msg, true, UnitTest.ErrorLocation.LASTLINE);
+	} else UnitTest.failTest(msg);
       }
     }
   }
@@ -163,11 +167,11 @@ public abstract class Call<V> extends Tryer {
   }
 
   public static void execute(List<Call<?>> calls) {
-    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls",false);
+    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls", UnitTest.ErrorLocation.AFTER);
     UnitTest t = calls.get(0).unitTest;
     
     // First check if any previous completed calls raised an exception which has not been handled
-    if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls);
+    if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls, false);
 
     // Next check if there are if a user in the new calls is blocked
     Set<Object> blockedUsers = new HashSet<>();
@@ -178,7 +182,7 @@ public abstract class Call<V> extends Tryer {
     for (Call<?> call : calls) {
       Object user = call.getUser();
       if (user != null && blockedUsers.contains(user)) {
-        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call, false);
+        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call, UnitTest.ErrorLocation.AFTER);
       }
     }
 
