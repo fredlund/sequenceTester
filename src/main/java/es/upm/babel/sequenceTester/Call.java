@@ -22,10 +22,8 @@ public abstract class Call<V> extends Tryer {
   private static int counter = 1;
   private static final Random rand = new Random();
 
-  int id;
-  boolean hasSymbolicName = false;
-  boolean started = false;
-  boolean executing = false;
+  private int id;
+  private boolean started = false;
   private Object user;
   private int waitTime;
   private UnitTest unitTest;
@@ -188,7 +186,6 @@ public abstract class Call<V> extends Tryer {
 
     for (Call<?> call : calls) {
       maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
-      call.executing = true;
     }
 
     t.addCalls(calls);
@@ -316,7 +313,7 @@ public abstract class Call<V> extends Tryer {
 
   // If a call is not executing force it to execute
   private void forceExecute() {
-    if (!executing)
+    if (!hasStarted())
       exec();
   }
 

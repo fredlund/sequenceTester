@@ -215,7 +215,7 @@ public class UnitTest {
     if (unblockedCalls != null && unblockedCalls.size() > 0)
       Call.checkExceptions(unblockedCalls);
     for (Call<?> call : allCreatedCalls) {
-      if (!call.executing) {
+      if (!call.hasStarted()) {
         failTestSyntax("call "+call+" was created but never executed");
       }
     }
