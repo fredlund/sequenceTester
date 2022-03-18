@@ -94,7 +94,7 @@ public class UnitTest {
     StringWriter errors = new StringWriter();
     new Throwable().printStackTrace(new PrintWriter(errors));
     String stackTrace = errors.toString();
-    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
+    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\nCall trace:\n"+mkTrace();
     failTest(message);
   }
   
@@ -138,7 +138,7 @@ public class UnitTest {
     StringWriter errors = new StringWriter();
     new Throwable().printStackTrace(new PrintWriter(errors));
     String stackTrace = errors.toString();
-    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
+    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nCall trace:\n"+mkTrace());
     failTest(message);
   }
   
