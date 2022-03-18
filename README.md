@@ -26,6 +26,24 @@ A Java library for testing sequences of possibly blocking Java commands
  
 ## Library Functionality 
 
+The sequenceTester library provides additional functionality to tests written
+using the Junit 5 testing library. Tests are written normally, except that
+instead of issuing normal method calls, and test the ouctome of such calls
+with test assertions, here a user defines a set of call (classes) representing
+calls to create objects and call methods, 
+instantiates them, and instructs the library to run a set of such call instances
+in parallel. The observable outcome is that some such calls may have
+terminated, others may be blocked waiting for some events. In tests we can
+directly observe the unblocked  calls (terminated calls, either due to having
+returned normally or abnormally through raising an exception), and the still
+executing (blocked calls). Return values can be inspected using
+normal Junit 5 assertions, as can exceptions.
+If a test case assertion fails, the library produces a detailed trace showing
+the execution of the test case. 
+
+As an example:
+
+
 ### Unit Tests
  
 A unit test is an instance of the 
