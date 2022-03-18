@@ -23,7 +23,7 @@ import java.io.PrintWriter;
  * to its call argument. That is, they check that immediately after executing call,
  * the call itself was unblocked or blocked, and the arguments calls were all unblocked.
  * Thus, suppose that initially call blocks, e.g., call.blocking(...) is true,
- * and that later another call' unblocks call, then call.blocking(...) remains true.
+ * and that later another call call' unblocks call, then call.blocking(...) remains true.
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
@@ -257,14 +257,15 @@ public abstract class Call<V> extends Tryer {
       // Compute unblocked (and change blockedCalls)
       t.calculateUnblocked();
       remainingTime -= waitTime;
-    } while (t.hasBlockedCalls() && remainingTime > 0);
+    } while (!t.getBlockedCalls().isEmpty() && remainingTime > 0);
+
+    t.afterRun(calls);
 
     for (Call<?> call : calls) {
-      call.unblockedCalls = new HashSet<>(t.getLastUnblockedCalls());
+      call.unblockedCalls = t.getLastUnblockedCalls();
       call.blockedCalls = new HashSet<>(t.getBlockedCalls());
       call.partnerCalls = calls;
     }
-    t.extendTrace(calls, t.getLastUnblockedCalls());
   }
 
   static void runCalls(List<Call<?>> calls) {
@@ -432,7 +433,7 @@ public abstract class Call<V> extends Tryer {
     return unitTest;
   }
 
-  public void toTry() throws Throwable {
+  public final void toTry() throws Throwable {
     setReturnValue(execute());
   }
 

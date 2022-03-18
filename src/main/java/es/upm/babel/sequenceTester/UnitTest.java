@@ -125,7 +125,7 @@ public class UnitTest {
   }
 
   /**
-   * Returns the set of all calls unblocked at this point in the execution of the test.
+   * Returns the set of all calls currently unblocked.
    */
   public Set<Call<?>> getAllUnblockedCalls() {
     return allUnblockedCalls;
@@ -148,17 +148,10 @@ public class UnitTest {
   }
 
   /**
-   * Returns the set of all calls blocked at this point in the execution of the test.
+   * Returns the set of calls currently blocked.
    */
   public Set<Call<?>> getBlockedCalls() {
     return blockedCalls;
-  }
-
-  /**
-   * Are there blocked calls?
-   */
-  boolean hasBlockedCalls() {
-    return !blockedCalls.isEmpty();
   }
 
   void prepareToRun(List<Call<?>> calls) {
@@ -169,11 +162,13 @@ public class UnitTest {
     lastCalls = calls;
     lastUnblockedCalls = new HashSet<Call<?>>();
   }
+
+  void afterRun(List<Call<?>> calls) {
+    extendTrace(calls, getLastUnblockedCalls());
+  }
   
   void calculateUnblocked()
   {
-    lastUnblockedCalls = new HashSet<Call<?>>();
-
     for (Call<?> blockedCall : blockedCalls) {
       if (!blockedCall.hasBlocked()) {
         lastUnblockedCalls.add(blockedCall);
