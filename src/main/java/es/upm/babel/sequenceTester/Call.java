@@ -192,7 +192,7 @@ public abstract class Call<V> extends Tryer {
     return super.getException();
   }
 
-  public void checkedForException() {
+  void checkedForException() {
     checkedForException = true;
   }
 
@@ -363,7 +363,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the return value of the call (if any).
    */
-  public void setReturnValue(V returnValue) {
+  private void setReturnValue(V returnValue) {
     this.hasReturnValue = true;
     this.returnValue = returnValue;
   }
@@ -425,11 +425,11 @@ public abstract class Call<V> extends Tryer {
     counter = 1;
   }
 
-  public void setUnitTest(UnitTest unitTest) {
+  void setUnitTest(UnitTest unitTest) {
     this.unitTest = unitTest;
   }
 
-  public UnitTest getUnitTest() {
+  UnitTest getUnitTest() {
     return unitTest;
   }
 
