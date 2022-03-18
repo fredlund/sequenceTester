@@ -51,11 +51,11 @@ public class Unblocks {
 
   //////////////////////////////////////////////////////////////////////
 
-  void checkCalls(Call<?> responsableCall) {
+  void checkCalls(Execute e) {
     boolean isOk = true;
-    UnitTest t = UnitTest.currentTest;
-    Set<Call<?>> unblockedCalls = responsableCall.getUnblockedCalls();
-    List<Call<?>> calls = responsableCall.getPartnerCalls();
+    UnitTest t = UnitTest.getCurrentTest();
+    List<Call<?>> calls = e.getCalls();
+    Set<Call<?>> unblockedCalls = e.getUnblockedCalls();
     
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration.
@@ -73,7 +73,7 @@ public class Unblocks {
       // Check that each call that must have been unblocked,
       // is no longer blocked
       for (Call shouldBeUnblockedCall : mustUnblock) {
-        if (responsableCall.getBlockedCalls().contains(shouldBeUnblockedCall)) {
+        if (e.getBlockedCalls().contains(shouldBeUnblockedCall)) {
           wronglyUnblocked.add(shouldBeUnblockedCall);
           isOk = false;
         }

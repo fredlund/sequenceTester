@@ -13,7 +13,7 @@ public class HandleExceptions implements TestExecutionExceptionHandler {
       if (throwable instanceof org.opentest4j.AssertionFailedError) {
         String msg = throwable.getMessage();
         if (msg == null) msg = "";
-        msg += "\n"+UnitTest.currentTest.errorTrace(UnitTest.ErrorLocation.LASTLINE);
+        msg += "\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
         // System.out.println(msg);
         org.opentest4j.AssertionFailedError newThrowable = new org.opentest4j.AssertionFailedError(msg);
         newThrowable.setStackTrace(throwable.getStackTrace());
@@ -24,7 +24,7 @@ public class HandleExceptions implements TestExecutionExceptionHandler {
 	UnitTest.ErrorLocation loc = error.getErrorLocation();
         if (msg == null) msg = "";
 	if (loc == null) loc = UnitTest.ErrorLocation.LASTLINE;
-        msg += "\n"+UnitTest.currentTest.errorTrace(loc);
+        msg += "\n"+UnitTest.getCurrentTest().errorTrace(loc);
         // System.out.println(msg);
         org.opentest4j.AssertionFailedError newThrowable = new org.opentest4j.AssertionFailedError(msg);
         newThrowable.setStackTrace(throwable.getStackTrace());

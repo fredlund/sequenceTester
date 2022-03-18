@@ -19,14 +19,13 @@ import org.junit.jupiter.api.*;
 public class UnitTest {
   static String testName;
   static Map<String,Boolean> testResults;
-  static UnitTest currentTest = null;
+  private static UnitTest currentTest = null;
   
   private final int n = 1;
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
-  private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history =
-    new ArrayList<Pair<List<Call<?>>,Set<Call<?>>>>();
+  private ArrayList<Execute> history = new ArrayList<Execute>();
 
   // All calls created through invoking the Call constructor
   private Set<Call<?>> allCreatedCalls = new HashSet<>();
@@ -43,8 +42,8 @@ public class UnitTest {
   // All calls that were unblocked by the execution of the last calls
   private Set<Call<?>> lastUnblockedCalls = null;
 
-  // The last calls executed
-  private List<Call<?>> lastCalls = null;
+  // The last Execute
+  private Execute lastExecute = null;
 
   
   /**
@@ -65,6 +64,10 @@ public class UnitTest {
   
   enum ErrorLocation {
     LASTLINE, INSIDE, AFTER
+  }
+
+  public static UnitTest getCurrentTest() {
+    return currentTest;
   }
 
   /**
@@ -142,11 +145,18 @@ public class UnitTest {
    * Returns the latest calls executed.
    */
   public List<Call<?>> getLastCalls() {
-    if (lastCalls == null)
-      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
-    return lastCalls;
+    return getLastExecute().getCalls();
   }
 
+  /**
+   * Returns the latest execute.
+   */
+  public Execute getLastExecute() {
+    if (lastExecute == null)
+      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
+    return lastExecute;
+  }
+  
   /**
    * Returns the set of calls currently blocked.
    */
@@ -154,17 +164,17 @@ public class UnitTest {
     return blockedCalls;
   }
 
-  void prepareToRun(List<Call<?>> calls) {
-    for (Call<?> call : calls) {
+  void prepareToRun(Execute e) {
+    for (Call<?> call : e.getCalls()) {
       allCalls.add(call);
       blockedCalls.add(call);
     }
-    lastCalls = calls;
+    lastExecute = e;
     lastUnblockedCalls = new HashSet<Call<?>>();
   }
 
-  void afterRun(List<Call<?>> calls) {
-    extendTrace(calls, getLastUnblockedCalls());
+  void afterRun(Execute e) {
+    history.add(e);
   }
   
   void calculateUnblocked()
@@ -205,15 +215,11 @@ public class UnitTest {
     System.out.println("\n\n========================================");
   }
   
-  void extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked) {
-    history.add(new Pair<List<Call<?>>,Set<Call<?>>>(calls,newUnblocked));
-  }
-
   static String mkTrace() {
     StringBuffer trace = new StringBuffer();
-    for (Pair<List<Call<?>>,Set<Call<?>>> historyPair : currentTest.history) {
-      List<Call<?>> calls = historyPair.getLeft();
-      Set<Call<?>> newUnblocked = historyPair.getRight();
+    for (Execute e: currentTest.history) {
+      List<Call<?>> calls = e.getCalls();
+      Set<Call<?>> newUnblocked = e.getUnblockedCalls();
       
       String unblocksString="";
       for (Call<?> unblockedCall : newUnblocked) {
