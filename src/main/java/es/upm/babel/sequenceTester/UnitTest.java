@@ -13,7 +13,7 @@ import org.junit.jupiter.api.*;
 
 
 /**
- * Support code for executing a Junit 5 tests composed of calls, i.e., instances
+ * Support code for executing a Junit 5 tests composed of sequences of parallel executions of sets of calls, i.e., sequences of instances of the Execute class.
  * of the Call class.
  */
 public class UnitTest {

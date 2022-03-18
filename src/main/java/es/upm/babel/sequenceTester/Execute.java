@@ -8,6 +8,11 @@ import java.util.HashSet;
 import java.util.Random;
 
 
+/**
+ * Represents the parallel execution of a set of calls, i.e., a set of instances of the Call class.
+ * Provides information regarding the outcome of the execution, e.g., which calls were unblocked
+ * and which calls remain blocked.
+ */
 public class Execute {
   private static final Random rand = new Random();
 
