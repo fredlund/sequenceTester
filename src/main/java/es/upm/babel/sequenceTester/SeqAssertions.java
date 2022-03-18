@@ -3,12 +3,19 @@ package es.upm.babel.sequenceTester;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides conventient test assertions.
  */
 public class SeqAssertions {
   private static ArrayList<String> alternatives;
+
+  private static Call<?> oneLastCall() {
+    if (UnitTest.currentTest.lastCalls == null)
+      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
+    return UnitTest.currentTest.lastCalls.get(0);
+  }
 
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
@@ -18,17 +25,31 @@ public class SeqAssertions {
   }
 
   public static void assertBlocking(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    new Unblocks(mustCalls,mayCalls).checkCalls();
+    new Unblocks(mustCalls,mayCalls).checkCalls(oneLastCall());
+  }
+  
+  public static void assertBlocking(Call<?> call, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    new Unblocks(mustCalls,mayCalls).checkCalls(call);
   }
   
   public static void assertUnblocks(Call... mustCalls) {
     List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
-    for (Call<?> call : mustCalls) mustCallsList.add(call);
+    for (Call<?> mustCall : mustCalls) mustCallsList.add(mustCall);
     assertBlocking(mustCallsList, Arrays.asList());
+  }
+
+  public static void assertUnblocks(Call<?> call, Call... mustCalls) {
+    List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
+    for (Call<?> mustCall : mustCalls) mustCallsList.add(mustCall);
+    assertBlocking(call, mustCallsList, Arrays.asList());
   }
 
   public static void assertBlocks(Call... mustCalls) {
     assertBlocking(Arrays.asList(mustCalls), Arrays.asList());
+  }
+
+  public static void assertBlocks(Call<?> call, Call... mustCalls) {
+    assertBlocking(call, Arrays.asList(mustCalls), Arrays.asList());
   }
 
   public static <V> void assertThrows(Class<?> excClass, Call<V> call) {

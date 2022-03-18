@@ -16,7 +16,9 @@ import java.io.PrintWriter;
 
 
 /**
- * A Call.
+ * Represents a call to an API, which can block, return a value or raise an exception.
+ * Methods permit to inspect the call to decide if its execution has terminated (unblocked),
+ * and how it terminated (with an exception or a normal return).
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
@@ -30,11 +32,13 @@ public abstract class Call<V> extends Tryer {
   private boolean hasReturnValue = false;
   private V returnValue = null;
   private boolean checkedForException = false;
-  private Set<Call<?>> unblocked;
+  private Set<Call<?>> unblockedCalls;
+  private Set<Call<?>> blockedCalls;
+  private List<Call<?>> partnerCalls;
 
   /**
-   * Constructs a call. A call consists of a recipe for making a call,
-   * and optionally a symbolic name for the call.
+   * Constructs a call. Often this constructor should be 
+   * extended in classes which extend the abstrac Call class.
    */
   public Call() {
     this.id = counter++;
@@ -56,8 +60,9 @@ public abstract class Call<V> extends Tryer {
 
   /**
    * Sets the user (process) executing a call.
-   * The library enforces that if a call from a user is blocked,
-   * another call from the same user cannot be made.
+   * The library fails a tests if a call is made from a user 
+   * who has another blocking call. Specifying the default nil
+   * user prevents this check.
    */
   public void setUser(Object user) {
     this.user = user;
@@ -92,17 +97,32 @@ public abstract class Call<V> extends Tryer {
     return this.waitTime;
   }
 
+  /**
+   * Commences the execution of the call.
+   */
   public Call<V> exec() {
     exec(Arrays.asList(this));
     return this;
   }
 
+  /**
+   * Checks that the call has unblocked, and that no other call was unblocked.
+   * Fails a test if the call did not unblock, or some other call unblocked.
+   * If the call has not started executing, this method forces its execution.
+   */
   public Call<V> unblocks() {
     forceExecute();
     SeqAssertions.assertUnblocks(this);
     return this;
   }
 
+  /**
+   * Checks that the call has unblocked, and that precisely the
+   * calls enumerated in the parameter list are the only additional calls that have unblocked.
+   * Fails a test if the call did not unblock, the parameter list calls did not all unblock,
+   * or if some other call unblocked.
+   * If the call has not started executing, this method forces its execution.
+   */
   public Call<V> unblocks(Call... calls) {
     forceExecute();
     ArrayList<Call<?>> mustBlocks = new ArrayList<>();
@@ -116,12 +136,24 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
+  /**
+   * Checks that the call remains blocked, and that no other call has unblocked.
+   * Fails a test if the call unblocked, or some other call unblocked.
+   * If the call has not started executing, this method forces its execution.
+   */
   public Call<V> blocks() {
     forceExecute();
     SeqAssertions.assertBlocks();
     return this;
   }
 
+  /**
+   * Checks that the call remains blocked, and that precisely the calls in 
+   * the parameter list are the only calls that have unblocked.
+   * Fails a test if the call unblocked, a call in the parameter list is blocked,
+   * or some call not in the parameter list have unblocked.
+   * If the call has not started executing, this method forces its execution.
+   */
   public Call<V> blocks(Call... calls) {
     forceExecute();
     SeqAssertions.assertBlocks(calls);
@@ -194,7 +226,7 @@ public abstract class Call<V> extends Tryer {
 
     t.addCalls(calls);
     t.resetUnblocked();
-    t.calls = new HashSet<Call<?>>(calls);
+    t.lastCalls = calls;
 
     runCalls(calls);
 
@@ -211,7 +243,9 @@ public abstract class Call<V> extends Tryer {
     } while (t.hasBlockedCalls() && remainingTime > 0);
 
     for (Call<?> call : calls) {
-      call.unblocked = new HashSet<>(t.unblockedCalls);
+      call.unblockedCalls = new HashSet<>(t.unblockedCalls);
+      call.blockedCalls = new HashSet<>(t.blockedCalls);
+      call.partnerCalls = calls;
     }
     t.extendTrace(calls, t.unblockedCalls());
   }
@@ -248,6 +282,21 @@ public abstract class Call<V> extends Tryer {
 
   public String printCall() {
     return id+": "+ this;
+  }
+
+  public Set<Call<?>> getUnblockedCalls() {
+    forceExecute();
+    return unblockedCalls;
+  }
+
+  public Set<Call<?>> getBlockedCalls() {
+    forceExecute();
+    return blockedCalls;
+  }
+
+  public List<Call<?>> getPartnerCalls() {
+    forceExecute();
+    return partnerCalls;
   }
 
   public static String printCalls(Collection<Call<?>> calls) {
@@ -291,11 +340,6 @@ public abstract class Call<V> extends Tryer {
     if (!hasReturnValue)
       UnitTest.failTest(this+" did not return a value");
     return returnValue;
-  }
-
-  public Set<Call<?>> getUnblockedCalls() {
-    forceExecute();
-    return unblocked;
   }
 
   /**

@@ -13,7 +13,8 @@ import org.junit.jupiter.api.*;
 
 
 /**
- * Represents a unit test which embedding a unit test statement.
+ * Support code for executing a Junit 5 tests composed of calls, i.e., instances
+ * of the Call class.
  */
 public class UnitTest {
   static String testName;
@@ -29,8 +30,7 @@ public class UnitTest {
   protected Set<Call<?>> allCreatedCalls = null;
   protected Set<Call<?>> blockedCalls = null;
   protected Set<Call<?>> unblockedCalls = null;
-  protected Call<?> lastCalls = null;
-  protected Set<Call<?>> calls = null;
+  protected List<Call<?>> lastCalls = null;
   
   /**
    * Constructs a unit test.

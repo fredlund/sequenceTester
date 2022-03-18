@@ -51,14 +51,15 @@ public class Unblocks {
 
   //////////////////////////////////////////////////////////////////////
 
-  void checkCalls() {
+  void checkCalls(Call<?> responsableCall) {
     boolean isOk = true;
     UnitTest t = UnitTest.currentTest;
-    Set<Call<?>> calls = t.calls;
+    Set<Call<?>> unblockedCalls = responsableCall.getUnblockedCalls();
+    List<Call<?>> calls = responsableCall.getPartnerCalls();
     
     // Check that each unbloked call is either
     // listed in the may or must unblocked enumeration.
-    for (Call<?> unblockedCall : t.unblockedCalls()) {
+    for (Call<?> unblockedCall : unblockedCalls) {
       if (!mustUnblock.contains(unblockedCall) &&
           !mayUnblock.contains(unblockedCall)) {
         isOk = false;
@@ -72,7 +73,7 @@ public class Unblocks {
       // Check that each call that must have been unblocked,
       // is no longer blocked
       for (Call shouldBeUnblockedCall : mustUnblock) {
-        if (t.blockedCalls.contains(shouldBeUnblockedCall)) {
+        if (responsableCall.getBlockedCalls().contains(shouldBeUnblockedCall)) {
           wronglyUnblocked.add(shouldBeUnblockedCall);
           isOk = false;
         }
@@ -106,7 +107,7 @@ public class Unblocks {
     else return "con la configuration "+configurationDescription+",\n";
   }
     
-  private void printReasonForUnblockingIncorrectly(Call<?> call, Set<Call<?>> calls, String configurationDescription) {
+  private void printReasonForUnblockingIncorrectly(Call<?> call, List<Call<?>> calls, String configurationDescription) {
     if (call.raisedException()) {
       Throwable exc = call.getException();
       StringWriter errors = new StringWriter();
