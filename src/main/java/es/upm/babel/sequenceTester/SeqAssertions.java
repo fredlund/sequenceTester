@@ -43,14 +43,12 @@ public class SeqAssertions {
   }
 
   public static void checkAlternatives() {
-    UnitTest.currentTest.setShortFailureMessages(true);
     alternatives = new ArrayList<String>();
   }
 
   public static boolean checkAlternative(Runnable assertions) {
     try {
       assertions.run();
-      UnitTest.currentTest.setShortFailureMessages(true);
       return true;
     } catch (org.opentest4j.AssertionFailedError exc) {
       String msg = exc.getMessage();
@@ -65,7 +63,6 @@ public class SeqAssertions {
       if (alternatives.get(i) != null)
         msg += "Alternative "+(i+1)+":\n  "+alternatives.get(i)+"\n";
     }
-    UnitTest.currentTest.setShortFailureMessages(false);
     UnitTest.failTest(msg+"\n");
   }
 

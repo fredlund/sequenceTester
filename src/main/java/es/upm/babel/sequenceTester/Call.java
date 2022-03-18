@@ -163,7 +163,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public static void execute(List<Call<?>> calls) {
-    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls");
+    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls",false);
     UnitTest t = calls.get(0).unitTest;
     
     // First check if any previous completed calls raised an exception which has not been handled
@@ -178,7 +178,7 @@ public abstract class Call<V> extends Tryer {
     for (Call<?> call : calls) {
       Object user = call.getUser();
       if (user != null && blockedUsers.contains(user)) {
-        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call);
+        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call, false);
       }
     }
 

@@ -24,7 +24,6 @@ public class UnitTest {
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
-  private boolean shortFailureMessages = false;
   private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history;
   protected Set<Call<?>> allCalls = null;
   protected Set<Call<?>> allCreatedCalls = null;
@@ -76,44 +75,64 @@ public class UnitTest {
   }
   
   /**
-   * Indicate a unit test failer.
+   * Indicates a syntactic error in a particular test (i.e., not an error
+   * in the tested program but rather in the test suite).
    */
-  public static void failTest(String msg) {
-    org.junit.jupiter.api.Assertions.fail(msg);
+  public static void failTestSyntax(String msg, boolean includeTrace) {
+    failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, includeTrace);
   }
   
-  void setShortFailureMessages(boolean mode) {
-    shortFailureMessages = mode;
-  }
-
   /**
    * Indicate a failure in the testing framework (i.e., not an error
    * in the tested program but rather in the test system).
    */
-  public static void failTestFramework(String msg) {
-    failTest("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\nCall trace:\n"+mkTrace());
+  public static void failTestFramework(String msg, boolean includeTrace) {
+    failTest("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg, includeTrace);
   }
   
-  public void resetUnblocked() {
+  /**
+   * Indicate a unit test fail.
+   */
+  protected static void failTest(String msg) {
+    failTest(msg, false);
+  }
+  
+  /**
+   * Indicate a unit test fail,u.
+   */
+  protected static void failTest(String msg, boolean includeTrace) {
+    if (includeTrace)
+      msg += "\nCall trace:\n"+mkTrace();
+    org.junit.jupiter.api.Assertions.fail(msg);
+  }
+  
+  protected void resetUnblocked() {
     unblockedCalls = new HashSet<Call<?>>();
   }
 
+  /**
+   * Returns the set of calls unblocked by executing this call -- or
+   * other calls executed in parallel with this call.
+   */
   public Set<Call<?>> unblockedCalls() {
     return unblockedCalls;
   }
 
+  /**
+   * Are there blocked calls?
+   */
   public boolean hasBlockedCalls() {
     return !blockedCalls.isEmpty();
   }
 
-  public void addCalls(List<Call<?>> calls) {
+  protected void addCalls(List<Call<?>> calls) {
     for (Call<?> call : calls) {
       allCalls.add(call);
       blockedCalls.add(call);
     }
   }
   
-  public void calculateUnblocked()
+  protected void calculateUnblocked()
   {
     Set<Call<?>> newUnblockedCalls = new HashSet<Call<?>>();
 
@@ -124,14 +143,6 @@ public class UnitTest {
     }
     blockedCalls.removeAll(newUnblockedCalls);
     unblockedCalls.addAll(newUnblockedCalls);
-  }
-  
-  /**
-   * Indicates a syntactic error in a particular test (i.e., not an error
-   * in the tested program but rather in the test suite).
-   */
-  public static void failTestSyntax(String msg) {
-    failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nCall trace:\n"+mkTrace());
   }
   
   public static void reportTestResults() {
@@ -208,7 +219,7 @@ public class UnitTest {
       Call.checkExceptions(unblockedCalls);
     for (Call<?> call : allCreatedCalls) {
       if (!call.hasStarted()) {
-        failTestSyntax("call "+call+" was created but never executed");
+        failTestSyntax("call "+call+" was created but never executed", true);
       }
     }
   }
