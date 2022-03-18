@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides conventient test assertions.
+ */
 public class SeqAssertions {
   private static ArrayList<String> alternatives;
 

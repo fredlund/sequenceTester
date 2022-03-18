@@ -70,7 +70,7 @@ class Tests {
     new Set(counter,3).returns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
-    Call.execute(inc,dec); SeqAssertions.assertUnblocks(inc,dec);
+    Call.exec(inc,dec); SeqAssertions.assertUnblocks(inc,dec);
     SeqAssertions.assertEquals(4,new Inc(counter));
   }
 
@@ -80,7 +80,7 @@ class Tests {
     new Set(counter,3).returns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
-    Call.execute(inc,dec); 
+    Call.exec(inc,dec); 
     SeqAssertions.checkAlternatives();
     if (SeqAssertions.checkAlternative(() -> { inc.unblocks(); }))
       ;

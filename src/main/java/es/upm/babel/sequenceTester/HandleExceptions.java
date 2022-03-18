@@ -3,6 +3,9 @@ package es.upm.babel.sequenceTester;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+/**
+ * Provides call traces for test failures.
+ */
 public class HandleExceptions implements TestExecutionExceptionHandler {
 
     @Override

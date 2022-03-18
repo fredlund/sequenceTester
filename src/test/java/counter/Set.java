@@ -12,8 +12,9 @@ public class Set extends Call<Void> {
     this.value = value;
   }
 
-  public void toTry() {
+  public Void execute() {
     counter.set(value);
+    return null;
   }
 
   public String toString() {

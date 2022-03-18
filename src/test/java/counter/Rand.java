@@ -5,11 +5,10 @@ import java.util.Random;
 
 
 public class Rand extends Call<Integer> {
-
   Rand() { }
 
-  public void toTry() {
-    setReturnValue(new Random().nextInt());
+  public Integer execute() {
+    return new Random().nextInt();
   }
 
   public String toString() {

@@ -10,8 +10,8 @@ public class IsEven extends Call<Boolean> {
     this.n = n;
   }
 
-  public void toTry() {
-    setReturnValue((n % 2) == 0);
+  public Boolean execute() {
+    return (n % 2) == 0;
   }
 
   public String toString() {

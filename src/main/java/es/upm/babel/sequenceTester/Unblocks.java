@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 
 
 /**
- * A description of which calls must or may become unblocked, optionally with attached oracles.
+ * Provides methods for specifying and checking which may or must become unblocked.
  */
 
 public class Unblocks {
@@ -27,16 +27,26 @@ public class Unblocks {
     this.mayUnblock = mayUnblock == null ? new HashSet<Call<?>>() : mayUnblock;
   }
 
+  /**
+   * Specifies that no calls may be unblocked.
+   */
   public Unblocks() {
     this(new HashSet<Call<?>>(), new HashSet<Call<?>>());
   }
 
-  public Unblocks(List<Call<?>> mayCalls) {
-    this(new HashSet<Call<?>>(mayCalls), new HashSet<Call<?>>());
+  /**
+   * Specifies that a number of calls must be unblocked.
+   */
+  public Unblocks(List<Call<?>> mustCalls) {
+    this(new HashSet<Call<?>>(mustCalls), new HashSet<Call<?>>());
   }
 
-  public Unblocks(List<Call<?>> mayCalls, List<Call<?>> mustCalls) {
-    this(new HashSet<Call<?>>(mayCalls), new HashSet<Call<?>>(mustCalls));
+  /**
+   * Specifies that a number of calls must be unblocked, and
+   * that (some other) calls may be unblocked.
+   */
+  public Unblocks(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    this(new HashSet<Call<?>>(mustCalls), new HashSet<Call<?>>(mayCalls));
   }
 
   //////////////////////////////////////////////////////////////////////

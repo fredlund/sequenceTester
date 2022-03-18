@@ -10,9 +10,9 @@ public class Print extends Call<Integer> {
     this.msg = msg;
   }
 
-  public void toTry() {
+  public Integer execute() {
     System.out.println(msg);
-    setReturnValue(2); 
+    return 2;
   }
 
   public String toString() {

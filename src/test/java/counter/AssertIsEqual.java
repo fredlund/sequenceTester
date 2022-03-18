@@ -12,8 +12,9 @@ public class AssertIsEqual extends Call<Void> {
     this.value = value;
   }
 
-  public void toTry() {
+  public Void execute() {
     counter.assertIsEqual(value);
+    return null;
   }
 
   public String toString() {

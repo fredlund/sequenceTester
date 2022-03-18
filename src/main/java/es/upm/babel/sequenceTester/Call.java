@@ -93,7 +93,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   public Call<V> exec() {
-    execute(Arrays.asList(this));
+    exec(Arrays.asList(this));
     return this;
   }
 
@@ -162,11 +162,11 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-  public static void execute(Call... calls) {
-    execute(Arrays.asList(calls));
+  public static void exec(Call... calls) {
+    exec(Arrays.asList(calls));
   }
 
-  public static void execute(List<Call<?>> calls) {
+  public static void exec(List<Call<?>> calls) {
     if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls", UnitTest.ErrorLocation.AFTER);
     UnitTest t = calls.get(0).unitTest;
     
@@ -371,4 +371,9 @@ public abstract class Call<V> extends Tryer {
     return unitTest;
   }
 
+  public void toTry() throws Throwable {
+    setReturnValue(execute());
+  }
+
+  abstract public V execute() throws Throwable;
 }

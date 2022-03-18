@@ -10,8 +10,8 @@ public class Inc extends Call<Integer> {
     this.counter = counter;
   }
 
-  public void toTry() {
-    setReturnValue(counter.inc());
+  public Integer execute() {
+    return counter.inc();
   }
 
   public String toString() {

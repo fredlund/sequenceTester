@@ -10,8 +10,8 @@ public class WhenEven extends Call<Integer> {
     this.counter = counter;
   }
 
-  public void toTry() {
-    setReturnValue(counter.whenEven());
+  public Integer execute() {
+    return counter.whenEven();
   }
 
   public String toString() {

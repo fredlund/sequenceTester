@@ -10,8 +10,8 @@ public class Dec extends Call<Integer> {
     this.counter = counter;
   }
 
-  public void toTry() {
-    setReturnValue(counter.dec());
+  public Integer execute() {
+    return counter.dec();
   }
 
   public String toString() {

@@ -6,9 +6,8 @@ import es.upm.babel.sequenceTester.*;
 public class CreateCounter extends Call<Counter> {
   CreateCounter() { }
 
-  public void toTry() {
-    Counter counter = new Counter();
-    setReturnValue(counter);
+  public Counter execute() {
+    return new Counter();
   }
 
   public String toString() {

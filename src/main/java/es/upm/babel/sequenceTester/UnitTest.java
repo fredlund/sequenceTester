@@ -34,13 +34,10 @@ public class UnitTest {
   
   /**
    * Constructs a unit test.
+   * This constructor should be called at the begining of each individual test,
+   * or in a @BeforeEach method.
    * 
    * @param name the name of the call sequence.
-   * @param stmt a test statement
-   * @throws RuntimeException if the test statement is syntactically
-   * invalid (e.g., unblocks calls that have already been unblocked).
-   * @see TestStmt
-   * @see Call
    */
   public UnitTest(String name) {
     testName = name;
@@ -60,16 +57,14 @@ public class UnitTest {
     LASTLINE, INSIDE, AFTER
   }
 
+  /**
+   * Provides a description of the current test.
+   */
   public UnitTest setConfigurationDescription(String desc) {
     configurationDescription = desc;
     return this;
   }
   
-  public String getConfigurationDescription(String desc) {
-    return configurationDescription;
-  }
-  
-
   /**
    * Returns the configuration description.
    * @return the configuration description.
@@ -82,11 +77,11 @@ public class UnitTest {
    * Indicates a syntactic error in a particular test (i.e., not an error
    * in the tested program but rather in the test suite).
    */
-  public static void failTestSyntax(String msg, ErrorLocation loc) {
+  static void failTestSyntax(String msg, ErrorLocation loc) {
     failTestSyntax(msg, loc, false);
   }
   
-  public static void failTestSyntax(String msg, ErrorLocation loc, boolean directFail) {
+  static void failTestSyntax(String msg, ErrorLocation loc, boolean directFail) {
     if (directFail) {
       failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, true, loc);
     } else throw new InternalException("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, loc);
@@ -96,7 +91,7 @@ public class UnitTest {
    * Indicate a failure in the testing framework (i.e., not an error
    * in the tested program but rather in the test system).
    */
-  public static void failTestFramework(String msg, ErrorLocation loc) {
+  static void failTestFramework(String msg, ErrorLocation loc) {
     throw new InternalException("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg, loc);
   }
   
@@ -123,14 +118,14 @@ public class UnitTest {
    * Returns the set of calls unblocked by executing this call -- or
    * other calls executed in parallel with this call.
    */
-  public Set<Call<?>> unblockedCalls() {
+  Set<Call<?>> unblockedCalls() {
     return unblockedCalls;
   }
 
   /**
    * Are there blocked calls?
    */
-  public boolean hasBlockedCalls() {
+  boolean hasBlockedCalls() {
     return !blockedCalls.isEmpty();
   }
 
@@ -154,7 +149,7 @@ public class UnitTest {
     unblockedCalls.addAll(newUnblockedCalls);
   }
   
-  public static void reportTestResults() {
+  static void reportTestResults() {
     ArrayList<String> successes = new ArrayList<>();
     ArrayList<String> failures = new ArrayList<>();
     boolean hasErrors = false;
@@ -181,11 +176,11 @@ public class UnitTest {
     System.out.println("\n\n========================================");
   }
   
-  public void extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked) {
+  void extendTrace(List<Call<?>> calls, Set<Call<?>> newUnblocked) {
     history.add(new Pair<List<Call<?>>,Set<Call<?>>>(calls,newUnblocked));
   }
 
-  protected static String mkTrace() {
+  static String mkTrace() {
     StringBuffer trace = new StringBuffer();
     for (Pair<List<Call<?>>,Set<Call<?>>> historyPair : currentTest.history) {
       List<Call<?>> calls = historyPair.getLeft();
@@ -219,6 +214,9 @@ public class UnitTest {
     return trace.toString();
   }
   
+  /**
+   * Method obligatory to call in an @AfterEach clause. 
+   */
   public void finish() {
     // Check if the last call resulted in an exception
     if (unblockedCalls != null && unblockedCalls.size() > 0)
@@ -243,17 +241,4 @@ public class UnitTest {
     return "Call trace"+locString+":\n\n"+mkTrace()+"\n";
   }
 
-  /**
-   * Return the test (context) state.
-   */
-  public Object getTestState() {
-    return state;
-  }
-  
-  /**
-   * Sets the test (context) state.
-   */
-  public void setTestState(Object state) {
-    this.state = state;
-  }
 }

@@ -6,7 +6,7 @@ import es.upm.babel.sequenceTester.*;
 public class Fail extends Call<Integer> {
   Fail() { }
 
-  public void toTry() {
+  public Integer execute() {
     throw new RuntimeException();
   }
 
