@@ -12,9 +12,7 @@ public class SeqAssertions {
   private static ArrayList<String> alternatives;
 
   private static Call<?> oneLastCall() {
-    if (UnitTest.currentTest.lastCalls == null)
-      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
-    return UnitTest.currentTest.lastCalls.get(0);
+    return UnitTest.currentTest.getLastCalls().get(0);
   }
 
   public static <V> void assertEquals(V expected, Call<V> call) {

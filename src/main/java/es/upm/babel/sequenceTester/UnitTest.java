@@ -25,12 +25,27 @@ public class UnitTest {
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
-  private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history;
-  protected Set<Call<?>> allCalls = null;
-  protected Set<Call<?>> allCreatedCalls = null;
-  protected Set<Call<?>> blockedCalls = null;
-  protected Set<Call<?>> unblockedCalls = null;
-  protected List<Call<?>> lastCalls = null;
+  private ArrayList<Pair<List<Call<?>>,Set<Call<?>>>> history =
+    new ArrayList<Pair<List<Call<?>>,Set<Call<?>>>>();
+
+  // All calls created through invoking the Call constructor
+  private Set<Call<?>> allCreatedCalls = new HashSet<>();
+
+  // All executed calls
+  private Set<Call<?>> allCalls = new HashSet<>();
+
+  // All calls unblocked
+  private Set<Call<?>> allUnblockedCalls = new HashSet<>();
+
+  // All calls currently blocked
+  private Set<Call<?>> blockedCalls = new HashSet<>();
+
+  // All calls that were unblocked by the execution of the last calls
+  private Set<Call<?>> lastUnblockedCalls = null;
+
+  // The last calls executed
+  private List<Call<?>> lastCalls = null;
+
   
   /**
    * Constructs a unit test.
@@ -43,11 +58,6 @@ public class UnitTest {
     testName = name;
     if (testResults == null)
       testResults = new HashMap<>();
-    allCalls = new HashSet<Call<?>>();
-    allCreatedCalls = new HashSet<Call<?>>();
-    blockedCalls = new HashSet<Call<?>>();
-    unblockedCalls = new HashSet<Call<?>>();
-    history = new ArrayList<Pair<List<Call<?>>,Set<Call<?>>>>();
     currentTest = this;
     Call.reset();
     Config.installTestConfig();
@@ -110,16 +120,38 @@ public class UnitTest {
     org.junit.jupiter.api.Assertions.fail(msg);
   }
   
-  protected void resetUnblocked() {
-    unblockedCalls = new HashSet<Call<?>>();
+  Set<Call<?>> getAllCreatedCalls() {
+    return allCreatedCalls;
   }
 
   /**
-   * Returns the set of calls unblocked by executing this call -- or
-   * other calls executed in parallel with this call.
+   * Returns the set of all calls unblocked at this point in the execution of the test.
    */
-  Set<Call<?>> unblockedCalls() {
-    return unblockedCalls;
+  public Set<Call<?>> getAllUnblockedCalls() {
+    return allUnblockedCalls;
+  }
+
+  /**
+   * Returns the set of all calls that were unblocked by the latest command.
+   */
+  public Set<Call<?>> getLastUnblockedCalls() {
+    return lastUnblockedCalls;
+  }
+
+  /**
+   * Returns the latest calls executed.
+   */
+  public List<Call<?>> getLastCalls() {
+    if (lastCalls == null)
+      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
+    return lastCalls;
+  }
+
+  /**
+   * Returns the set of all calls blocked at this point in the execution of the test.
+   */
+  public Set<Call<?>> getBlockedCalls() {
+    return blockedCalls;
   }
 
   /**
@@ -129,24 +161,26 @@ public class UnitTest {
     return !blockedCalls.isEmpty();
   }
 
-  protected void addCalls(List<Call<?>> calls) {
+  void prepareToRun(List<Call<?>> calls) {
     for (Call<?> call : calls) {
       allCalls.add(call);
       blockedCalls.add(call);
     }
+    lastCalls = calls;
+    lastUnblockedCalls = new HashSet<Call<?>>();
   }
   
   protected void calculateUnblocked()
   {
-    Set<Call<?>> newUnblockedCalls = new HashSet<Call<?>>();
+    lastUnblockedCalls = new HashSet<Call<?>>();
 
     for (Call<?> blockedCall : blockedCalls) {
       if (!blockedCall.hasBlocked()) {
-        newUnblockedCalls.add(blockedCall);
+        lastUnblockedCalls.add(blockedCall);
       }
     }
-    blockedCalls.removeAll(newUnblockedCalls);
-    unblockedCalls.addAll(newUnblockedCalls);
+    blockedCalls.removeAll(lastUnblockedCalls);
+    allUnblockedCalls.addAll(lastUnblockedCalls);
   }
   
   static void reportTestResults() {
@@ -219,8 +253,8 @@ public class UnitTest {
    */
   public void finish() {
     // Check if the last call resulted in an exception
-    if (unblockedCalls != null && unblockedCalls.size() > 0)
-      Call.checkExceptions(unblockedCalls, true);
+    if (allUnblockedCalls != null && allUnblockedCalls.size() > 0)
+      Call.checkExceptions(allUnblockedCalls, true);
 
     // Check for created calls that were never executed -- a test syntax error
     for (Call<?> call : allCreatedCalls) {

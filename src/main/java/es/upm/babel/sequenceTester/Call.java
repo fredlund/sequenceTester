@@ -19,6 +19,11 @@ import java.io.PrintWriter;
  * Represents a call to an API, which can block, return a value or raise an exception.
  * Methods permit to inspect the call to decide if its execution has terminated (unblocked),
  * and how it terminated (with an exception or a normal return).
+ * Note that a number of predicates, e.g., call.unblocks(...) and call.blocks(...), are defined relative
+ * to its call argument. That is, they check that immediately after executing call,
+ * the call itself was unblocked or blocked, and the arguments calls were all unblocked.
+ * Thus, suppose that initially call blocks, e.g., call.blocking(...) is true,
+ * and that later another call' unblocks call, then call.blocking(...) remains true.
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
@@ -46,7 +51,7 @@ public abstract class Call<V> extends Tryer {
     // By default we check that the call returns normally.
     this.waitTime = Config.getTestWaitTime();
     unitTest = UnitTest.currentTest;
-    unitTest.allCreatedCalls.add(this);
+    unitTest.getAllCreatedCalls().add(this);
   }
 
   /**
@@ -106,7 +111,9 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Checks that the call has unblocked, and that no other call was unblocked.
+   * Checks that the call has unblocked as a result of its execution, 
+   * and that no other call was unblocked as a result
+   * of executing the call (and its sibling calls).
    * Fails a test if the call did not unblock, or some other call unblocked.
    * If the call has not started executing, this method forces its execution.
    */
@@ -117,8 +124,9 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Checks that the call has unblocked, and that precisely the
-   * calls enumerated in the parameter list are the only additional calls that have unblocked.
+   * Checks that the call has unblocked, as a result of executing the call, and that precisely the
+   * calls enumerated in the parameter list are the only additional calls that have unblocked
+   * as a result of executing the call (and its sibling calls).
    * Fails a test if the call did not unblock, the parameter list calls did not all unblock,
    * or if some other call unblocked.
    * If the call has not started executing, this method forces its execution.
@@ -137,7 +145,8 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Checks that the call remains blocked, and that no other call has unblocked.
+   * Checks that the call was blocked after executing it and its sibling calls,
+   * and moreover that no other call has unblocked.
    * Fails a test if the call unblocked, or some other call unblocked.
    * If the call has not started executing, this method forces its execution.
    */
@@ -148,8 +157,9 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
-   * Checks that the call remains blocked, and that precisely the calls in 
-   * the parameter list are the only calls that have unblocked.
+   * Checks that the call was blocked after its execution, and that precisely the calls in 
+   * the parameter list are the only calls that have unblocked as a result of executing
+   * the call and its sibling calls.
    * Fails a test if the call unblocked, a call in the parameter list is blocked,
    * or some call not in the parameter list have unblocked.
    * If the call has not started executing, this method forces its execution.
@@ -160,11 +170,21 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
+  /**
+   * Checks whether the call raised an exception. 
+   * If the call has not started executing, this method forces its execution.
+   * If the call is still blocked, a test failure is indicated.
+   */
   public boolean raisedException() {
     forceExecute();
     return super.raisedException();
   }
 
+  /**
+   * Checks whether the call raised an exception. 
+   * If the call has not started executing, this method forces its execution.
+   * If the call is still blocked, a test failure is indicated.
+   */
   public Throwable getException() {
     forceExecute();
     if (!raisedException())
@@ -203,11 +223,11 @@ public abstract class Call<V> extends Tryer {
     UnitTest t = calls.get(0).unitTest;
     
     // First check if any previous completed calls raised an exception which has not been handled
-    if (t.unblockedCalls != null) checkExceptions(t.unblockedCalls, false);
+    if (t.getAllUnblockedCalls() != null) checkExceptions(t.getAllUnblockedCalls(), false);
 
     // Next check if there are if a user in the new calls is blocked
     Set<Object> blockedUsers = new HashSet<>();
-    for (Call<?> call : t.blockedCalls) {
+    for (Call<?> call : t.getBlockedCalls()) {
       Object user = call.getUser();
       if (user != null) blockedUsers.add(user);
     }
@@ -224,10 +244,7 @@ public abstract class Call<V> extends Tryer {
       maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
     }
 
-    t.addCalls(calls);
-    t.resetUnblocked();
-    t.lastCalls = calls;
-
+    t.prepareToRun(calls);
     runCalls(calls);
 
     // Busywait a while until either we wait the maxWaitTime, or all active
@@ -243,11 +260,11 @@ public abstract class Call<V> extends Tryer {
     } while (t.hasBlockedCalls() && remainingTime > 0);
 
     for (Call<?> call : calls) {
-      call.unblockedCalls = new HashSet<>(t.unblockedCalls);
-      call.blockedCalls = new HashSet<>(t.blockedCalls);
+      call.unblockedCalls = new HashSet<>(t.getLastUnblockedCalls());
+      call.blockedCalls = new HashSet<>(t.getBlockedCalls());
       call.partnerCalls = calls;
     }
-    t.extendTrace(calls, t.unblockedCalls());
+    t.extendTrace(calls, t.getLastUnblockedCalls());
   }
 
   static void runCalls(List<Call<?>> calls) {
