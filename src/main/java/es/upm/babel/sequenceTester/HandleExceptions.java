@@ -17,7 +17,7 @@ public class HandleExceptions implements TestExecutionExceptionHandler {
         throw newThrowable;
       } else if (throwable instanceof InternalException) {
 	InternalException error = (InternalException) throwable;
-        String msg = "*** INTERNAL ERROR *** -- "+error.getMessage();
+        String msg = "*** INTERNAL ERROR ***"+error.getMessage();
 	UnitTest.ErrorLocation loc = error.getErrorLocation();
         if (msg == null) msg = "";
 	if (loc == null) loc = UnitTest.ErrorLocation.LASTLINE;
