@@ -63,7 +63,7 @@ public class UnitTest {
     Config.installTestConfig();
   }
   
-  protected enum ErrorLocation {
+  enum ErrorLocation {
     LASTLINE, INSIDE, AFTER
   }
 
@@ -108,14 +108,14 @@ public class UnitTest {
   /**
    * Indicate a unit test fail.
    */
-  protected static void failTest(String msg) {
+  static void failTest(String msg) {
     failTest(msg, false, ErrorLocation.LASTLINE);
   }
   
   /**
    * Indicate a unit test fail.
    */
-  protected static void failTest(String msg, boolean includeTrace, ErrorLocation loc) {
+  static void failTest(String msg, boolean includeTrace, ErrorLocation loc) {
     if (includeTrace) msg += "\n"+errorTrace(loc);
     org.junit.jupiter.api.Assertions.fail(msg);
   }
@@ -170,7 +170,7 @@ public class UnitTest {
     lastUnblockedCalls = new HashSet<Call<?>>();
   }
   
-  protected void calculateUnblocked()
+  void calculateUnblocked()
   {
     lastUnblockedCalls = new HashSet<Call<?>>();
 
@@ -264,7 +264,7 @@ public class UnitTest {
     }
   }
 
-  protected static String errorTrace(ErrorLocation loc) {
+  static String errorTrace(ErrorLocation loc) {
     String locString = "";
     if (loc == ErrorLocation.LASTLINE)
       locString = " (detectado en la ultima linea)";

@@ -196,7 +196,7 @@ public abstract class Call<V> extends Tryer {
     checkedForException = true;
   }
 
-  protected static void checkExceptions(Set<Call<?>> calls, boolean calledFromAfter) {
+  static void checkExceptions(Set<Call<?>> calls, boolean calledFromAfter) {
     for (Call<?> call : calls) {
       if (call.raisedException() && !call.checkedForException) {
         Throwable exc = call.getException();
