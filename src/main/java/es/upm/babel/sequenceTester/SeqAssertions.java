@@ -11,10 +11,6 @@ import java.util.Set;
 public class SeqAssertions {
   private static ArrayList<String> alternatives;
 
-  private static Call<?> oneLastCall() {
-    return UnitTest.currentTest.getLastCalls().get(0);
-  }
-
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
     if (!expected.equals(actual))
@@ -22,32 +18,42 @@ public class SeqAssertions {
                         " pero devolvió "+actual); 
   }
 
+  public static void assertBlocking(Execute e, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    new Unblocks(mustCalls,mayCalls).checkCalls(e);
+  }
+
   public static void assertBlocking(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    new Unblocks(mustCalls,mayCalls).checkCalls(oneLastCall());
+    assertBlocking(UnitTest.getCurrentTest().getLastExecute(), mustCalls, mayCalls);
   }
   
   public static void assertBlocking(Call<?> call, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    new Unblocks(mustCalls,mayCalls).checkCalls(call);
+    assertBlocking(call.getExecute(), mustCalls, mayCalls);
   }
   
-  public static void assertUnblocks(Call... mustCalls) {
+  public static void assertUnblocks(Execute e, Call... mustCalls) {
     List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
     for (Call<?> mustCall : mustCalls) mustCallsList.add(mustCall);
-    assertBlocking(mustCallsList, Arrays.asList());
+    assertBlocking(e, mustCallsList, Arrays.asList());
+  }
+
+  public static void assertUnblocks(Call... mustCalls) {
+    assertUnblocks(UnitTest.getCurrentTest().getLastExecute(), mustCalls);
   }
 
   public static void assertUnblocks(Call<?> call, Call... mustCalls) {
-    List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
-    for (Call<?> mustCall : mustCalls) mustCallsList.add(mustCall);
-    assertBlocking(call, mustCallsList, Arrays.asList());
+    assertUnblocks(call.getExecute(), mustCalls);
+  }
+
+  public static void assertBlocks(Execute e, Call... mustCalls) {
+    assertBlocking(e, Arrays.asList(mustCalls), Arrays.asList());
   }
 
   public static void assertBlocks(Call... mustCalls) {
-    assertBlocking(Arrays.asList(mustCalls), Arrays.asList());
+    assertBlocks(UnitTest.getCurrentTest().getLastExecute(), mustCalls);
   }
 
   public static void assertBlocks(Call<?> call, Call... mustCalls) {
-    assertBlocking(call, Arrays.asList(mustCalls), Arrays.asList());
+    assertBlocks(call.getExecute(), mustCalls);
   }
 
   public static <V> void assertThrows(Class<?> excClass, Call<V> call) {

@@ -3,7 +3,6 @@ package es.upm.babel.sequenceTester;
 import es.upm.babel.cclib.Tryer;
 
 import java.util.Collection;
-import java.util.Random;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -19,15 +18,9 @@ import java.io.PrintWriter;
  * Represents a call to an API, which can block, return a value or raise an exception.
  * Methods permit to inspect the call to decide if its execution has terminated (unblocked),
  * and how it terminated (with an exception or a normal return).
- * Note that a number of predicates, e.g., call.unblocks(...) and call.blocks(...), are defined relative
- * to its call argument. That is, they check that immediately after executing call,
- * the call itself was unblocked or blocked, and the arguments calls were all unblocked.
- * Thus, suppose that initially call blocks, e.g., call.blocking(...) is true,
- * and that later another call call' unblocks call, then call.blocking(...) remains true.
  */
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
-  private static final Random rand = new Random();
 
   private int id;
   private boolean started = false;
@@ -37,9 +30,7 @@ public abstract class Call<V> extends Tryer {
   private boolean hasReturnValue = false;
   private V returnValue = null;
   private boolean checkedForException = false;
-  private Set<Call<?>> unblockedCalls;
-  private Set<Call<?>> blockedCalls;
-  private List<Call<?>> partnerCalls;
+  private Execute execute;
 
   /**
    * Constructs a call. Often this constructor should be 
@@ -50,7 +41,7 @@ public abstract class Call<V> extends Tryer {
     this.user = getUser();
     // By default we check that the call returns normally.
     this.waitTime = Config.getTestWaitTime();
-    unitTest = UnitTest.currentTest;
+    unitTest = UnitTest.getCurrentTest();
     unitTest.getAllCreatedCalls().add(this);
   }
 
@@ -100,14 +91,6 @@ public abstract class Call<V> extends Tryer {
    */
   public int getWaitTime() {
     return this.waitTime;
-  }
-
-  /**
-   * Commences the execution of the call.
-   */
-  public Call<V> exec() {
-    exec(Arrays.asList(this));
-    return this;
   }
 
   /**
@@ -214,81 +197,6 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-  public static void exec(Call... calls) {
-    exec(Arrays.asList(calls));
-  }
-
-  public static void exec(List<Call<?>> calls) {
-    if (calls.size() == 0) UnitTest.failTestSyntax("trying to execute 0 calls", UnitTest.ErrorLocation.AFTER);
-    UnitTest t = calls.get(0).unitTest;
-    
-    // First check if any previous completed calls raised an exception which has not been handled
-    if (t.getAllUnblockedCalls() != null) checkExceptions(t.getAllUnblockedCalls(), false);
-
-    // Next check if there are if a user in the new calls is blocked
-    Set<Object> blockedUsers = new HashSet<>();
-    for (Call<?> call : t.getBlockedCalls()) {
-      Object user = call.getUser();
-      if (user != null) blockedUsers.add(user);
-    }
-    for (Call<?> call : calls) {
-      Object user = call.getUser();
-      if (user != null && blockedUsers.contains(user)) {
-        UnitTest.failTestSyntax("user "+user+" is blocked in call "+call, UnitTest.ErrorLocation.AFTER);
-      }
-    }
-
-    int maxWaitTime = 0;
-
-    for (Call<?> call : calls) {
-      maxWaitTime = Math.max(maxWaitTime, call.getWaitTime());
-    }
-
-    t.prepareToRun(calls);
-    runCalls(calls);
-
-    // Busywait a while until either we wait the maxWaitTime, or all active
-    // calls have been unblocked
-    long remainingTime = maxWaitTime;
-    do {
-      long waitTime = Math.min(remainingTime, 10);
-      try { Thread.sleep(waitTime); }
-      catch (InterruptedException exc) { }
-      // Compute unblocked (and change blockedCalls)
-      t.calculateUnblocked();
-      remainingTime -= waitTime;
-    } while (!t.getBlockedCalls().isEmpty() && remainingTime > 0);
-
-    t.afterRun(calls);
-
-    for (Call<?> call : calls) {
-      call.unblockedCalls = t.getLastUnblockedCalls();
-      call.blockedCalls = new HashSet<>(t.getBlockedCalls());
-      call.partnerCalls = calls;
-    }
-  }
-
-  static void runCalls(List<Call<?>> calls) {
-    boolean randomize = Config.getTestRandomize();
-    List<Call<?>> callsInOrder = calls;
-
-    // Check if the starting order of calls should be randomized
-    if (randomize) {
-      callsInOrder = new ArrayList<>();
-      ArrayList<Call<?>> copiedCalls = new ArrayList<>(calls);
-      int remaining = copiedCalls.size();
-      while (remaining > 0) {
-        int nextToTake = rand.nextInt(remaining);
-        callsInOrder.add(copiedCalls.get(nextToTake));
-        copiedCalls.remove(nextToTake);
-        --remaining;
-      }
-    }
-
-    for (Call<?> call : callsInOrder) {
-      call.makeCall();
-    }
-  }
 
   /**
    * Executes the call. The method waits a fixed interval of time before returning.
@@ -300,21 +208,6 @@ public abstract class Call<V> extends Tryer {
 
   public String printCall() {
     return id+": "+ this;
-  }
-
-  public Set<Call<?>> getUnblockedCalls() {
-    forceExecute();
-    return unblockedCalls;
-  }
-
-  public Set<Call<?>> getBlockedCalls() {
-    forceExecute();
-    return blockedCalls;
-  }
-
-  public List<Call<?>> getPartnerCalls() {
-    forceExecute();
-    return partnerCalls;
   }
 
   public static String printCalls(Collection<Call<?>> calls) {
@@ -380,7 +273,7 @@ public abstract class Call<V> extends Tryer {
   // If a call is not executing force it to execute
   private void forceExecute() {
     if (!hasStarted())
-      exec();
+      Execute.exec(this);
   }
 
   /**
@@ -431,6 +324,14 @@ public abstract class Call<V> extends Tryer {
 
   UnitTest getUnitTest() {
     return unitTest;
+  }
+
+  void setExecute(Execute e) {
+    execute = e;
+  }
+
+  Execute getExecute() {
+    return execute;
   }
 
   public final void toTry() throws Throwable {
