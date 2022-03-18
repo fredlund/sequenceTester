@@ -91,11 +91,7 @@ public class UnitTest {
    * in the tested program but rather in the test system).
    */
   public static void failTestFramework(String msg) {
-    StringWriter errors = new StringWriter();
-    new Throwable().printStackTrace(new PrintWriter(errors));
-    String stackTrace = errors.toString();
-    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\nCall trace:\n"+mkTrace();
-    failTest(message);
+    failTest("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\nCall trace:\n"+mkTrace());
   }
   
   public void resetUnblocked() {
@@ -135,11 +131,7 @@ public class UnitTest {
    * in the tested program but rather in the test suite).
    */
   public static void failTestSyntax(String msg) {
-    StringWriter errors = new StringWriter();
-    new Throwable().printStackTrace(new PrintWriter(errors));
-    String stackTrace = errors.toString();
-    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nCall trace:\n"+mkTrace());
-    failTest(message);
+    failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nCall trace:\n"+mkTrace());
   }
   
   public static void reportTestResults() {
