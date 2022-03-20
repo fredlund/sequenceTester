@@ -3,10 +3,10 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Fail extends Call<Integer> {
+public class Fail extends VoidCall {
   Fail() { }
 
-  public Integer execute() {
+  public void execute() {
     throw new RuntimeException();
   }
 

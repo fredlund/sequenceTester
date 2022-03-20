@@ -183,7 +183,7 @@ public class UnitTest {
   void calculateUnblocked()
   {
     for (Call<?> blockedCall : blockedCalls) {
-      if (!blockedCall.blocked()) {
+      if (!blockedCall.isBlocked()) {
         lastUnblockedCalls.add(blockedCall);
       }
     }

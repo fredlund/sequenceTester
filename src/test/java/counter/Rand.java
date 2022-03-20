@@ -4,7 +4,7 @@ import es.upm.babel.sequenceTester.*;
 import java.util.Random;
 
 
-public class Rand extends Call<Integer> {
+public class Rand extends ReturningCall<Integer> {
   Rand() { }
 
   public Integer execute() {

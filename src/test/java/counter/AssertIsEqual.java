@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class AssertIsEqual extends Call<Void> {
+public class AssertIsEqual extends VoidCall {
   private final int value;
   private final Counter counter;
 
@@ -12,9 +12,8 @@ public class AssertIsEqual extends Call<Void> {
     this.value = value;
   }
 
-  public Void execute() {
+  public void execute() {
     counter.assertIsEqual(value);
-    return null;
   }
 
   public String toString() {

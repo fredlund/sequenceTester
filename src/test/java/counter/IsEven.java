@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class IsEven extends Call<Boolean> {
+public class IsEven extends ReturningCall<Boolean> {
   private final int n;
 
   IsEven(int n) {

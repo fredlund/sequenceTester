@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class CreateCounter extends Call<Counter> {
+public class CreateCounter extends ReturningCall<Counter> {
   CreateCounter() { }
 
   public Counter execute() {

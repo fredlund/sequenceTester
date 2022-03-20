@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Set extends Call<Void> {
+public class Set extends VoidCall {
   private final int value;
   private final Counter counter;
 
@@ -12,9 +12,8 @@ public class Set extends Call<Void> {
     this.value = value;
   }
 
-  public Void execute() {
+  public void execute() {
     counter.set(value);
-    return null;
   }
 
   public String toString() {

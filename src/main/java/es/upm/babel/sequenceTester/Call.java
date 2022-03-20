@@ -146,7 +146,7 @@ public abstract class Call<V> extends Tryer {
     if (raisedException())
       return callString + " raised " + getException();
     else {
-      if (hasReturnValue())
+      if (hasReturnedValue())
         return callString + " returned " + getReturnValue();
       else
         return callString;
@@ -164,17 +164,15 @@ public abstract class Call<V> extends Tryer {
    * Returns true if the call is blocked and false otherwise.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean blocked() {
+  public boolean isBlocked() {
     forceExecute();
     // In the "current" cclib a tryer may be:
-    //  blocked (tryer.isBlocked())
-    // - blocked because it terminated with an exception
+    // - blocked because it did not terminate, OR because it with an exception
     // (tryer.raisedException())
-    // - or not blocked because it terminated normally.
     // In the code below we instead consider a call blocked
     // if the call truly blocked AND it did not raise an
     // exception.
-    return isBlocked() && !raisedException();
+    return super.isBlocked() && !raisedException();
   }
 
   /**
@@ -182,29 +180,36 @@ public abstract class Call<V> extends Tryer {
    * or has raised an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Call<V> unblocked() {
-    if (!returned() && !raisedException())
-      UnitTest.failTest(this+" is not unblocked");
-    return this;
+  public boolean isUnblocked() {
+    forceExecute();
+    return !isBlocked();
   }
 
   /**
    * Returns true if the call raised an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Call<V> raised() {
-    if (!raisedException())
-      UnitTest.failTest(this+" did not raise an exception");
-    return this;
+  public boolean hasRaised() {
+    forceExecute();
+    return !super.raisedException();
   }
 
   /**
    * Returns true if the call returned normally, i.e., did not raise an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean returned() {
+  public boolean hasReturned() {
     forceExecute();
-    return hasStarted() && !blocked() && !raisedException();
+    return hasStarted() && !isBlocked() && !raisedException();
+  }
+
+  /**
+   * Returns true if the call returned normally, i.e., did not raise an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public boolean hasReturnedValue() {
+    forceExecute();
+    return hasStarted() && !isBlocked() && !raisedException() && hasReturnValue;
   }
 
   /**
@@ -215,7 +220,7 @@ public abstract class Call<V> extends Tryer {
    */
   public V getReturnValue() {
     forceExecute();
-    if (!hasReturnValue)
+    if (!hasReturnedValue())
       UnitTest.failTest(this+" did not return a value");
     return returnValue;
   }
@@ -233,19 +238,7 @@ public abstract class Call<V> extends Tryer {
     return super.getException();
   }
 
-  /**
-   * Checks if the call returned a value. 
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean hasReturnValue() {
-    forceExecute();
-    return hasReturnValue;
-  }
-
-  /**
-   * Sets the return value of the call (if any).
-   */
-  private void setReturnValue(V returnValue) {
+  void setReturnValue(V returnValue) {
     this.hasReturnValue = true;
     this.returnValue = returnValue;
   }
@@ -276,10 +269,4 @@ public abstract class Call<V> extends Tryer {
   Execute getExecute() {
     return execute;
   }
-
-  public final void toTry() throws Throwable {
-    setReturnValue(execute());
-  }
-
-  abstract public V execute() throws Throwable;
 }

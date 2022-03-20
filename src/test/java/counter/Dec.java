@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Dec extends Call<Integer> {
+public class Dec extends ReturningCall<Integer> {
   private final Counter counter;
 
   Dec(Counter counter) {

@@ -3,7 +3,7 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Await extends Call<Void> {
+public class Await extends VoidCall {
   private int waitingFor;
   private final Counter counter;
 
@@ -12,9 +12,8 @@ public class Await extends Call<Void> {
     setUser("await");
   }
 
-  public Void execute() {
+  public void execute() {
     counter.await(waitingFor);
-    return null;
   }
 
   public String toString() {
