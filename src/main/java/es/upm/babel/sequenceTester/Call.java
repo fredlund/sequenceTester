@@ -1,7 +1,5 @@
 package es.upm.babel.sequenceTester;
 
-import es.upm.babel.cclib.Tryer;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Arrays;
@@ -48,7 +46,8 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the user (process) executing a call.
    * The library enforces that if a call from a user is blocked,
-   * another call from the same user cannot be made.
+   * another call from the same user cannot be made. Specifying the default nil
+   * user prevents this check.
    */
   public Call<V> user(Object user) {
     return this;
@@ -93,88 +92,6 @@ public abstract class Call<V> extends Tryer {
     return this.waitTime;
   }
 
-  /**
-   * Checks that the call has unblocked as a result of its execution, 
-   * and that no other call was unblocked as a result
-   * of executing the call (and its sibling calls).
-   * Fails a test if the call did not unblock, or some other call unblocked.
-   * If the call has not started executing, this method forces its execution.
-   */
-  public Call<V> unblocks() {
-    forceExecute();
-    SeqAssertions.assertUnblocks(this);
-    return this;
-  }
-
-  /**
-   * Checks that the call has unblocked, as a result of executing the call, and that precisely the
-   * calls enumerated in the parameter list are the only additional calls that have unblocked
-   * as a result of executing the call (and its sibling calls).
-   * Fails a test if the call did not unblock, the parameter list calls did not all unblock,
-   * or if some other call unblocked.
-   * If the call has not started executing, this method forces its execution.
-   */
-  public Call<V> unblocks(Call... calls) {
-    forceExecute();
-    ArrayList<Call<?>> mustBlocks = new ArrayList<>();
-    boolean addedThis = false;
-    for (Call call : calls) {
-      mustBlocks.add(call);
-      addedThis = addedThis || call==this;
-    }
-    if (!addedThis) mustBlocks.add(this);
-    SeqAssertions.assertBlocking(mustBlocks,Arrays.asList());
-    return this;
-  }
-
-  /**
-   * Checks that the call was blocked after executing it and its sibling calls,
-   * and moreover that no other call has unblocked.
-   * Fails a test if the call unblocked, or some other call unblocked.
-   * If the call has not started executing, this method forces its execution.
-   */
-  public Call<V> blocks() {
-    forceExecute();
-    SeqAssertions.assertBlocks();
-    return this;
-  }
-
-  /**
-   * Checks that the call was blocked after its execution, and that precisely the calls in 
-   * the parameter list are the only calls that have unblocked as a result of executing
-   * the call and its sibling calls.
-   * Fails a test if the call unblocked, a call in the parameter list is blocked,
-   * or some call not in the parameter list have unblocked.
-   * If the call has not started executing, this method forces its execution.
-   */
-  public Call<V> blocks(Call... calls) {
-    forceExecute();
-    SeqAssertions.assertBlocks(calls);
-    return this;
-  }
-
-  /**
-   * Checks whether the call raised an exception. 
-   * If the call has not started executing, this method forces its execution.
-   * If the call is still blocked, a test failure is indicated.
-   */
-  public boolean raisedException() {
-    forceExecute();
-    return super.raisedException();
-  }
-
-  /**
-   * Checks whether the call raised an exception. 
-   * If the call has not started executing, this method forces its execution.
-   * If the call is still blocked, a test failure is indicated.
-   */
-  public Throwable getException() {
-    forceExecute();
-    if (!raisedException())
-      UnitTest.failTest(this+" did not raise an exception");
-    return super.getException();
-  }
-
   void checkedForException() {
     checkedForException = true;
   }
@@ -197,13 +114,18 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-
   /**
    * Executes the call. The method waits a fixed interval of time before returning.
    */
    void makeCall() {
     started = true;
     start();
+  }
+
+  // If a call is not executing force it to execute
+  private void forceExecute() {
+    if (!hasStarted())
+      Execute.exec(this);
   }
 
   public String printCall() {
@@ -231,20 +153,65 @@ public abstract class Call<V> extends Tryer {
     }
   }
 
-  public Call<V> raises() {
+  /**
+   * Returns true if the execution of the call has started.
+   */
+  public boolean hasStarted() {
+    return started;
+  }
+
+  /**
+   * Returns true if the call is blocked and false otherwise.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public boolean blocked() {
+    forceExecute();
+    // In the "current" cclib a tryer may be:
+    //  blocked (tryer.isBlocked())
+    // - blocked because it terminated with an exception
+    // (tryer.raisedException())
+    // - or not blocked because it terminated normally.
+    // In the code below we instead consider a call blocked
+    // if the call truly blocked AND it did not raise an
+    // exception.
+    return isBlocked() && !raisedException();
+  }
+
+  /**
+   * Returns true if the call is unblocked, i.e., either it has returned normally
+   * or has raised an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> unblocked() {
+    if (!returned() && !raisedException())
+      UnitTest.failTest(this+" is not unblocked");
+    return this;
+  }
+
+  /**
+   * Returns true if the call raised an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> raised() {
     if (!raisedException())
       UnitTest.failTest(this+" did not raise an exception");
     return this;
   }
 
-  public Call<V> returns() {
-    if (!returned())
-      UnitTest.failTest(this+" did not return normally");
-    return this;
+  /**
+   * Returns true if the call returned normally, i.e., did not raise an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public boolean returned() {
+    forceExecute();
+    return hasStarted() && !blocked() && !raisedException();
   }
 
   /**
-   * Returns the return value of the call (if any).
+   * Returns the return value of the call (if any). If the call is still blocked,
+   * or if the call raised an exception, or if the call did not return any value,
+   * the method fails.
+   * If the call has not yet started executing this method forces its execution.
    */
   public V getReturnValue() {
     forceExecute();
@@ -254,53 +221,33 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
+   * Returns the return value of the call (if any). If the call is still blocked,
+   * or if the call raised an exception, or if the call did not return any value,
+   * the method fails.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Throwable getException() {
+    forceExecute();
+    if (!raisedException())
+      UnitTest.failTest(this+" did not return a value");
+    return super.getException();
+  }
+
+  /**
+   * Checks if the call returned a value. 
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public boolean hasReturnValue() {
+    forceExecute();
+    return hasReturnValue;
+  }
+
+  /**
    * Sets the return value of the call (if any).
    */
   private void setReturnValue(V returnValue) {
     this.hasReturnValue = true;
     this.returnValue = returnValue;
-  }
-
-  /**
-   * Checks whether the call returned normally. That is, it is not blocked
-   * and the call did not raise an exception.
-   */
-  public boolean returned() {
-    forceExecute();
-    return hasStarted() && !hasBlocked() && !raisedException();
-  }
-
-  // If a call is not executing force it to execute
-  private void forceExecute() {
-    if (!hasStarted())
-      Execute.exec(this);
-  }
-
-  /**
-   * Returns true if the execution of the call has started.
-   */
-  public boolean hasStarted() {
-    return started;
-  }
-
-  public boolean hasReturnValue() {
-    return hasReturnValue;
-  }
-
-  public boolean hasBlocked() {
-    /**
-     * In the "current" cclib a tryer may be:
-     * - blocked (tryer.isBlocked())
-     * - blocked because it terminated with an exception
-     * (tryer.raisedException())
-     * - or not blocked because it terminated normally.
-     *
-     * In the code below we instead consider a call blocked
-     * if the call truly blocked AND it did not raise an
-     * exception.
-     **/
-    forceExecute();
-    return isBlocked() && !raisedException();
   }
 
   public int hashCode() {
@@ -316,10 +263,6 @@ public abstract class Call<V> extends Tryer {
 
   static void reset() {
     counter = 1;
-  }
-
-  void setUnitTest(UnitTest unitTest) {
-    this.unitTest = unitTest;
   }
 
   UnitTest getUnitTest() {

@@ -67,6 +67,9 @@ public class UnitTest {
   }
 
   public static UnitTest getCurrentTest() {
+    if (currentTest == null)
+      failTestSyntax
+        ("There is no current test -- has an UnitTest instance been created?", ErrorLocation.INSIDE, true);
     return currentTest;
   }
 
@@ -180,7 +183,7 @@ public class UnitTest {
   void calculateUnblocked()
   {
     for (Call<?> blockedCall : blockedCalls) {
-      if (!blockedCall.hasBlocked()) {
+      if (!blockedCall.blocked()) {
         lastUnblockedCalls.add(blockedCall);
       }
     }
