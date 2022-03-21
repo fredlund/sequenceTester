@@ -11,6 +11,25 @@ import java.util.Set;
 public class SeqAssertions {
   private static ArrayList<String> alternatives;
 
+  public static void assertFail(Runnable assertion, boolean showFailure) {
+    boolean failed = false;
+    try {
+      System.out.println("will run "+assertion);
+      assertion.run();
+      System.out.println(assertion+" terminated normally");
+    } catch (org.opentest4j.AssertionFailedError exc) {
+      System.out.println(assertion+" terminated with an exception");
+      failed = true;
+      if (showFailure) {
+        String msg = exc.getMessage();
+        if (msg == null) msg = "";
+        msg += "\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
+        System.out.println("As expected the test failed. Message:\n"+msg);
+      }
+    }
+    if (!failed) UnitTest.failTest("The test did not fail");
+  }
+
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
     if (!expected.equals(actual))
@@ -19,7 +38,6 @@ public class SeqAssertions {
   }
 
   public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
-    System.out.println("assertThrown("+excClass+","+call+")");
     if (!call.raisedException()) {
       UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass);
     }

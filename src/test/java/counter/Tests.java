@@ -18,10 +18,12 @@ class Tests {
 
   @Test
   public void test_01() {
-    Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    new Await(counter,4).blocks();
-    SeqAssertions.assertEquals(3,new Dec(counter));
+    SeqAssertions.assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).returns();
+        new Await(counter,4).blocks();
+        SeqAssertions.assertEquals(3,new Dec(counter));
+      }, true);
   }
 
   @Test
@@ -50,19 +52,24 @@ class Tests {
 
   @Test
   public void test_05() {
-    Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    new Await(counter,4).blocks();
-    Assertions.assertEquals(3,new Dec(counter).getReturnValue());
+    SeqAssertions.assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).returns();
+        new Await(counter,4).blocks();
+        Assertions.assertEquals(3,new Dec(counter).getReturnValue());
+      }, true);
   }
 
   @Test
   public void test_06() {
-    Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    new Await(counter,4).blocks();
-    Assertions.assertEquals(2,new Dec(counter).getReturnValue());
-    new Fail().unblocks();
+    SeqAssertions.assertFail(() ->  {
+      Counter counter = new CreateCounter().getReturnValue();
+      new Set(counter,3).returns();
+      new Await(counter,4).blocks();
+      Assertions.assertEquals(2,new Dec(counter).getReturnValue());
+      new Fail().unblocks();
+      new Set(counter,4).returns();
+    }, true);
   }
 
   @Test
@@ -77,18 +84,20 @@ class Tests {
 
   @Test
   public void test_par_2() {
-    Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    Call<Integer> inc = new Inc(counter);
-    Call<Integer> dec = new Dec(counter);
-    Execute.exec(inc,dec); 
-    SeqAssertions.checkAlternatives();
-    if (SeqAssertions.checkAlternative(() -> { inc.unblocks(); }))
-      ;
-    else if (SeqAssertions.checkAlternative(() -> { dec.unblocks(); }))
-      ;
-    else
-      SeqAssertions.endAlternatives();
+    SeqAssertions.assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).returns();
+        Call<Integer> inc = new Inc(counter);
+        Call<Integer> dec = new Dec(counter);
+        Execute.exec(inc,dec); 
+        SeqAssertions.checkAlternatives();
+        if (SeqAssertions.checkAlternative(() -> { inc.unblocks(); }))
+          ;
+        else if (SeqAssertions.checkAlternative(() -> { dec.unblocks(); }))
+          ;
+        else
+          SeqAssertions.endAlternatives();
+      }, true);
   }
 
   @Test
