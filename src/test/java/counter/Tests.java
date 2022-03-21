@@ -9,6 +9,7 @@ import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
 import org.junit.jupiter.api.extension.ExtendWith;
 // Please tell the Java people to permit package aliases
+import static es.upm.babel.sequenceTester.SeqAssertions.*;
 import org.junit.jupiter.api.Assertions;
 
 @ExtendWith(HandleExceptions.class)
@@ -18,85 +19,84 @@ class Tests {
 
   @Test
   public void test_01() {
-    SeqAssertions.assertFail(() -> {
+    assertFail(() -> {
         Counter counter = new CreateCounter().getReturnValue();
-        new Set(counter,3).returns();
-        new Await(counter,4).blocks();
-        SeqAssertions.assertEquals(3,new Dec(counter));
+        new Set(counter,3).assertReturns();
+        new Await(counter,4).assertBlocks();
+        assertEquals(3,new Dec(counter));
       }, true);
   }
 
   @Test
   public void test_02() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    Call<Integer> whenEven = new WhenEven(counter).blocks();
-    SeqAssertions.assertEquals(2,new Dec(counter).unblocks(whenEven));
-    SeqAssertions.assertEquals(2,whenEven);
+    new Set(counter,3).assertReturns();
+    Call<Integer> whenEven = new WhenEven(counter).assertBlocks();
+    assertEquals(2,new Dec(counter).assertUnblocks(whenEven));
+    assertEquals(2,whenEven);
   }
 
   @Test
   public void test_03() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
-    SeqAssertions.assertEquals(2,new Dec(counter));
-    SeqAssertions.assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
+    new Set(counter,3).assertReturns();
+    assertEquals(2,new Dec(counter));
+    assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
   }
 
   @Test
   public void test_04() {
     Counter counter = new CreateCounter().getReturnValue();
     Integer rndInt = new Rand().getReturnValue();
-    SeqAssertions.assertEquals((rndInt % 2) == 0, new IsEven(rndInt));
+    assertEquals((rndInt % 2) == 0, new IsEven(rndInt));
   }
 
   @Test
   public void test_05() {
-    SeqAssertions.assertFail(() -> {
+    assertFail(() -> {
         Counter counter = new CreateCounter().getReturnValue();
-        new Set(counter,3).returns();
-        new Await(counter,4).blocks();
+        new Set(counter,3).assertReturns();
+        new Await(counter,4).assertBlocks();
         Assertions.assertEquals(3,new Dec(counter).getReturnValue());
       }, true);
   }
 
   @Test
   public void test_06() {
-    SeqAssertions.assertFail(() ->  {
+    assertFail(() ->  {
       Counter counter = new CreateCounter().getReturnValue();
-      new Set(counter,3).returns();
-      new Await(counter,4).blocks();
+      new Set(counter,3).assertReturns();
+      new Await(counter,4).assertBlocks();
       Assertions.assertEquals(2,new Dec(counter).getReturnValue());
-      new Fail().unblocks();
-      new Set(counter,4).returns();
+      new Fail().assertReturns();
     }, true);
   }
 
   @Test
   public void test_par_1() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).assertReturns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
-    Execute.exec(inc,dec); SeqAssertions.assertUnblocks(Arrays.asList(inc,dec));
-    SeqAssertions.assertEquals(4,new Inc(counter));
+    Execute.exec(inc,dec); assertUnblocks(Arrays.asList(inc,dec));
+    assertEquals(4,new Inc(counter));
   }
 
   @Test
   public void test_par_2() {
-    SeqAssertions.assertFail(() -> {
+    assertFail(() -> {
         Counter counter = new CreateCounter().getReturnValue();
-        new Set(counter,3).returns();
+        new Set(counter,3).assertReturns();
         Call<Integer> inc = new Inc(counter);
         Call<Integer> dec = new Dec(counter);
         Execute.exec(inc,dec); 
-        SeqAssertions.checkAlternatives();
-        if (SeqAssertions.checkAlternative(() -> { inc.unblocks(); }))
+        checkAlternatives();
+        if (checkAlternative(() -> { inc.assertUnblocks(); }))
           ;
-        else if (SeqAssertions.checkAlternative(() -> { dec.unblocks(); }))
+        else if (checkAlternative(() -> { dec.assertUnblocks(); }))
           ;
         else
-          SeqAssertions.endAlternatives();
+          endAlternatives();
       }, true);
   }
 
@@ -104,9 +104,8 @@ class Tests {
   public void test_repeat() {
     for (int i=0; i<2; i++) {
       Counter counter = new CreateCounter().getReturnValue();
-      new Set(counter,3).returns();
-      new Await(counter,4).blocks();
-      SeqAssertions.assertEquals(2,new Dec(counter).unblocks());
+      new Set(counter,3).assertReturns();
+      assertEquals(2,new Dec(counter).assertUnblocks());
     }
   }
 

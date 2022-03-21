@@ -27,6 +27,7 @@ public class Execute {
   
   public static Execute exec(Call... calls) {
     Execute e = new Execute(Arrays.asList(calls));
+    System.out.println("executing "+e);
     e.exec();
     return e;
   }

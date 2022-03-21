@@ -24,7 +24,7 @@ public class SeqAssertions {
         String msg = exc.getMessage();
         if (msg == null) msg = "";
         msg += "\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
-        System.out.println("As expected the test failed. Message:\n"+msg);
+        System.out.println("As expected the test failed. Message:\n\n"+msg);
       }
     }
     if (!failed) UnitTest.failTest("The test did not fail");
@@ -38,10 +38,7 @@ public class SeqAssertions {
   }
 
   public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
-    if (!call.raisedException()) {
-      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass);
-    }
-
+    call.assertRaisedException();
     Class<?> exceptionClass = call.getException().getClass();
     if (!excClass.isAssignableFrom(exceptionClass)) {
       UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass+
@@ -53,22 +50,9 @@ public class SeqAssertions {
   }
 
   public static <V> void assertThrown(Call<V> call) {
-    if (!call.raisedException()) {
-      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception");
-    }
-
+    call.assertRaisedException();
     // Note that we checked whether it raised an exception
     call.checkedForException();
-  }
-  
-  public static void assertIsUnblocked(Call<?> call) {
-    if (call.isBlocked())
-      UnitTest.failTest("la llamada "+call+" deberia haber sido desbloqueada pero es bloqueada todavia");
-  }
-
-  public static void assertIslocked(Call<?> call) {
-    if (call.isBlocked())
-      UnitTest.failTest("la llamada "+call+" todavia deberia ser bloqueada pero fue desbloqueda");
   }
   
   public static void assertMustMayUnblocked(Execute e, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {

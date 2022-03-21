@@ -103,6 +103,7 @@ public abstract class Call<V> extends Tryer {
         StringWriter errors = new StringWriter();
         exc.printStackTrace(new PrintWriter(errors));
         String StackTrace = errors.toString();
+        call.checkedForException();
 
 	String msg = "the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n";
 	if (calledFromAfter) {
@@ -128,11 +129,11 @@ public abstract class Call<V> extends Tryer {
       Execute.exec(this);
   }
 
-  public String printCall() {
+  String printCall() {
     return id+": "+ this;
   }
 
-  public static String printCalls(Collection<Call<?>> calls) {
+  static String printCalls(Collection<Call<?>> calls) {
     String callsString="";
     for (Call<?> call : calls) {
       if (callsString != "") callsString += "\n  "+call.printCall();
@@ -141,7 +142,7 @@ public abstract class Call<V> extends Tryer {
     return callsString;
   }
 
-  public String printCallWithReturn() {
+  String printCallWithReturn() {
     String callString = printCall();
     if (raisedException())
       return callString + " raised " + getException();
@@ -156,86 +157,12 @@ public abstract class Call<V> extends Tryer {
   /**
    * Returns true if the execution of the call has started.
    */
-  public boolean hasStarted() {
+  boolean hasStarted() {
     return started;
   }
 
-  /**
-   * Returns true if the call is blocked and false otherwise.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean isBlocked() {
-    forceExecute();
-    // In the "current" cclib a tryer may be:
-    // - blocked because it did not terminate, OR because it with an exception
-    // (tryer.raisedException())
-    // In the code below we instead consider a call blocked
-    // if the call truly blocked AND it did not raise an
-    // exception.
-    return super.isBlocked() && !raisedException();
-  }
-
-  /**
-   * Returns true if the call is unblocked, i.e., either it has returned normally
-   * or has raised an exception.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean isUnblocked() {
-    forceExecute();
-    return !isBlocked();
-  }
-
-  /**
-   * Returns true if the call raised an exception.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean raisedException() {
-    forceExecute();
-    return super.raisedException();
-  }
-
-  /**
-   * Returns true if the call returned normally, i.e., did not raise an exception.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean returns() {
-    forceExecute();
-    return hasStarted() && !isBlocked() && !raisedException();
-  }
-
-  /**
-   * Returns true if the call returned normally, i.e., did not raise an exception.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public boolean returnsValue() {
-    forceExecute();
+  boolean returnsValue() {
     return hasStarted() && !isBlocked() && !raisedException() && hasReturnValue;
-  }
-
-  /**
-   * Returns the return value of the call (if any). If the call is still blocked,
-   * or if the call raised an exception, or if the call did not return any value,
-   * the method fails.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public V getReturnValue() {
-    forceExecute();
-    if (!returnsValue())
-      UnitTest.failTest(this+" did not return a value");
-    return returnValue;
-  }
-
-  /**
-   * Returns the return value of the call (if any). If the call is still blocked,
-   * or if the call raised an exception, or if the call did not return any value,
-   * the method fails.
-   * If the call has not yet started executing this method forces its execution.
-   */
-  public Throwable getException() {
-    forceExecute();
-    if (!raisedException())
-      UnitTest.failTest(this+" did not return a value");
-    return super.getException();
   }
 
   void setReturnValue(V returnValue) {
@@ -272,7 +199,13 @@ public abstract class Call<V> extends Tryer {
 
   //////////////////////////////////////////////////////////////////////
 
-  public Call<V> unblocks(Call... calls) {
+  /**
+   * Asserts that the call unblocked immediately after starting it (possibly running
+   * in parallel with other calls), 
+   * and moreover that the calls mentioned in calls were unblocked too,
+   * and moreover that no other calls were unblocked.
+   */
+  public Call<V> assertUnblocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
     for (Call call : calls) mustUnblocks.add(call);
@@ -281,7 +214,13 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
-  public Call<V> blocks(Call... calls) {
+  /**
+   * Asserts that the call was blocked immediately after starting it (possibly
+   * running in parallel with other calls), 
+   * and moreover that the calls mentioned in calls were unblocked,
+   * and moreover that no other calls were unblocked.
+   */
+  public Call<V> assertBlocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
     for (Call call : calls) mustUnblocks.add(call);
@@ -289,9 +228,93 @@ public abstract class Call<V> extends Tryer {
     return this;
   }
 
+  /**
+   * Asserts that the call is blocked.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertIsBlocked() {
+    forceExecute();
+    // In the "current" cclib a tryer may be:
+    // - blocked because it did not terminate, OR because it with an exception
+    // (tryer.raisedException())
+    // In the code below we instead consider a call blocked
+    // if the call truly blocked AND it did not raise an
+    // exception.
+    if (!(super.isBlocked() && !raisedException()))
+      UnitTest.failTest("call "+this+" is not blocked");
+    return this;
+  }
+
+  /**
+   * Asserts that the call is unblocked, i.e., returned normally or raised an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertIsUnblocked() {
+    forceExecute();
+    if (!isBlocked())
+      UnitTest.failTest("call "+this+" is still blocked");
+    return this;
+  }
+
+  /**
+   * Asserts that the call raised an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertRaisedException() {
+    forceExecute();
+    if (!super.raisedException())
+      UnitTest.failTest("call "+this+" did not raise an exception");
+    return this;
+  }
+
+  /**
+   * Asserts that the call returned normally, i.e., did not raise an exception.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertReturns() {
+    forceExecute();
+    if (!(hasStarted() && !isBlocked() && !raisedException()))
+      UnitTest.failTest("call "+this+" did not return");
+    return this;
+  }
+
+  /**
+   * Asserts that the call returned a value.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertReturnsValue() {
+    forceExecute();
+    if (!returnsValue())
+      UnitTest.failTest("call "+this+" did not return a value");
+    return this;
+  }
+
+  /**
+   * Returns the return value of the call (if any). If the call is still blocked,
+   * or if the call raised an exception, or if the call did not return any value,
+   * the method fails.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public V getReturnValue() {
+    forceExecute();
+    assertReturnsValue();
+    return returnValue;
+  }
+
+  /**
+   * Returns the exception raised during the execution of the call. If the call is still blocked,
+   * or if the call returned normally, the method fails.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Throwable getException() {
+    forceExecute();
+    assertRaisedException();
+    return super.getException();
+  }
+
   //////////////////////////////////////////////////////////////////////
 
   String intToString() {
-    return "{id="+id+",started="+started+",hasReturnValue="+hasReturnValue+",returnValue="+returnValue+",raisedException="+super.raisedException()+"}";
+    return this+"{id="+id+",started="+started+",hasReturnValue="+hasReturnValue+",returnValue="+returnValue+",raisedException="+super.raisedException()+"}";
   }
 }
