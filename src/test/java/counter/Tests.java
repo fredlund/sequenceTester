@@ -84,20 +84,20 @@ class Tests {
 
   @Test
   public void test_par_2() {
-    assertFail(() -> {
+    // assertFail(() -> {
         Counter counter = new CreateCounter().getReturnValue();
         new Set(counter,3).assertReturns();
-        Call<Integer> inc = new Inc(counter);
-        Call<Integer> dec = new Dec(counter);
-        Execute.exec(inc,dec); 
+        Call<Integer> inc1 = new Inc(counter);
+        Call<Integer> inc2 = new Inc(counter);
+        Execute.exec(inc1,inc2); 
         checkAlternatives();
-        if (checkAlternative(() -> { inc.assertUnblocks(); }))
+        if (checkAlternative(() -> { inc1.assertUnblocks(); }))
           ;
-        else if (checkAlternative(() -> { dec.assertUnblocks(); }))
+        else if (checkAlternative(() -> { inc2.assertUnblocks(); }))
           ;
         else
           endAlternatives();
-      }, true);
+        // }, true);
   }
 
   @Test
