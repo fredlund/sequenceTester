@@ -111,4 +111,7 @@ public class Execute {
     return calls;
   }
   
+  public String toString() {
+    return Call.printCalls(calls);
+  }
 }

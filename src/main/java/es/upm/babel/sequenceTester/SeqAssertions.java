@@ -19,6 +19,7 @@ public class SeqAssertions {
   }
 
   public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
+    System.out.println("assertThrown("+excClass+","+call+")");
     if (!call.raisedException()) {
       UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass);
     }

@@ -189,9 +189,9 @@ public abstract class Call<V> extends Tryer {
    * Returns true if the call raised an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean raises() {
+  public boolean raisedException() {
     forceExecute();
-    return !super.raisedException();
+    return super.raisedException();
   }
 
   /**
@@ -287,5 +287,11 @@ public abstract class Call<V> extends Tryer {
     for (Call call : calls) mustUnblocks.add(call);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  String intToString() {
+    return "{id="+id+",started="+started+",hasReturnValue="+hasReturnValue+",returnValue="+returnValue+",raisedException="+super.raisedException()+"}";
   }
 }
