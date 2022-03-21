@@ -1,102 +1,152 @@
 package counter;
 
+import java.util.Arrays;
 import es.upm.babel.sequenceTester.*;
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.TestInfo;
 import java.time.Duration;
+import org.junit.jupiter.api.extension.ExtendWith;
+// Please tell the Java people to permit package aliases
+import static es.upm.babel.sequenceTester.SeqAssertions.*;
+import org.junit.jupiter.api.Assertions;
 
-
+@ExtendWith(HandleExceptions.class)
 class Tests {
+  UnitTest test;
+  public Counter counter;
 
   @Test
   public void test_01() {
-    UnitTest.test
-      ("test_01",
-       Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.blocks(new Await(4).n("await"))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2))))
-       ).run();
+    assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).assertReturns();
+        new Await(counter,4).assertBlocks();
+        assertEquals(3,new Dec(counter));
+      }, true);
   }
 
   @Test
   public void test_02() {
-    UnitTest.test
-      ("test_02",
-       Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.blocks(new WhenEven().n("whenEven").o(Check.returns(2)))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2)),"whenEven"))
-       ).run();
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).assertReturns();
+    Call<Integer> whenEven = new WhenEven(counter).assertBlocks();
+    assertEquals(2,new Dec(counter).assertUnblocks(whenEven));
+    assertEquals(2,whenEven);
   }
 
   @Test
   public void test_03() {
-    UnitTest.test
-      ("test_03",
-       Util.seq
-       (TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Set(3))
-        ,TestCall.unblocks(new Dec().o(Check.returns(2)))
-        ,TestCall.unblocks(new AssertIsEqual(3).o(Check.raisesException(RuntimeException.class))))
-       ).run();
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).assertReturns();
+    assertEquals(2,new Dec(counter));
+    assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
   }
 
   @Test
   public void test_04() {
-    UnitTest.test
-      ("test_04",
-       Util.sequenceEndsWith
-       (new Lambda(() ->
-                   {
-                     Integer rndInt = (Integer) Call.returnValue("rand");
-                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
-                   }),
-        TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Rand().n("rand")))
-       ).run();
+    Counter counter = new CreateCounter().getReturnValue();
+    Integer rndInt = new Rand().getReturnValue();
+    assertEquals((rndInt % 2) == 0, new IsEven(rndInt));
   }
 
   @Test
   public void test_05() {
-    Return<Integer> randR = new Return<>();
-    
-    UnitTest.test
-      ("test_05",
-       Util.sequenceEndsWith
-       (new Lambda(() ->
-                   {
-                     int rndInt = randR.getReturnValue();
-                     return Util.seq(TestCall.unblocks(new IsEven(rndInt).oracle(Check.returns((rndInt % 2) == 0))));
-                   }),
-        TestCall.unblocks(new CreateCounter()),
-        TestCall.unblocks(new Rand().n("rand").r(randR)))
-       ).run();
+    assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).assertReturns();
+        new Await(counter,4).assertBlocks();
+        Assertions.assertEquals(3,new Dec(counter).getReturnValue());
+      }, true);
+  }
+
+  @Test
+  public void test_06() {
+    assertFail(() ->  {
+      Counter counter = new CreateCounter().getReturnValue();
+      new Set(counter,3).assertReturns();
+      new Await(counter,4).assertBlocks();
+      Assertions.assertEquals(2,new Dec(counter).getReturnValue());
+      new Fail().assertReturns();
+    }, true);
+  }
+
+  @Test
+  public void test_par_1() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).assertReturns();
+    Call<Integer> inc = new Inc(counter);
+    Call<Integer> dec = new Dec(counter);
+    Execute.exec(inc,dec); assertUnblocks(Arrays.asList(inc,dec));
+    assertEquals(4,new Inc(counter));
+  }
+
+  @Test
+  public void test_par_2() {
+    // assertFail(() -> {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).assertReturns();
+        Call<Integer> inc1 = new Inc(counter);
+        Call<Integer> inc2 = new Inc(counter);
+        Execute.exec(inc1,inc2); 
+        checkAlternatives();
+        if (checkAlternative(() -> { inc1.assertUnblocks(); }))
+          ;
+        else if (checkAlternative(() -> { inc2.assertUnblocks(); }))
+          ;
+        else
+          endAlternatives();
+        // }, true);
   }
 
   @Test
   public void test_repeat() {
-    UnitTest.repeatTest
-      ("test_repeat",
-       5,
-       new Lambda
-       (
-        () -> {
-          return
-            Util.sequence
-            (TestCall.unblocks(new CreateCounter())
-             ,TestCall.unblocks(new Set(3))
-             ,TestCall.blocks(new Await(4).n("await"))
-             ,TestCall.unblocks(new Dec().o(Check.returns(2))));
-        })
-       ).run();
+    for (int i=0; i<2; i++) {
+      Counter counter = new CreateCounter().getReturnValue();
+      new Set(counter,3).assertReturns();
+      assertEquals(2,new Dec(counter).assertUnblocks());
+    }
+  }
+
+  @Test
+  public void test1a() {
+    CreateCounter cc = new CreateCounter();
+    Execute.exec(cc); // Execute the call and wait
+    Counter counter = cc.getReturnValue(); // Inspect the result
+    
+    Set s = new Set(counter,3);
+    Execute.exec(s);   // Execute the call and wait
+    s.assertReturns(); // Assert that the call returns
+
+    Await a = new Await(counter,2);
+    Execute.exec(a); // Execute the call and wait
+    a.assertBlocks(); // Assert that the call blocks
+        
+    Dec d = new Dec(counter);
+    Execute.exec(d); // Execute the call and wait
+    // Assert that the call to dec() unblocks also the earlier call to await()
+    // and moreover that the call to dec() returns 2
+    SeqAssertions.assertEquals(2,d.assertUnblocks(a)); 
+  }
+
+  @Test
+  public void test1b() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).assertReturns();
+    Await await = new Await(counter,2); await.assertBlocks();
+    SeqAssertions.assertEquals(2,new Dec(counter).assertUnblocks(await));
   }
 
   @BeforeEach
-  public void setup(TestInfo testInfo) throws Exception {
-    UnitTest.setupTest(testInfo.getDisplayName());
+  public void start(TestInfo testInfo) {
+    test = new UnitTest(testInfo.getDisplayName());
   }
+
+  @AfterEach
+  public void finish(TestInfo testInfo) {
+    test.finish();
+  }
+
 }
 

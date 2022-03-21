@@ -3,15 +3,11 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class CreateCounter extends CounterCall<Counter> {
-  CreateCounter() {
-    setUser("createCounter");
-  }
+public class CreateCounter extends ReturningCall<Counter> {
+  CreateCounter() { }
 
-  public void toTry() {
-    Counter counter = new Counter();
-    setTestState(counter);
-    setReturnValue(counter);
+  public Counter execute() {
+    return new Counter();
   }
 
   public String toString() {

@@ -3,16 +3,18 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Await extends CounterCall {
+public class Await extends VoidCall {
   private int waitingFor;
+  private final Counter counter;
 
-
-  Await(int waitingFor) {
+  Await(Counter counter, int waitingFor) {
+    this.counter = counter;
+    this.waitingFor = waitingFor;
     setUser("await");
   }
 
-  public void toTry() {
-    counter().await(waitingFor);
+  public void execute() {
+    counter.await(waitingFor);
   }
 
   public String toString() {

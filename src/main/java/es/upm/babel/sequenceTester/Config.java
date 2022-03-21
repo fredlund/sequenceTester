@@ -13,8 +13,6 @@ public class Config {
   int testWaitTime;
   boolean testRandomize;
 
-  
-
   Config() {
     testWaitTime = WaitTime;
     testRandomize = randomize;

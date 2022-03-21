@@ -3,18 +3,18 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class WhenEven extends ReturningCall<Integer> {
+public class Inc extends ReturningCall<Integer> {
   private final Counter counter;
 
-  WhenEven(Counter counter) {
+  Inc(Counter counter) {
     this.counter = counter;
   }
 
   public Integer execute() {
-    return counter.whenEven();
+    return counter.inc();
   }
 
   public String toString() {
-    return "whenEven()";
+    return "inc()";
   }
 }

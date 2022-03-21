@@ -3,16 +3,16 @@ package counter;
 import es.upm.babel.sequenceTester.*;
 
 
-public class Print extends CounterCall<Integer> {
-  private String msg;
+public class Print extends ReturningCall<Integer> {
+  private final String msg;
 
   Print(String msg) {
     this.msg = msg;
   }
 
-  public void toTry() {
+  public Integer execute() {
     System.out.println(msg);
-    setReturnValue(2); 
+    return 2;
   }
 
   public String toString() {

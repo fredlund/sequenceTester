@@ -4,13 +4,11 @@ import es.upm.babel.sequenceTester.*;
 import java.util.Random;
 
 
-public class Rand extends CounterCall<Integer> {
-  Rand() {
-    setUser("rand");
-  }
+public class Rand extends ReturningCall<Integer> {
+  Rand() { }
 
-  public void toTry() {
-    setReturnValue(new Random().nextInt());
+  public Integer execute() {
+    return new Random().nextInt();
   }
 
   public String toString() {

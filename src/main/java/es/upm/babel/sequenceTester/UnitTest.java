@@ -10,246 +10,77 @@ import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
- * Represents a unit test which embedding a unit test statement.
+ * Support code for executing a Junit 5 tests composed of sequences of parallel executions of sets of calls, i.e., sequences of instances of the Execute class.
+ * of the Call class.
  */
 public class UnitTest {
-  static TestCaseChecker checker = null;
   static String testName;
   static Map<String,Boolean> testResults;
-
-  int n = 1;
-  TestStmt stmt = null;
-  String trace="\nCall trace:\n";
-  String name;
-  private Object state = null;
-  String configurationDescription;
+  private static UnitTest currentTest = null;
   
-  Set<Call<?>> allCalls=null;
-  Set<Call<?>> blockedCalls=null;
+  private final int n = 1;
+  private String trace = "\nCall trace:\n";
+  private Object state = null;
+  private String configurationDescription;
+  private ArrayList<Execute> history = new ArrayList<Execute>();
+
+  // All calls created through invoking the Call constructor
+  private Set<Call<?>> allCreatedCalls = new HashSet<>();
+
+  // All executed calls
+  private Set<Call<?>> allCalls = new HashSet<>();
+
+  // All calls unblocked
+  private Set<Call<?>> allUnblockedCalls = new HashSet<>();
+
+  // All calls currently blocked
+  private Set<Call<?>> blockedCalls = new HashSet<>();
+
+  // All calls that were unblocked by the execution of the last calls
+  private Set<Call<?>> lastUnblockedCalls = null;
+
+  // The last Execute
+  private Execute lastExecute = null;
+
   
   /**
    * Constructs a unit test.
+   * This constructor should be called at the begining of each individual test,
+   * or in a @BeforeEach method.
    * 
    * @param name the name of the call sequence.
-   * @param stmt a test statement
-   * @throws RuntimeException if the test statement is syntactically
-   * invalid (e.g., unblocks calls that have already been unblocked).
-   * @see TestStmt
-   * @see Call
    */
-  UnitTest(String name, TestStmt stmt) {
-    this.name = name;
-    this.stmt = stmt;
+  public UnitTest(String name) {
+    testName = name;
     if (testResults == null)
       testResults = new HashMap<>();
+    currentTest = this;
+    Call.reset();
+    Config.installTestConfig();
   }
   
+  enum ErrorLocation {
+    LASTLINE, INSIDE, AFTER
+  }
+
+  static UnitTest getCurrentTest() {
+    if (currentTest == null)
+      failTestSyntax
+        ("There is no current test -- has an UnitTest instance been created?", ErrorLocation.INSIDE, true);
+    return currentTest;
+  }
+
+  /**
+   * Provides a description of the current test.
+   */
   public UnitTest setConfigurationDescription(String desc) {
     configurationDescription = desc;
     return this;
   }
-
-  public String getConfigurationDescription(String desc) {
-    return configurationDescription;
-  }
-
-  public static UnitTest test(String name, TestStmt stmt) {
-    UnitTest t = new UnitTest(name, stmt);
-    return t;
-  }
-
-  public static UnitTest test(String name, TestCall... calls) {
-    UnitTest t = new UnitTest(name, Util.seq(calls));
-    return t;
-  }
   
-  public static UnitTest repeatTest(String name, int n, TestStmt stmt) {
-    if (n < 1) {
-      System.out.println("It does not make sense to run a test less than 1 time: "+n);
-      throw new RuntimeException();
-    }
-    if (!(stmt instanceof Lambda)) {
-      System.out.println("Can only repeat a test which is abstracted (a lambda statement)");
-      throw new RuntimeException();
-    }
-    UnitTest t = new UnitTest(name, stmt);
-    t.n = n;
-    return t;
-  }
-
-  /**
-   * Defines the test name and does other internal bookkeeping that is required before
-   * the arguments of the UnitTest constructor is called in the tests.
-   */
-  public static void setupTest(String name) {
-    System.out.println("\n\nTesting "+name);
-    
-    // Set the test name (needed for the evaluation of arguments to the UnitTest constructor)
-    testName = name;
-    
-    // This creates a new map for the symbolic variables.
-    Call.reset();
-
-    // Setup a test configuration
-    Config.installTestConfig();
-  }
-
-  /**
-   * Executes a test statement. The method checks that calls return correct values
-   * (according to the call sequence specification), and that calls are blocked
-   * and unblocked correctly.
-   */
-  public void run() {
-    testName = name;
-    checkSoundNess(name,stmt);
-
-    if (name.equals("desarollo")) {
-      System.out.println
-        ("\n*** Error: el sistema de entrega todavia esta en desarollo.");
-      throw new RuntimeException();
-    }
-
-    if (testResults.containsKey(name)) {
-      failTestSyntax
-        ("*** Test "+name+" is used twice\n");
-    } else testResults.put(name,false);
-
-    for (int i=0; i<n; i++) {
-      runInt();
-    }
-
-    testResults.put(name,true);
-
-    System.out.println("\nFinished testing "+name+"\n");
-  }
-
-  private void runInt() {
-    allCalls = new HashSet<>();
-    blockedCalls = new HashSet<>();
-    
-    stmt.execute
-      (allCalls,
-       blockedCalls,
-       this,
-       "");
-  }
-  
-  boolean contains(int i, int[] calls) {
-    for (Integer elem : calls)
-      if (i==elem) return true;
-    return false;
-  }
-  
-  /**
-   * Installs a custom checker to use for deciding whether a test statement
-   * is (syntactically) valid, in addition to the standard syntactic checker.
-   * @param checker the name of the checker.
-   */
-  public static void installChecker(TestCaseChecker checker) {
-    UnitTest.checker = checker;
-  }
-  
-  // Soundness checks for sequences of calls
-  private void checkSoundNess(String name, TestStmt stmt) {
-    
-    Set<String> active = new HashSet<String>();
-    Set<Object> blockedUsers = new HashSet<Object>();
-    checkSoundNess(name,stmt,active,blockedUsers);
-    if (checker != null) checker.check(name,stmt);
-  }
-  
-  // blockedUsers are the users that are currently executing a call, and so cannot execute another until
-  // that call returns.
-  // active are the currently active calls.
-  private void checkSoundNess(String name,TestStmt stmt,Set<String> active,Set<Object> blockedUsers) {
-
-    if (stmt instanceof Prefix) {
-      Prefix prefix = (Prefix) stmt;
-      TestCall testCall = prefix.testCall();
-      TestStmt continuation = prefix.stmt();
-      
-      // Update blocked users and active calls
-      checkAndUpdateActiveBlocked(name,testCall.calls(),active,blockedUsers);
-
-      // Check that unblocks only refers to active calls and update blocked users
-      checkUnblocksActive(testCall.calls(), testCall.unblocks(), blockedUsers, active);
-
-      // Remove unblocked calls from active
-      for (String unblocked : testCall.unblocks().mustUnblock().keySet()) {
-        active.remove(unblocked);
-      }
-      checkSoundNess(name,continuation,active,blockedUsers);
-    }
-
-    else if (stmt instanceof Branches) {
-      Branches b = (Branches) stmt;
-      
-      // Update blocked and active calls
-      checkAndUpdateActiveBlocked(name,b.calls(),active,blockedUsers);
-      
-      for (Alternative alt : b.alternatives()) {
-        Set<String> newActive = new HashSet<>(active);
-        Set<Object> newBlockedUsers = new HashSet<Object>(blockedUsers);
-
-        // Check that unblocks only refers to active calls and update blocked users
-        checkUnblocksActive(b.calls(), alt.unblocks(), newBlockedUsers, newActive);
-
-        for (String unblocked : alt.unblocks().mustUnblock().keySet()) {
-          newActive.remove(unblocked);
-        }
-        checkSoundNess(name,alt.continuation(),newActive,newBlockedUsers);
-      }
-    }
-  }
-  
-  private void checkUnblocksActive(List<Call<?>> calls, Unblocks unblocks, Set<Object> blockedUsers, Set<String> active) {
-    for (String unblocked : unblocks.mustUnblock().keySet()) {
-      if (!active.contains(unblocked)) {
-        failTestSyntax
-          ("*** Test "+name+" is incorrect:\n"+
-           Call.printCalls(calls)+
-           " unblocks "+unblocked+
-           " which is not in the active set "+active+"\n");
-      }
-      Call<?> call = Call.lookupCall(unblocked);
-      Object user = call.getUser();
-      if (user != null)
-        blockedUsers.remove(user);
-    }
-      
-    for (String unblocked : unblocks.mayUnblock().keySet()) {
-      if (!active.contains(unblocked)) {
-        failTestSyntax
-          ("*** Test "+name+" is incorrect:\n"+
-           Call.printCalls(calls)+
-           " may unblocks "+unblocked+
-           " which is not in the active set "+active+"\n");
-      }
-    }
-  }
-      
-
-  private void checkAndUpdateActiveBlocked(String name, List<Call<?>> calls, Set<String> active, Set<Object> blockedUsers) {
-    for (Call<?> call : calls) {
-      Object user = call.getUser();
-      if (user != null && blockedUsers.contains(user)) {
-        failTestSyntax
-          ("*** Test "+name+" is incorrect:\n"+
-           "user "+user+" in call "+call+
-           " is blocked"+"\n");
-      }
-      blockedUsers.add(user);
-    }
-    
-    for (Call<?> call : calls) {
-      active.add(call.getSymbolicName());
-    }
-  }
-
   /**
    * Returns the configuration description.
    * @return the configuration description.
@@ -259,39 +90,101 @@ public class UnitTest {
   }
   
   /**
-   * Indicate a unit test failer.
+   * Indicates a syntactic error in a particular test (i.e., not an error
+   * in the tested program but rather in the test suite).
    */
-  public static void failTest(String msg) {
-    String failMessage = "\n\n*** Error en la prueba "+testName+":\n"+msg;
-    System.out.println(failMessage);
-    Assertions.assertTrue(false,failMessage);
+  static void failTestSyntax(String msg, ErrorLocation loc) {
+    failTestSyntax(msg, loc, false);
+  }
+  
+  static void failTestSyntax(String msg, ErrorLocation loc, boolean directFail) {
+    if (directFail) {
+      failTest("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, true, loc);
+    } else throw new InternalException("\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg, loc);
   }
   
   /**
    * Indicate a failure in the testing framework (i.e., not an error
    * in the tested program but rather in the test system).
    */
-  public static void failTestFramework(String msg) {
-    StringWriter errors = new StringWriter();
-    new Throwable().printStackTrace(new PrintWriter(errors));
-    String stackTrace = errors.toString();
-    String message = "\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
-    failTest(message);
+  static void failTestFramework(String msg, ErrorLocation loc) {
+    throw new InternalException("\n\n*** Failure in testing framework: (CONTACTA PROFESORES):\n"+msg, loc);
   }
   
   /**
-   * Indicates a syntactic error in a particular test (i.e., not an error
-   * in the tested program but rather in the test suite).
+   * Indicate a unit test fail.
    */
-  public static void failTestSyntax(String msg) {
-    StringWriter errors = new StringWriter();
-    new Throwable().printStackTrace(new PrintWriter(errors));
-    String stackTrace = errors.toString();
-    String message = "\n\n*** Test is syntactically incorrect (CONTACTA PROFESORES):\n"+msg+"\nError context:\n"+stackTrace+"\n";
-    failTest(message);
+  static void failTest(String msg) {
+    failTest(msg, false, ErrorLocation.LASTLINE);
   }
   
-  public static void reportTestResults() {
+  /**
+   * Indicate a unit test fail.
+   */
+  static void failTest(String msg, boolean includeTrace, ErrorLocation loc) {
+    if (includeTrace) msg += "\n"+errorTrace(loc);
+    org.junit.jupiter.api.Assertions.fail(msg);
+  }
+  
+  Set<Call<?>> getAllCreatedCalls() {
+    return allCreatedCalls;
+  }
+
+  /**
+   * Returns the set of all calls that have been unblocked.
+   */
+  public Set<Call<?>> getAllUnblockedCalls() {
+    return allUnblockedCalls;
+  }
+
+  /**
+   * Returns the set of all calls that were unblocked by the latest command.
+   */
+  Set<Call<?>> getLastUnblockedCalls() {
+    return lastUnblockedCalls;
+  }
+
+  /**
+   * Returns the latest execute.
+   */
+  public Execute getLastExecute() {
+    if (lastExecute == null)
+      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
+    return lastExecute;
+  }
+  
+  /**
+   * Returns the set of calls currently blocked.
+   */
+  public Set<Call<?>> getBlockedCalls() {
+    return blockedCalls;
+  }
+
+  void prepareToRun(Execute e) {
+    for (Call<?> call : e.getCalls()) {
+      allCalls.add(call);
+      blockedCalls.add(call);
+    }
+    lastExecute = e;
+    lastUnblockedCalls = new HashSet<Call<?>>();
+  }
+
+  void afterRun(Execute e) {
+    history.add(e);
+  }
+  
+  void calculateUnblocked()
+  {
+    for (Call<?> blockedCall : blockedCalls) {
+      if (!blockedCall.isBlocked()) {
+        lastUnblockedCalls.add(blockedCall);
+      }
+    }
+    blockedCalls.removeAll(lastUnblockedCalls);
+    allUnblockedCalls.addAll(lastUnblockedCalls);
+  }
+  
+  static void reportTestResults() {
     ArrayList<String> successes = new ArrayList<>();
     ArrayList<String> failures = new ArrayList<>();
     boolean hasErrors = false;
@@ -305,7 +198,7 @@ public class UnitTest {
         hasErrors = true;
       }
     }
-
+    
     System.out.println("\n\n========================================\n");
     if (!hasErrors) System.out.println("All tests successful.\n");
     else System.out.println("Some tests failed.\n");
@@ -317,19 +210,66 @@ public class UnitTest {
     for (String testName : failures) System.out.print(testName+" ");
     System.out.println("\n\n========================================");
   }
-
+  
+  static String mkTrace() {
+    StringBuffer trace = new StringBuffer();
+    for (Execute e: currentTest.history) {
+      List<Call<?>> calls = e.getCalls();
+      Set<Call<?>> newUnblocked = e.getUnblockedCalls();
+      
+      String unblocksString="";
+      for (Call<?> unblockedCall : newUnblocked) {
+        String callString = unblockedCall.printCallWithReturn();
+        if (unblocksString=="") unblocksString=callString;
+        else unblocksString+=", "+callString;
+      }
+      if (unblocksString!="")
+        unblocksString = " --> unblocked "+unblocksString;
+    
+      String callsString = "";
+      String indent = calls.size() > 1 ? "  " : "";
+      
+      for (Call<?> call : calls) {
+        if (callsString != "") callsString += "\n"+indent+call.printCall();
+        else callsString = indent+call.printCall();
+      }
+      
+      String callPlusUnblock;
+      if (calls.size() > 1)
+        callPlusUnblock = "===  calls executed in parallel: \n"+callsString+unblocksString;
+      else
+        callPlusUnblock = callsString+unblocksString;
+      
+      trace.append(callPlusUnblock+"\n");
+    }
+    return trace.toString();
+  }
+  
   /**
-   * Return the test (context) state.
+   * Method obligatory to call in an @AfterEach clause. 
    */
-  public Object getTestState() {
-    return state;
+  public void finish() {
+    // Check if the last call resulted in an exception
+    if (allUnblockedCalls != null && allUnblockedCalls.size() > 0)
+      Call.checkExceptions(allUnblockedCalls, true);
+
+    // Check for created calls that were never executed -- a test syntax error
+    for (Call<?> call : allCreatedCalls) {
+      if (!call.hasStarted()) {
+        failTestSyntax("call "+call+" was created but never executed", ErrorLocation.INSIDE, true);
+      }
+    }
   }
 
-  /**
-   * Sets the test (context) state.
-   */
-  public void setTestState(Object state) {
-    this.state = state;
+  static String errorTrace(ErrorLocation loc) {
+    String locString = "";
+    if (loc == ErrorLocation.LASTLINE)
+      locString = "detectado en la ultima linea";
+    else if (loc == ErrorLocation.INSIDE)
+      locString = "detectado dentro la traza";
+    else if (loc == ErrorLocation.AFTER)
+      locString = "detectado despues de la traza";
+    return "Call trace (error "+locString+"):\n\n"+mkTrace()+"\n";
   }
+
 }
-
