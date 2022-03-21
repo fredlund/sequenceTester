@@ -66,7 +66,7 @@ public class UnitTest {
     LASTLINE, INSIDE, AFTER
   }
 
-  public static UnitTest getCurrentTest() {
+  static UnitTest getCurrentTest() {
     if (currentTest == null)
       failTestSyntax
         ("There is no current test -- has an UnitTest instance been created?", ErrorLocation.INSIDE, true);
@@ -131,7 +131,7 @@ public class UnitTest {
   }
 
   /**
-   * Returns the set of all calls currently unblocked.
+   * Returns the set of all calls that have been unblocked.
    */
   public Set<Call<?>> getAllUnblockedCalls() {
     return allUnblockedCalls;
@@ -140,15 +140,8 @@ public class UnitTest {
   /**
    * Returns the set of all calls that were unblocked by the latest command.
    */
-  public Set<Call<?>> getLastUnblockedCalls() {
+  Set<Call<?>> getLastUnblockedCalls() {
     return lastUnblockedCalls;
-  }
-
-  /**
-   * Returns the latest calls executed.
-   */
-  public List<Call<?>> getLastCalls() {
-    return getLastExecute().getCalls();
   }
 
   /**
