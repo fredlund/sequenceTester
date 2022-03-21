@@ -25,9 +25,11 @@ public class Execute {
     this.calls = calls;
   }
   
+  /**
+   * Execute the calls in paralell.
+   */
   public static Execute exec(Call... calls) {
     Execute e = new Execute(Arrays.asList(calls));
-    System.out.println("executing "+e);
     e.exec();
     return e;
   }
@@ -100,14 +102,27 @@ public class Execute {
     }
   }
 
+  /**
+   * Returns the set of calls unblocked by the execution of the calls
+   * provided as parameter to the exec method. Such an unblocked call
+   * may have been provided as a parameter to this Execute object, 
+   * or in an earlier Execte object.
+   */
   public Set<Call<?>> getUnblockedCalls() {
     return unblockedCalls;
   }
 
+  /**
+   * Returns the set of calls which were started by calling
+   * the exec method, but did not unblock.
+   */
   public Set<Call<?>> getBlockedCalls() {
     return blockedCalls;
   }
 
+  /**
+   * Returns the set of calls provided as arguments to the exec method.
+   */
   public List<Call<?>> getCalls() {
     return calls;
   }
