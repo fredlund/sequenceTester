@@ -66,6 +66,54 @@ The Counter class defines three methods: set(int) which sets the value of the co
 dec() which decreases the value of the counter and await(int) which busy-waits until
 the value of the counter is equal to its argument.
 
+To use the library we must define four new classes representing the constructor and the
+tree methods. Methods that have the type void should subclass the VoidCall class,
+whereas other methods and the constructor should subclass the ReturningCall class. Below we
+show the corresponding class definitions:
+
+    public class CreateCounter extends ReturningCall<Counter> {
+        CreateCounter() { }
+        public Counter execute() { return new Counter(); }
+        public String toString() { return "createCounter()"; }
+    }
+
+    public class Set extends VoidCall {
+        private final int value;
+        private final Counter counter;
+
+        Set(Counter counter, int value) {
+            this.counter = counter;
+            this.value = value;
+        }
+
+        public void execute() { counter.set(value); }
+        public String toString() { return "set("+value+")"; }
+    }
+
+    public class Dec extends ReturningCall<Integer> {
+        private final Counter counter;
+
+        Dec(Counter counter) { this.counter = counter; }
+        public Integer execute() { return counter.dec(); }
+        public String toString() { return "dec()"; }
+    }
+
+    public class Await extends VoidCall {
+        private int waitingFor;
+        private final Counter counter;
+
+        Await(Counter counter, int waitingFor) {
+            this.counter = counter;
+            setUser("await");
+        }
+        public void execute() { counter.await(waitingFor); }
+        public String toString() { return "await("+waitingFor+")"; }
+    }
+
+Such command classes must provide a definition of the execute method, which is responsible
+for invoking the tested API. Moreover they should provide a toString() which is used
+to pretty-print commands.
+
 
 ### Unit Tests
  
