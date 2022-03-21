@@ -18,45 +18,7 @@ public class SeqAssertions {
                         " pero devolvió "+actual); 
   }
 
-  public static void assertBlocking(Execute e, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    new Unblocks(mustCalls,mayCalls).checkCalls(e);
-  }
-
-  public static void assertBlocking(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    assertBlocking(UnitTest.getCurrentTest().getLastExecute(), mustCalls, mayCalls);
-  }
-  
-  public static void assertBlocking(Call<?> call, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
-    assertBlocking(call.getExecute(), mustCalls, mayCalls);
-  }
-  
-  public static void assertUnblocks(Execute e, Call... mustCalls) {
-    List<Call<?>> mustCallsList = new ArrayList<Call<?>>();
-    for (Call<?> mustCall : mustCalls) mustCallsList.add(mustCall);
-    assertBlocking(e, mustCallsList, Arrays.asList());
-  }
-
-  public static void assertUnblocks(Call... mustCalls) {
-    assertUnblocks(UnitTest.getCurrentTest().getLastExecute(), mustCalls);
-  }
-
-  public static void assertUnblocks(Call<?> call, Call... mustCalls) {
-    assertUnblocks(call.getExecute(), mustCalls);
-  }
-
-  public static void assertBlocks(Execute e, Call... mustCalls) {
-    assertBlocking(e, Arrays.asList(mustCalls), Arrays.asList());
-  }
-
-  public static void assertBlocks(Call... mustCalls) {
-    assertBlocks(UnitTest.getCurrentTest().getLastExecute(), mustCalls);
-  }
-
-  public static void assertBlocks(Call<?> call, Call... mustCalls) {
-    assertBlocks(call.getExecute(), mustCalls);
-  }
-
-  public static <V> void assertThrows(Class<?> excClass, Call<V> call) {
+  public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
     if (!call.raisedException()) {
       UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass);
     }
@@ -66,8 +28,52 @@ public class SeqAssertions {
       UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass+
                         " pero lanzo una excepcion "+exceptionClass);
     }
-    
+
+    // Note that we checked whether it raised an exception
     call.checkedForException();
+  }
+
+  public static <V> void assertThrown(Call<V> call) {
+    if (!call.raisedException()) {
+      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception");
+    }
+
+    // Note that we checked whether it raised an exception
+    call.checkedForException();
+  }
+  
+  public static void assertIsUnblocked(Call<?> call) {
+    if (call.isBlocked())
+      UnitTest.failTest("la llamada "+call+" deberia haber sido desbloqueada pero es bloqueada todavia");
+  }
+
+  public static void assertIslocked(Call<?> call) {
+    if (call.isBlocked())
+      UnitTest.failTest("la llamada "+call+" todavia deberia ser bloqueada pero fue desbloqueda");
+  }
+  
+  public static void assertMustMayUnblocked(Execute e, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    new Unblocks(mustCalls,mayCalls).checkCalls(e);
+  }
+
+  public static void assertMustMayUnblocked(Call<?> call, List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    assertMustMayUnblocked(call.getExecute(), mustCalls, mayCalls);
+  }
+  
+  public static void assertMustMayUnblocked(List<Call<?>> mustCalls, List<Call<?>> mayCalls) {
+    assertMustMayUnblocked(UnitTest.getCurrentTest().getLastExecute(), mustCalls, mayCalls);
+  }
+  
+  public static void assertUnblocks(Execute e, List<Call<?>> mustCallsList) {
+    assertMustMayUnblocked(e, mustCallsList, Arrays.asList());
+  }
+
+  public static void assertUnblocks(Call<?> call, List<Call<?>> mustCallsList) {
+    assertUnblocks(call.getExecute(), mustCallsList);
+  }
+
+  public static void assertUnblocks(List<Call<?>> mustCallsList) {
+    assertUnblocks(UnitTest.getCurrentTest().getLastExecute(), mustCallsList);
   }
 
   public static void checkAlternatives() {

@@ -269,4 +269,23 @@ public abstract class Call<V> extends Tryer {
   Execute getExecute() {
     return execute;
   }
+
+  //////////////////////////////////////////////////////////////////////
+
+  public Call<V> unblocks(Call... calls) {
+    forceExecute();
+    List<Call<?>> mustUnblocks = new ArrayList<>();
+    for (Call call : calls) mustUnblocks.add(call);
+    mustUnblocks.add(this);
+    SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
+    return this;
+  }
+
+  public Call<V> blocks(Call... calls) {
+    forceExecute();
+    List<Call<?>> mustUnblocks = new ArrayList<>();
+    for (Call call : calls) mustUnblocks.add(call);
+    SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
+    return this;
+  }
 }

@@ -1,5 +1,6 @@
 package counter;
 
+import java.util.Arrays;
 import es.upm.babel.sequenceTester.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ class Tests {
   @Test
   public void test_01() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     new Await(counter,4).blocks();
     SeqAssertions.assertEquals(3,new Dec(counter));
   }
@@ -26,7 +27,7 @@ class Tests {
   @Test
   public void test_02() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     Call<Integer> whenEven = new WhenEven(counter).blocks();
     SeqAssertions.assertEquals(2,new Dec(counter).unblocks(whenEven));
     SeqAssertions.assertEquals(2,whenEven);
@@ -35,9 +36,9 @@ class Tests {
   @Test
   public void test_03() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     SeqAssertions.assertEquals(2,new Dec(counter));
-    SeqAssertions.assertThrows(RuntimeException.class,new AssertIsEqual(counter,3));
+    SeqAssertions.assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
   }
 
   @Test
@@ -50,7 +51,7 @@ class Tests {
   @Test
   public void test_05() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     new Await(counter,4).blocks();
     Assertions.assertEquals(3,new Dec(counter).getReturnValue());
   }
@@ -58,7 +59,7 @@ class Tests {
   @Test
   public void test_06() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     new Await(counter,4).blocks();
     Assertions.assertEquals(2,new Dec(counter).getReturnValue());
     new Fail().unblocks();
@@ -67,17 +68,17 @@ class Tests {
   @Test
   public void test_par_1() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
-    Execute.exec(inc,dec); SeqAssertions.assertUnblocks(inc,dec);
+    Execute.exec(inc,dec); SeqAssertions.assertUnblocks(Arrays.asList(inc,dec));
     SeqAssertions.assertEquals(4,new Inc(counter));
   }
 
   @Test
   public void test_par_2() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).returns();
+    new Set(counter,3).hasReturned();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
     Execute.exec(inc,dec); 
@@ -94,7 +95,7 @@ class Tests {
   public void test_repeat() {
     for (int i=0; i<2; i++) {
       Counter counter = new CreateCounter().getReturnValue();
-      new Set(counter,3).returns();
+      new Set(counter,3).hasReturned();
       new Await(counter,4).blocks();
       SeqAssertions.assertEquals(2,new Dec(counter).unblocks());
     }
