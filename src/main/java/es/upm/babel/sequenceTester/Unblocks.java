@@ -144,14 +144,14 @@ public class Unblocks {
   /**
    * Returns the set of calls (and associated oracles) which must unblock.
    */
-  public Set<Call<?>> mustUnblock() {
+  Set<Call<?>> mustUnblock() {
     return mustUnblock;
   }
   
   /**
    * Returns the set of calls (and associated oracles) which may unblock.
    */
-  public Set<Call<?>> mayUnblock() {
+  Set<Call<?>> mayUnblock() {
     return mayUnblock;
   }
 
