@@ -208,16 +208,14 @@ This is obviously wrong, so Junit 5 displays the following error:
     Tests > test_par_2() FAILED
         org.opentest4j.AssertionFailedError: All possible alternative executions failed:
     Alternative 1:
-      la llamada 4: inc() deberia bloquear
-    pero devolvió el valor 5
+      the call 4: inc() should block
+    but returned the value 5
 
     Alternative 2:
-      la llamada 3: inc() deberia bloquear
-    pero devolvió el valor 4
+      the call 3: inc() should block
+    but returned the value 4
 
-
-
-    Call trace (error detectado en la ultima linea):
+    Call trace (error detected in the last line):
 
     1: createCounter() --> unblocked 1: createCounter() returned counter.Counter@271d4193
     2: set(3) --> unblocked 2: set(3)
