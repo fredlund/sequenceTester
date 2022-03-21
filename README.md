@@ -158,7 +158,7 @@ Both tests fail since we have specified that the decrement call should unblock t
 earlier call to await, but the value of the counter after executing decrement will
 be 2 instead of 1 (which await excepts). The failure report is documented as:
 
-Tests > test1b() FAILED
+    Tests > test1b() FAILED
     org.opentest4j.AssertionFailedError: the call 3: await(1) is still blocked although it should have been unblocked
 
     Call trace (error detected in the last line):
