@@ -20,8 +20,8 @@ A Java library for testing sequences of possibly blocking Java commands
   The main idea is to write test cases as sequences of API calls,
   and to provide excellent diagnostics of why a test case failed, i.e.,
   showing a complete trace of the calls of a failed test case, and
-  indicating clearly the reason for failure. For example, that the call
-  is blocked although it should have been unblocked by a call,
+  indicating clearly the reason for failure. For example, that a call "a"
+  is blocked although it should have been unblocked by a call "b",
   or that it returned an incorrect value.
  
 ## Library Functionality 
