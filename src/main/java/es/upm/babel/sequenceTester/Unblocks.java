@@ -133,7 +133,7 @@ public class Unblocks {
         blockStr = "deberia todavía estar bloqueada después las llamadas "+Call.printCalls(calls);
       
       String returnString = "";
-      if (call.hasReturnedValue()) returnString = "pero "+returned(call.getReturnValue());
+      if (call.returnsValue()) returnString = "pero "+returned(call.getReturnValue());
 
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+

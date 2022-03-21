@@ -19,7 +19,7 @@ class Tests {
   @Test
   public void test_01() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     new Await(counter,4).blocks();
     SeqAssertions.assertEquals(3,new Dec(counter));
   }
@@ -27,7 +27,7 @@ class Tests {
   @Test
   public void test_02() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     Call<Integer> whenEven = new WhenEven(counter).blocks();
     SeqAssertions.assertEquals(2,new Dec(counter).unblocks(whenEven));
     SeqAssertions.assertEquals(2,whenEven);
@@ -36,7 +36,7 @@ class Tests {
   @Test
   public void test_03() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     SeqAssertions.assertEquals(2,new Dec(counter));
     SeqAssertions.assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
   }
@@ -51,7 +51,7 @@ class Tests {
   @Test
   public void test_05() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     new Await(counter,4).blocks();
     Assertions.assertEquals(3,new Dec(counter).getReturnValue());
   }
@@ -59,7 +59,7 @@ class Tests {
   @Test
   public void test_06() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     new Await(counter,4).blocks();
     Assertions.assertEquals(2,new Dec(counter).getReturnValue());
     new Fail().unblocks();
@@ -68,7 +68,7 @@ class Tests {
   @Test
   public void test_par_1() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
     Execute.exec(inc,dec); SeqAssertions.assertUnblocks(Arrays.asList(inc,dec));
@@ -78,7 +78,7 @@ class Tests {
   @Test
   public void test_par_2() {
     Counter counter = new CreateCounter().getReturnValue();
-    new Set(counter,3).hasReturned();
+    new Set(counter,3).returns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
     Execute.exec(inc,dec); 
@@ -95,7 +95,7 @@ class Tests {
   public void test_repeat() {
     for (int i=0; i<2; i++) {
       Counter counter = new CreateCounter().getReturnValue();
-      new Set(counter,3).hasReturned();
+      new Set(counter,3).returns();
       new Await(counter,4).blocks();
       SeqAssertions.assertEquals(2,new Dec(counter).unblocks());
     }

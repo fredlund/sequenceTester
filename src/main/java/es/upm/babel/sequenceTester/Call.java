@@ -146,7 +146,7 @@ public abstract class Call<V> extends Tryer {
     if (raisedException())
       return callString + " raised " + getException();
     else {
-      if (hasReturnedValue())
+      if (returnsValue())
         return callString + " returned " + getReturnValue();
       else
         return callString;
@@ -189,7 +189,7 @@ public abstract class Call<V> extends Tryer {
    * Returns true if the call raised an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean hasRaised() {
+  public boolean raises() {
     forceExecute();
     return !super.raisedException();
   }
@@ -198,7 +198,7 @@ public abstract class Call<V> extends Tryer {
    * Returns true if the call returned normally, i.e., did not raise an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean hasReturned() {
+  public boolean returns() {
     forceExecute();
     return hasStarted() && !isBlocked() && !raisedException();
   }
@@ -207,7 +207,7 @@ public abstract class Call<V> extends Tryer {
    * Returns true if the call returned normally, i.e., did not raise an exception.
    * If the call has not yet started executing this method forces its execution.
    */
-  public boolean hasReturnedValue() {
+  public boolean returnsValue() {
     forceExecute();
     return hasStarted() && !isBlocked() && !raisedException() && hasReturnValue;
   }
@@ -220,7 +220,7 @@ public abstract class Call<V> extends Tryer {
    */
   public V getReturnValue() {
     forceExecute();
-    if (!hasReturnedValue())
+    if (!returnsValue())
       UnitTest.failTest(this+" did not return a value");
     return returnValue;
   }
