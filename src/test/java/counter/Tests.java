@@ -109,6 +109,35 @@ class Tests {
     }
   }
 
+  @Test
+  public void test1a() {
+    CreateCounter cc = new CreateCounter();
+    Execute.exec(cc); // Execute the call and wait
+    Counter counter = cc.getReturnValue(); // Inspect the result
+    
+    Set s = new Set(counter,3);
+    Execute.exec(s);   // Execute the call and wait
+    s.assertReturns(); // Assert that the call returns
+
+    Await a = new Await(counter,2);
+    Execute.exec(a); // Execute the call and wait
+    a.assertBlocks(); // Assert that the call blocks
+        
+    Dec d = new Dec(counter);
+    Execute.exec(d); // Execute the call and wait
+    // Assert that the call to dec() unblocks also the earlier call to await()
+    // and moreover that the call to dec() returns 2
+    SeqAssertions.assertEquals(2,d.assertUnblocks(a)); 
+  }
+
+  @Test
+  public void test1b() {
+    Counter counter = new CreateCounter().getReturnValue();
+    new Set(counter,3).assertReturns();
+    Await await = new Await(counter,2); await.assertBlocks();
+    SeqAssertions.assertEquals(2,new Dec(counter).assertUnblocks(await));
+  }
+
   @BeforeEach
   public void start(TestInfo testInfo) {
     test = new UnitTest(testInfo.getDisplayName());

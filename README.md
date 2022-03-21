@@ -103,6 +103,7 @@ show the corresponding class definitions:
 
         Await(Counter counter, int waitingFor) {
             this.counter = counter;
+            this.waitingFor = waitingFor;
             setUser("await");
         }
         public void execute() { counter.await(waitingFor); }
@@ -125,19 +126,19 @@ A concrete example:
     @Test
     public void test1a() {
         CreateCounter cc = new CreateCounter();
-        Execute.exec(cc); // Execute the call
+        Execute.exec(cc); // Execute the call and wait
         Counter counter = cc.getReturnValue(); // Inspect the result
 
         Set s = new Set(counter,3);
-        Execute.exec(s);   // Execute the call
+        Execute.exec(s);   // Execute the call and wait
         s.assertReturns(); // Assert that the call returns
 
-        Await a = new Await(counter,2);
-        Execute.exec(a); // Execute the call
+        Await a = new Await(counter,1);
+        Execute.exec(a); // Execute the call and wait
         a.assertBlocks(); // Assert that the call blocks
         
         Dec d = new Dec(counter);
-        Execute.exec(d); // Execute the call
+        Execute.exec(d); // Execute the call and wait
         // Assert that the call to dec() unblocks also the earlier call to await()
         // and moreover that the call to dec() returns 2
         SeqAssertions.assertEquals(2,d.assertUnblocks(a)); 
@@ -149,9 +150,32 @@ Using a number of convenience methods this can be shortened to:
     public void test1b() {
         Counter counter = new CreateCounter().getReturnValue();
         new Set(counter,3).assertReturns();
-        Await await = new Await(counter).assertBlocks();
-        assertEquals(2,new Dec(counter).assertUnblocks(await));
+        Await await = new Await(counter,1); await.assertBlocks();
+        SeqAssertions.assertEquals(2,new Dec(counter).assertUnblocks(await));
     }
+
+Both tests fail since we have specified that the decrement call should unblock the
+earlier call to await, but the value of the counter after executing decrement will
+be 2 instead of 1 (which await excepts). The failure report is documented as:
+
+Tests > test1b() FAILED
+    org.opentest4j.AssertionFailedError: the call 3: await(1) is still blocked although it should have been unblocked
+
+    Call trace (error detected in the last line):
+
+    1: createCounter() --> unblocked 1: createCounter() returned counter.Counter@1cf9eb89
+    2: set(3) --> unblocked 2: set(3)
+    3: await(1)
+    4: dec() --> unblocked 4: dec() returned 2
+        at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:39)
+        at org.junit.jupiter.api.Assertions.fail(Assertions.java:109)
+        at es.upm.babel.sequenceTester.UnitTest.failTest(UnitTest.java:126)
+        at es.upm.babel.sequenceTester.UnitTest.failTest(UnitTest.java:118)
+        at es.upm.babel.sequenceTester.Unblocks.checkCalls(Unblocks.java:91)
+        at es.upm.babel.sequenceTester.SeqAssertions.assertMustMayUnblocked(SeqAssertions.java:82)
+        at es.upm.babel.sequenceTester.SeqAssertions.assertUnblocks(SeqAssertions.java:107)
+        at es.upm.babel.sequenceTester.Call.assertUnblocks(Call.java:213)
+        at counter.Tests.test1b(Tests.java:138)
 
 `TestStmt` interface. A test statement is either:
  

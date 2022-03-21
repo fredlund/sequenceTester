@@ -264,12 +264,12 @@ public class UnitTest {
   static String errorTrace(ErrorLocation loc) {
     String locString = "";
     if (loc == ErrorLocation.LASTLINE)
-      locString = " (detectado en la ultima linea)";
+      locString = "detectado en la ultima linea";
     else if (loc == ErrorLocation.INSIDE)
-      locString = " (detectado dentro la traza)";
+      locString = "detectado dentro la traza";
     else if (loc == ErrorLocation.AFTER)
-      locString = " (detectado despues de la traza)";
-    return "Call trace"+locString+":\n\n"+mkTrace()+"\n";
+      locString = "detectado despues de la traza";
+    return "Call trace (error "+locString+"):\n\n"+mkTrace()+"\n";
   }
 
 }

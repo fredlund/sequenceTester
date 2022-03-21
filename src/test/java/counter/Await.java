@@ -9,6 +9,7 @@ public class Await extends VoidCall {
 
   Await(Counter counter, int waitingFor) {
     this.counter = counter;
+    this.waitingFor = waitingFor;
     setUser("await");
   }
 
