@@ -113,10 +113,46 @@ Such command classes must provide a definition of the execute method, which is r
 for invoking the tested API. Moreover they should provide a toString() which is used
 to pretty-print commands.
 
-
 ### Unit Tests
  
-A unit test is an instance of the 
+A unit test is a sequence of test "phases". In a phase a number of calls are
+executed concurrently. Next the library waits a definable period of time, and
+after the wait observes the outcome of the execution of calls. That is, which calls
+are still running, which calls have terminated throwing an exception or returning
+a value. In the unit test we can assert that such observations hold.
+A concrete example:
+
+    @Test
+    public void test1a() {
+        CreateCounter cc = new CreateCounter();
+        Execute.exec(cc); // Execute the call
+        Counter counter = cc.getReturnValue(); // Inspect the result
+
+        Set s = new Set(counter,3);
+        Execute.exec(s);   // Execute the call
+        s.assertReturns(); // Assert that the call returns
+
+        Await a = new Await(counter,2);
+        Execute.exec(a); // Execute the call
+        a.assertBlocks(); // Assert that the call blocks
+        
+        Dec d = new Dec(counter);
+        Execute.exec(d); // Execute the call
+        // Assert that the call to dec() unblocks also the earlier call to await()
+        // and moreover that the call to dec() returns 2
+        SeqAssertions.assertEquals(2,d.assertUnblocks(a)); 
+    }
+
+Using a number of convenience methods this can be shortened to:
+
+    @Test
+    public void test1b() {
+        Counter counter = new CreateCounter().getReturnValue();
+        new Set(counter,3).assertReturns();
+        Await await = new Await(counter).assertBlocks();
+        assertEquals(2,new Dec(counter).assertUnblocks(await));
+    }
+
 `TestStmt` interface. A test statement is either:
  
   - `Nil` -- A test statement which always succeeds.
