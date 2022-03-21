@@ -28,9 +28,9 @@ A Java library for testing sequences of possibly blocking Java commands
 
 The sequenceTester library provides additional functionality to tests written
 using the Junit 5 testing library. Tests are written normally, except that
-instead of issuing normal method calls, and test the ouctome of such calls
+instead of issuing normal method calls, and testing the ouctome of such calls
 with test assertions, here a user defines a set of call (classes) representing
-calls to create objects and call methods, 
+"commands" to create objects and call methods, 
 instantiates them, and instructs the library to run a set of such call instances
 in parallel. The observable outcome is that some such calls may have
 terminated, others may be blocked waiting for some events. In tests we can
@@ -41,7 +41,30 @@ normal Junit 5 assertions, as can exceptions.
 If a test case assertion fails, the library produces a detailed trace showing
 the execution of the test case. 
 
-As an example:
+As an example suppose that we want to check a simple Counter implemented below:
+    public class Counter {
+        private Integer counter;
+
+       public synchronized void set(int value) { counter = value; }
+
+       public synchronized int dec() { return --counter; }
+
+       public void await(int value) {
+           boolean equal = false;
+    
+             do {
+                 synchronized (this) { equal = counter == value; }
+                 if (!equal) {
+                     try { Thread.sleep(100); } catch (InterruptedException exc) {
+                         throw new RuntimeException();
+                     }
+                 }
+             } while (!equal);
+         }
+    }
+The Counter class defines three methods: set(int) which sets the value of the counter,
+dec() which decreases the value of the counter and await(int) which busy-waits until
+the value of the counter is equal to its argument.
 
 
 ### Unit Tests
