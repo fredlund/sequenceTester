@@ -16,7 +16,7 @@ public class Version {
      * @return the major version number.
      */
     public static int major() {
-	return 1;
+	return 2;
     }
 
     /**
