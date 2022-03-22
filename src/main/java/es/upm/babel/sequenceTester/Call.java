@@ -105,7 +105,7 @@ public abstract class Call<V> extends Tryer {
         String StackTrace = errors.toString();
         call.checkedForException();
 
-	String msg = "the call to "+call+" raised an exception "+exc+"\nStacktrace:\n"+StackTrace+"\n";
+	String msg = Texts.getText("the_call_to","S")+call+Texts.getText("raised_an_exception","SP")+exc+"\nStacktrace:\n"+StackTrace+"\n";
 	if (calledFromAfter) {
 	  // Note that we have to fill in the execution trace here since this
 	  // fail (in @AfterEach) does not seem to be caught by the exception handler
@@ -145,10 +145,10 @@ public abstract class Call<V> extends Tryer {
   String printCallWithReturn() {
     String callString = printCall();
     if (raisedException())
-      return callString + " raised " + getException();
+      return callString + Texts.getText("raised","SP") + getException();
     else {
       if (returnsValue())
-        return callString + " returned " + getReturnValue();
+        return callString + Texts.getText("returned","SP") + getReturnValue();
       else
         return callString;
     }
@@ -241,7 +241,7 @@ public abstract class Call<V> extends Tryer {
     // if the call truly blocked AND it did not raise an
     // exception.
     if (!(super.isBlocked() && !raisedException()))
-      UnitTest.failTest("call "+this+" is not blocked");
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("no esta bloqueada","P"));
     return this;
   }
 
@@ -252,7 +252,7 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertIsUnblocked() {
     forceExecute();
     if (!isBlocked())
-      UnitTest.failTest("call "+this+" is still blocked");
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_still_blocked","P"));
     return this;
   }
 
@@ -263,7 +263,8 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertRaisedException() {
     forceExecute();
     if (!super.raisedException())
-      UnitTest.failTest("call "+this+" did not raise an exception");
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
+                        Texts.getText("raise_an_exception"));
     return this;
   }
 
@@ -274,7 +275,8 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertReturns() {
     forceExecute();
     if (!(hasStarted() && !isBlocked() && !raisedException()))
-      UnitTest.failTest("call "+this+" did not return");
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
+                        Texts.getText("return"));
     return this;
   }
 
@@ -285,7 +287,8 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertReturnsValue() {
     forceExecute();
     if (!returnsValue())
-      UnitTest.failTest("call "+this+" did not return a value");
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
+                        Texts.getText("return_a_value"));
     return this;
   }
 

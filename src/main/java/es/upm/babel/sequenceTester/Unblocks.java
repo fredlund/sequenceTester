@@ -84,27 +84,25 @@ public class Unblocks {
       String llamadas;
       if (calls.size() > 1)
         llamadas =
-          "las llamadas \nparallel\n{\n  "+Call.printCalls(calls)+"\n}\n";
+          Texts.getText("the_calls","S") + Call.printCalls(calls)+"\n";
       else
-        llamadas = "la llamada "+Call.printCalls(calls);
+        llamadas = Texts.getText("the_call","S") + Call.printCalls(calls);
       UnitTest.failTest
         (prefixConfigurationDescription(t.getConfigurationDescription())+
-         "la llamadas "+Call.printCalls(wronglyUnblocked)+
-         " todavia son bloqueadas aunque deberian haber sido"+
-         " desbloqueadas\n");
+         Texts.getText("the_calls","S")+Call.printCalls(wronglyUnblocked)+
+         Texts.getText("are_still","S")+Texts.getText("blocked_plural","S")+
+         Texts.getText("although_they_should_have_been","S")+Texts.getText("unblocked_plural")+"\n");
     }
   }
     
   private String returned(Object value) {
-    if (value == null)
-      return "terminó normalmente";
-    else
-      return "devolvió el valor "+value;
+    if (value == null) return Texts.getText("terminated_normally");
+    else return Texts.getText("returned_the_value","S")+value;
   }
   
   private String prefixConfigurationDescription(String configurationDescription) {
     if (configurationDescription == null || configurationDescription.equals("")) return "";
-    else return "con la configuration "+configurationDescription+",\n";
+    else return Texts.getText("with_the_configuration","S") + configurationDescription+",\n";
   }
     
   private void printReasonForUnblockingIncorrectly(Call<?> call, List<Call<?>> calls, String configurationDescription) {
@@ -116,9 +114,9 @@ public class Unblocks {
       
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+
-         " deberia bloquear\n"+
-         "pero lanzó la excepción "+exc+
+         Texts.getText("the_call","S") + call.printCall()+
+         Texts.getText("should_block_singular")+ "\n" +
+         Texts.getText("but","S") + Texts.getText("raised_the_exception","S") + exc +
          "\n\nStacktrace:\n"+StackTrace+"\n");
     } else {
       boolean justExecuted = false;
@@ -128,16 +126,17 @@ public class Unblocks {
       
       String blockStr;
       if (justExecuted)
-        blockStr = "deberia bloquear";
+        blockStr = Texts.getText("should_block_singular","P");
       else
-        blockStr = "deberia todavía estar bloqueada después las llamadas "+Call.printCalls(calls);
+        blockStr = Texts.getText("should_still_be_blocked_singular","SP") +
+          Texts.getText("after","S") + Texts.getText("the_calls","S") + Call.printCalls(calls);
       
       String returnString = "";
-      if (call.returnsValue()) returnString = "pero "+returned(call.getReturnValue());
+      if (call.returnsValue()) returnString = Texts.getText("but","S") + returned(call.getReturnValue());
 
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
-         "la llamada "+call.printCall()+" "+blockStr+"\n"+returnString+"\n");
+         Texts.getText("the_call","S") + call.printCall()+blockStr+"\n"+returnString+"\n");
     }
   }
 

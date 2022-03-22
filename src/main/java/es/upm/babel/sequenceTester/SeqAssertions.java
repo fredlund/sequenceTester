@@ -19,20 +19,17 @@ public class SeqAssertions {
   public static void assertFail(Runnable assertion, boolean showFailure) {
     boolean failed = false;
     try {
-      System.out.println("will run "+assertion);
       assertion.run();
-      System.out.println(assertion+" terminated normally");
     } catch (org.opentest4j.AssertionFailedError exc) {
-      System.out.println(assertion+" terminated with an exception");
       failed = true;
       if (showFailure) {
         String msg = exc.getMessage();
         if (msg == null) msg = "";
         msg += "\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
-        System.out.println("As expected the test failed. Message:\n\n"+msg);
+        System.out.println(Texts.getText("as_expected_the_test_failed")+".\n"+Texts.getText("message","C")+": "+msg);
       }
     }
-    if (!failed) UnitTest.failTest("The test did not fail");
+    if (!failed) UnitTest.failTest("the_test_did_not_fail");
   }
 
   /**
@@ -44,8 +41,7 @@ public class SeqAssertions {
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
     if (!expected.equals(actual))
-      UnitTest.failTest(" la llamada "+call+" deberia haber devuelto el valor "+expected+
-                        " pero devolvió "+actual); 
+      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have_returned","SP")+Texts.getText("the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
   }
 
   /**
@@ -56,8 +52,9 @@ public class SeqAssertions {
     call.assertRaisedException();
     Class<?> exceptionClass = call.getException().getClass();
     if (!excClass.isAssignableFrom(exceptionClass)) {
-      UnitTest.failTest("la llamada "+call+" deberia haber lanzado una exception "+excClass+
-                        " pero lanzo una excepcion "+exceptionClass);
+      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have","SP")+
+                        Texts.getText("raised_an_exception","S")+excClass+
+                        Texts.getText("but","SP")+Texts.getText("raised_the_exception","S")+exceptionClass);
     }
 
     // Note that we checked whether it raised an exception
@@ -151,10 +148,10 @@ public class SeqAssertions {
    * and that if no alternative succeeded, the branching assertion failed.
    */
   public static void endAlternatives() {
-    String msg = "All possible alternative executions failed:\n";
+    String msg = Texts.getText("all_possible_alternatives_failed","C")+":\n";
     for (int i=0; i<alternatives.size(); i++) {
       if (alternatives.get(i) != null)
-        msg += "Alternative "+(i+1)+":\n  "+alternatives.get(i)+"\n";
+        msg += Texts.getText("alternative","SC")+(i+1)+":\n  "+alternatives.get(i)+"\n";
     }
     UnitTest.failTest(msg+"\n");
   }

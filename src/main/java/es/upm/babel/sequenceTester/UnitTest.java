@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.Locale;
 import org.junit.jupiter.api.*;
 
 
@@ -20,11 +21,13 @@ public class UnitTest {
   static String testName;
   static Map<String,Boolean> testResults;
   private static UnitTest currentTest = null;
+  private static Locale locale;
   
   private final int n = 1;
   private String trace = "\nCall trace:\n";
   private Object state = null;
   private String configurationDescription;
+
   private ArrayList<Execute> history = new ArrayList<Execute>();
 
   // All calls created through invoking the Call constructor
@@ -60,6 +63,26 @@ public class UnitTest {
     currentTest = this;
     Call.reset();
     Config.installTestConfig();
+    if (locale == null) {
+      locale = new Locale("es");
+      Texts.setLocale(locale);
+    }
+  }
+  
+  /**
+   * Specifies the locale used for messages.
+   */
+  public static void setLocale(String language) {
+    locale = new Locale(language);
+    Texts.setLocale(locale);
+  }
+
+  /**
+   * Specifies the locale used for messages.
+   */
+  public static void setLocale(String language, String country) {
+    locale = new Locale(language,country);
+    Texts.setLocale(locale);
   }
   
   enum ErrorLocation {
