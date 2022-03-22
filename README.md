@@ -12,7 +12,8 @@ A Java library for testing sequences of possibly blocking Java commands
   The sequenceTester library is a Java library
   used for writing and testing unit tests
   for a possibly non-sequential APIs, i.e.,
-  were calls may block. The library has been used to test
+  were calls can execute in parallel, and
+  where calls may block. The library has been used to test
   exercises in the undergraduate
   course "Concurrencia" at the Escuela Tecnica Superior
   de Ingenieros Informaticos at the Universidad Politecnica de Madrid, Spain.
@@ -33,7 +34,7 @@ with test assertions, here a user defines a set of call (classes) representing
 "commands" to create objects and call methods, 
 instantiates them, and instructs the library to run a set of such call instances
 in parallel. The observable outcome is that some such calls may have
-terminated, others may be blocked waiting for some events. In tests we can
+terminated, others may be blocked waiting for events. In tests we can
 directly observe the unblocked  calls (terminated calls, either due to having
 returned normally or abnormally through raising an exception), and the still
 executing (blocked calls). Return values can be inspected using
@@ -42,16 +43,15 @@ If a test case assertion fails, the library produces a detailed trace showing
 the execution of the test case. 
 
 As an example suppose that we want to check a simple Counter implemented below:
+
     public class Counter {
         private Integer counter;
 
        public synchronized void set(int value) { counter = value; }
-
        public synchronized int dec() { return --counter; }
 
        public void await(int value) {
            boolean equal = false;
-    
              do {
                  synchronized (this) { equal = counter == value; }
                  if (!equal) {
@@ -98,7 +98,7 @@ show the corresponding class definitions:
     }
 
     public class Await extends VoidCall {
-        private int waitingFor;
+        private final int waitingFor;
         private final Counter counter;
 
         Await(Counter counter, int waitingFor) {
@@ -156,7 +156,7 @@ Using a number of convenience methods this can be shortened to:
 
 Both tests fail since we have specified that the decrement call should unblock the
 earlier call to await, but the value of the counter after executing decrement will
-be 2 instead of 1 (which await excepts). The failure report is documented as:
+be 2 instead of 1 (which await expects). The failure report is documented as:
 
     Tests > test1b() FAILED
     org.opentest4j.AssertionFailedError: the call 3: await(1) is still blocked although it should have been unblocked
@@ -228,3 +228,49 @@ This is obviously wrong, so Junit 5 displays the following error:
         at es.upm.babel.sequenceTester.UnitTest.failTest(UnitTest.java:118)
         at es.upm.babel.sequenceTester.SeqAssertions.endAlternatives(SeqAssertions.java:159)
         at counter.Tests.test_par_2(Tests.java:99)
+
+### Test Case definition
+
+To use the library properly it is required to define both a @BeforeEach and an @AfterEach method.
+
+    @BeforeEach
+    public void start(TestInfo testInfo) {
+        test = new UnitTest(testInfo.getDisplayName());
+    }
+
+    @AfterEach
+    public void finish(TestInfo testInfo) { 
+        test.finish(); 
+    }
+In the @BeforeEach method we provide the name of the test to the library, and also initialize
+library internal data structures, through the creation of
+an instance of the UnitTest class (and saving the instance in an attribute).
+In the post-test method calling test.finish() permits the library to perform some
+post-test correctness checks.
+
+### Checking Test Cases
+
+Apart from the assertions a number of other checks are done on test cases.
+
+#### Users
+
+A "user" can be attached to a call; this is an arbitrary object. If a call user has been specified
+(i.e., it is distinct from null) when the call is executed then the library checks that 
+no other call with the same user remains blocked, and if such a call exists,
+the test case fails. That is, think of the user mechanism
+as providing a client caller that requires calls to be served strictly in order, i.e.,
+waits for the completion of one call before attempting another.
+
+### Exceptions
+
+The library enforces that all thrown exceptions must be explictely permitted. That is, 
+if a call throws an exception, and we do not assert that such an exception may be throws
+(e.g., using the assertions assertThrown) then the corresponding test case will fail.
+
+### Created Calls Must be Executed
+
+Similarly the library enforces that upon the successfull completion of a test case,
+all calls created during the execution of the test case have been executed; otherwise
+the test case fails.
+This can be understood as a syntax check on test case, preventing us to forget to execute
+a call.

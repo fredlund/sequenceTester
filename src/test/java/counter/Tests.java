@@ -84,7 +84,7 @@ class Tests {
 
   @Test
   public void test_par_2() {
-    // assertFail(() -> {
+    assertFail(() -> {
         Counter counter = new CreateCounter().getReturnValue();
         new Set(counter,3).assertReturns();
         Call<Integer> inc1 = new Inc(counter);
@@ -97,7 +97,7 @@ class Tests {
           ;
         else
           endAlternatives();
-        // }, true);
+      }, true);
   }
 
   @Test
