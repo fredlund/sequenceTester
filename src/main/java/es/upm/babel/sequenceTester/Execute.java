@@ -48,7 +48,7 @@ public class Execute {
     for (Call<?> call : calls) {
       Object user = call.getUser();
       if (user != null && blockedUsers.contains(user)) {
-        UnitTest.failTest("user "+user+" is blocked in call "+call, UnitTest.ErrorLocation.AFTER);
+        UnitTest.failTest("user "+user+" is blocked in call "+call, true, UnitTest.ErrorLocation.AFTER);
       }
     }
 
