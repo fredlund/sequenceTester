@@ -264,7 +264,7 @@ waits for the completion of one call before attempting another.
 #### Exceptions
 
 The library enforces that all thrown exceptions must be explictely permitted. That is, 
-if a call throws an exception, and we do not assert that such an exception may be throws
+if a call throws an exception, and we do not assert that an exception may be thrown
 (e.g., using the assertions assertThrown) then the corresponding test case will fail.
 
 #### Created Calls Must be Executed
@@ -272,5 +272,5 @@ if a call throws an exception, and we do not assert that such an exception may b
 Similarly the library enforces that upon the successfull completion of a test case,
 all calls created during the execution of the test case have been executed; otherwise
 the test case fails.
-This can be understood as a syntax check on test case, preventing us to forget to execute
+This can be understood as a syntax check on a test case, preventing us to forget to execute
 a call.
