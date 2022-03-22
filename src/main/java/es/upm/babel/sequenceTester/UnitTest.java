@@ -270,7 +270,8 @@ public class UnitTest {
   }
   
   /**
-   * Method obligatory to call in an @AfterEach clause. 
+   * Method obligatory to call in an @AfterEach clause or as the last statement in
+   * a test.
    */
   public void finish() {
     // Check if the last call resulted in an exception
