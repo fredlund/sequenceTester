@@ -229,7 +229,7 @@ This is obviously wrong, so Junit 5 displays the following error:
         at es.upm.babel.sequenceTester.SeqAssertions.endAlternatives(SeqAssertions.java:159)
         at counter.Tests.test_par_2(Tests.java:99)
 
-### Test Case definition
+### Test Case Definition
 
 To use the library properly it is required to define both a @BeforeEach and an @AfterEach method.
 
