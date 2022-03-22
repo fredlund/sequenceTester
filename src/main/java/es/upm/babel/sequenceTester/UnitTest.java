@@ -24,7 +24,7 @@ public class UnitTest {
   private static Locale locale;
   
   private final int n = 1;
-  private String trace = "\nCall trace:\n";
+  private String trace = "";
   private Object state = null;
   private String configurationDescription;
 
@@ -145,7 +145,7 @@ public class UnitTest {
    * Indicate a unit test fail.
    */
   static void failTest(String msg, boolean includeTrace, ErrorLocation loc) {
-    if (includeTrace) msg += "\n"+errorTrace(loc);
+    if (includeTrace) msg += "\n\n"+errorTrace(loc);
     org.junit.jupiter.api.Assertions.fail(msg);
   }
   
@@ -172,7 +172,8 @@ public class UnitTest {
    */
   public Execute getLastExecute() {
     if (lastExecute == null)
-      UnitTest.failTestSyntax("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
+      UnitTest.failTestSyntax
+        ("asserting blocking behaviour before first call",UnitTest.ErrorLocation.INSIDE,false);
     return lastExecute;
   }
   
@@ -247,7 +248,7 @@ public class UnitTest {
         else unblocksString+=", "+callString;
       }
       if (unblocksString!="")
-        unblocksString = " --> unblocked "+unblocksString;
+        unblocksString = " --> "+Texts.getText("unblocked_singular","S")+unblocksString;
     
       String callsString = "";
       String indent = calls.size() > 1 ? "  " : "";
@@ -259,7 +260,7 @@ public class UnitTest {
       
       String callPlusUnblock;
       if (calls.size() > 1)
-        callPlusUnblock = "===  calls executed in parallel: \n"+callsString+unblocksString;
+        callPlusUnblock = "===  "+Texts.getText("calls_executed_in_parallel")+": \n"+callsString+unblocksString;
       else
         callPlusUnblock = callsString+unblocksString;
       
@@ -285,14 +286,14 @@ public class UnitTest {
   }
 
   static String errorTrace(ErrorLocation loc) {
-    String locString = "";
+    String locString = Texts.getText("detected","S");
     if (loc == ErrorLocation.LASTLINE)
-      locString = "detectado en la ultima linea";
+      locString = Texts.getText("in_the_last_line");
     else if (loc == ErrorLocation.INSIDE)
-      locString = "detectado dentro la traza";
+      locString = Texts.getText("inside","S")+Texts.getText("the_trace");
     else if (loc == ErrorLocation.AFTER)
-      locString = "detectado despues de la traza";
-    return "Call trace (error "+locString+"):\n\n"+mkTrace()+"\n";
+      locString = Texts.getText("after","S")+Texts.getText("the_trace");
+    return Texts.getText("call_trace","SC")+"("+Texts.getText("error","S")+locString+"):\n\n"+mkTrace()+"\n";
   }
 
 }

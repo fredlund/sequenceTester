@@ -25,7 +25,7 @@ public class SeqAssertions {
       if (showFailure) {
         String msg = exc.getMessage();
         if (msg == null) msg = "";
-        msg += "\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
+        msg += "\n\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
         System.out.println(Texts.getText("as_expected_the_test_failed")+".\n"+Texts.getText("message","C")+": "+msg);
       }
     }
