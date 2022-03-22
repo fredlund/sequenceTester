@@ -261,13 +261,13 @@ the test case fails. That is, think of the user mechanism
 as providing a client caller that requires calls to be served strictly in order, i.e.,
 waits for the completion of one call before attempting another.
 
-### Exceptions
+#### Exceptions
 
 The library enforces that all thrown exceptions must be explictely permitted. That is, 
 if a call throws an exception, and we do not assert that such an exception may be throws
 (e.g., using the assertions assertThrown) then the corresponding test case will fail.
 
-### Created Calls Must be Executed
+#### Created Calls Must be Executed
 
 Similarly the library enforces that upon the successfull completion of a test case,
 all calls created during the execution of the test case have been executed; otherwise
