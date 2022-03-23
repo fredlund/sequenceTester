@@ -2,9 +2,8 @@ package es.upm.babel.sequenceTester;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.MissingResourceException;
-import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 
 class Texts {

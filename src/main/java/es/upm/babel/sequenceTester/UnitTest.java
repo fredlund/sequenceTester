@@ -1,16 +1,6 @@
 package es.upm.babel.sequenceTester;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.util.Locale;
-import org.junit.jupiter.api.*;
+import java.util.*;
 
 
 /**
@@ -22,11 +12,10 @@ public class UnitTest {
   static Map<String,Boolean> testResults;
   private static UnitTest currentTest = null;
   private static Locale locale;
-  
-  private final int n = 1;
+
   private String configurationDescription;
 
-  private final ArrayList<Execute> history = new ArrayList<Execute>();
+  private final ArrayList<Execute> history = new ArrayList<>();
 
   // All calls created through invoking the Call constructor
   private final Set<Call<?>> allCreatedCalls = new HashSet<>();
@@ -188,7 +177,7 @@ public class UnitTest {
       blockedCalls.add(call);
     }
     lastExecute = e;
-    lastUnblockedCalls = new HashSet<Call<?>>();
+    lastUnblockedCalls = new HashSet<>();
   }
 
   void afterRun(Execute e) {
@@ -242,18 +231,18 @@ public class UnitTest {
       String unblocksString="";
       for (Call<?> unblockedCall : newUnblocked) {
         String callString = unblockedCall.printCallWithReturn();
-        if (unblocksString=="") unblocksString=callString;
+        if (Objects.equals(unblocksString, "")) unblocksString=callString;
         else unblocksString+=", "+callString;
       }
-      if (unblocksString!="")
+      if (!Objects.equals(unblocksString, ""))
         unblocksString = " --> "+Texts.getText("unblocked_singular","S")+unblocksString;
     
-      String callsString = "";
+      StringBuilder callsString = new StringBuilder();
       String indent = calls.size() > 1 ? "  " : "";
       
       for (Call<?> call : calls) {
-        if (callsString != "") callsString += "\n"+indent+call.printCall();
-        else callsString = indent+call.printCall();
+        if (!callsString.toString().equals("")) callsString.append("\n").append(indent).append(call.printCall());
+        else callsString = new StringBuilder(indent + call.printCall());
       }
       
       String callPlusUnblock;
@@ -262,7 +251,7 @@ public class UnitTest {
       else
         callPlusUnblock = callsString+unblocksString;
       
-      trace.append(callPlusUnblock+"\n");
+      trace.append(callPlusUnblock).append("\n");
     }
     return trace.toString();
   }

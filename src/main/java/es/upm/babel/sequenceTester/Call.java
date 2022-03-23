@@ -43,6 +43,7 @@ public abstract class Call<V> extends Tryer {
    * user prevents this check.
    */
   public Call<V> user(Object user) {
+    this.user = user;
     return this;
   }
 
@@ -201,8 +202,7 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertUnblocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call call : calls)
-      mustUnblocks.add(call);
+    for (Call<?> call : calls) mustUnblocks.add(call);
     mustUnblocks.add(this);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
@@ -217,8 +217,7 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertBlocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call call : calls)
-      mustUnblocks.add(call);
+    for (Call<?> call : calls) mustUnblocks.add(call);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
   }

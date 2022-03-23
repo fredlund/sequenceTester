@@ -3,7 +3,7 @@ package es.upm.babel.sequenceTester;
 import java.util.*;
 
 /**
- * Provides conventient test assertions.
+ * Provides convenient test assertions.
  */
 public class SeqAssertions {
   private static ArrayList<String> alternatives;
@@ -32,7 +32,7 @@ public class SeqAssertions {
   /**
    * Asserts that call returns a value equal to expected.
    * Otherwise (e.g., the call is blocked, it raises an exception, it returns
-   * an unequal value, etc) the assertion fails.
+   * an unequal value, etc.) the assertion fails.
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertEquals(V expected, Call<V> call) {
@@ -122,7 +122,7 @@ public class SeqAssertions {
    * Marks the beginning of a "branching" assertion.
    */
   public static void checkAlternatives() {
-    alternatives = new ArrayList<String>();
+    alternatives = new ArrayList<>();
   }
 
   /**
@@ -145,10 +145,11 @@ public class SeqAssertions {
    * and that if no alternative succeeded, the branching assertion failed.
    */
   public static void endAlternatives() {
-    String msg = Texts.getText("all_possible_alternatives_failed","C")+":\n";
+    StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_failed", "C") + ":\n");
     for (int i=0; i<alternatives.size(); i++) {
-      if (alternatives.get(i) != null)
-        msg += Texts.getText("alternative","SC")+(i+1)+":\n  "+alternatives.get(i)+"\n";
+      if (alternatives.get(i) != null) {
+        msg.append(Texts.getText("alternative", "SC")).append(i + 1).append(":\n  ").append(alternatives.get(i)).append("\n");
+      }
     }
     UnitTest.failTest(msg+"\n");
   }

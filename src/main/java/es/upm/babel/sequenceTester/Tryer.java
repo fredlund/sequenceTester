@@ -39,7 +39,7 @@ abstract class Tryer extends Thread {
    }
 
    void gimmeTime(int ms) {
-      while (!started) { };
+      while (!started) { }
       Tryer.sleep(ms);
    }
 
