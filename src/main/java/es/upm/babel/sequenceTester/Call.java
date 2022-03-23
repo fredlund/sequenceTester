@@ -155,8 +155,18 @@ public abstract class Call<V> extends Tryer {
     return started;
   }
 
+  // In the "current" cclib a tryer may be:
+  //  - blocked because it did not terminate, OR because it with an exception
+  // (tryer.raisedException())
+  // In the code below we instead consider a call blocked
+  // if the call truly blocked AND it did not raise an
+  // exception.
+  boolean isBlocked() {
+    return super.isBlocked() && !raisedException();
+  }
+
   boolean returnsValue() {
-    return hasStarted() && !isBlocked() && !raisedException() && hasReturnValue;
+    return hasStarted() && !isBlocked() && hasReturnValue;
   }
 
   void setReturnValue(V returnValue) {
@@ -228,14 +238,9 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertIsBlocked() {
     forceExecute();
-    // In the "current" cclib a tryer may be:
-    // - blocked because it did not terminate, OR because it with an exception
-    // (tryer.raisedException())
-    // In the code below we instead consider a call blocked
-    // if the call truly blocked AND it did not raise an
-    // exception.
-    if (!(super.isBlocked() && !raisedException()))
-      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("no esta bloqueada","P"));
+    checkedForException();
+    if (!isBlocked())
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_not_blocked","P"));
     return this;
   }
 
@@ -245,7 +250,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertIsUnblocked() {
     forceExecute();
-    if (!isBlocked())
+    if (isBlocked())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_still_blocked","P"));
     return this;
   }
@@ -256,6 +261,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertRaisedException() {
     forceExecute();
+    checkedForException();
     if (!super.raisedException())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("raise_an_exception"));
@@ -268,6 +274,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertReturns() {
     forceExecute();
+    checkedForException();
     if (!(hasStarted() && !isBlocked() && !raisedException()))
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("return"));
@@ -280,6 +287,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertReturnsValue() {
     forceExecute();
+    checkedForException();
     if (!returnsValue())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("return_a_value"));
@@ -294,6 +302,7 @@ public abstract class Call<V> extends Tryer {
    */
   public V getReturnValue() {
     forceExecute();
+    checkedForException();
     assertReturnsValue();
     return returnValue;
   }
@@ -305,13 +314,14 @@ public abstract class Call<V> extends Tryer {
    */
   public Throwable getException() {
     forceExecute();
+    checkedForException();
     assertRaisedException();
     return super.getException();
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  String intToString() {
-    return this+"{id="+id+",started="+started+",hasReturnValue="+hasReturnValue+",returnValue="+returnValue+",raisedException="+super.raisedException()+"}";
-  }
+//  String intToString() {
+//    return this+"{id="+id+",started="+started+",hasReturnValue="+hasReturnValue+",returnValue="+returnValue+",raisedException="+super.raisedException()+"}";
+//  }
 }

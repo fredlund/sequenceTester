@@ -2,15 +2,10 @@ package counter;
 
 import java.util.Arrays;
 import es.upm.babel.sequenceTester.*;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 // Please tell the Java people to permit package aliases
 import static es.upm.babel.sequenceTester.SeqAssertions.*;
-import org.junit.jupiter.api.Assertions;
 
 @ExtendWith(HandleExceptions.class)
 class Tests {
@@ -151,6 +146,11 @@ class Tests {
   @BeforeAll
   public static void before() {
     UnitTest.setLocale("en");
+  }
+
+  @AfterAll
+  public static void after() {
+    UnitTest.reportTestResults();
   }
 }
 

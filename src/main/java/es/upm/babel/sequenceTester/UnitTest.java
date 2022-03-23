@@ -140,6 +140,8 @@ public class UnitTest {
     return allCreatedCalls;
   }
 
+  public Set<Call<?>> getAllCalls() { return allCalls; }
+
   /**
    * Returns the set of all calls that have been unblocked.
    */
@@ -195,7 +197,7 @@ public class UnitTest {
     allUnblockedCalls.addAll(lastUnblockedCalls);
   }
   
-  static void reportTestResults() {
+  public static void reportTestResults() {
     ArrayList<String> successes = new ArrayList<>();
     ArrayList<String> failures = new ArrayList<>();
     boolean hasErrors = false;
@@ -278,9 +280,9 @@ public class UnitTest {
     if (loc == ErrorLocation.LASTLINE)
       locString = Texts.getText("in_the_last_line");
     else if (loc == ErrorLocation.INSIDE)
-      locString = Texts.getText("inside","S")+Texts.getText("the_trace");
+      locString = Texts.getText("inside","S")+Texts.getText("the_call_trace");
     else if (loc == ErrorLocation.AFTER)
-      locString = Texts.getText("after","S")+Texts.getText("the_trace");
+      locString = Texts.getText("after","S")+Texts.getText("the_call_trace");
     return Texts.getText("call_trace","SC")+"("+Texts.getText("error","S")+locString+"):\n\n"+mkTrace()+"\n";
   }
 
