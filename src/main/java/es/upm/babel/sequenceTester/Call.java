@@ -189,9 +189,7 @@ public abstract class Call<V> extends Tryer {
     counter = 1;
   }
 
-  UnitTest getUnitTest() {
-    return unitTest;
-  }
+  UnitTest getUnitTest() { return unitTest; }
 
   void setExecute(Execute e) {
     execute = e;
@@ -209,10 +207,10 @@ public abstract class Call<V> extends Tryer {
    * and moreover that the calls mentioned in calls were unblocked too,
    * and moreover that no other calls were unblocked.
    */
-  public Call<V> assertUnblocks(Call... calls) {
+  public Call<V> assertUnblocks(Call<?>... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call<?> call : calls) mustUnblocks.add(call);
+    Collections.addAll(mustUnblocks, calls);
     mustUnblocks.add(this);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
@@ -224,10 +222,10 @@ public abstract class Call<V> extends Tryer {
    * and moreover that the calls mentioned in calls were unblocked,
    * and moreover that no other calls were unblocked.
    */
-  public Call<V> assertBlocks(Call... calls) {
+  public Call<V> assertBlocks(Call<?>... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call<?> call : calls) mustUnblocks.add(call);
+    Collections.addAll(mustUnblocks, calls);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
   }

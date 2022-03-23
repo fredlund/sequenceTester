@@ -191,12 +191,9 @@ permit expressive error messages. An example:
         Call<Integer> inc2 = new Inc(counter);
         Execute.exec(inc1,inc2); # Executes increments in parallel
         checkAlternatives();
-        if (checkAlternative(() -> { inc1.assertUnblocks(); }))
-          ;
-        else if (checkAlternative(() -> { inc2.assertUnblocks(); }))
-          ;
-        else
-          endAlternatives();
+        if (!checkAlternative(() -> { inc1.assertUnblocks(); }))
+            checkAlternative(() -> { inc2.assertUnblocks(); });
+        endAlternatives();
     }
 
 In the test first a counter is created, initialized to 3. Then two increment calls are created

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static es.upm.babel.sequenceTester.SeqAssertions.*;
 
 @ExtendWith(HandleExceptions.class)
-class Tests {
+class CallTests {
   UnitTest test;
   public Counter counter;
 
@@ -41,7 +41,6 @@ class Tests {
 
   @Test
   public void test_04() {
-    Counter counter = new CreateCounter().getReturnValue();
     Integer rndInt = new Rand().getReturnValue();
     assertEquals((rndInt % 2) == 0, new IsEven(rndInt));
   }
@@ -86,12 +85,9 @@ class Tests {
         Call<Integer> inc2 = new Inc(counter);
         Execute.exec(inc1,inc2); 
         checkAlternatives();
-        if (checkAlternative(() -> { inc1.assertUnblocks(); }))
-          ;
-        else if (checkAlternative(() -> { inc2.assertUnblocks(); }))
-          ;
-        else
-          endAlternatives();
+        if (!checkAlternative(inc1::assertUnblocks))
+          checkAlternative(inc2::assertUnblocks);
+        endAlternatives();
       }, true);
   }
 
@@ -139,9 +135,7 @@ class Tests {
   }
 
   @AfterEach
-  public void finish(TestInfo testInfo) {
-    test.finish();
-  }
+  public void finish() { test.finish(); }
 
   @BeforeAll
   public static void before() {

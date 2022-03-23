@@ -1,10 +1,10 @@
 package counter;
 
-import es.upm.babel.sequenceTester.Call;
-import es.upm.babel.sequenceTester.UnitTest;
-import es.upm.babel.sequenceTester.Version;
-import es.upm.babel.sequenceTester.Execute;
+import es.upm.babel.sequenceTester.*;
 import org.junit.jupiter.api.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static es.upm.babel.sequenceTester.SeqAssertions.assertEquals;
 
@@ -28,7 +28,14 @@ public class LibraryTest {
         Assertions.assertTrue(test.getAllCalls().contains(c1));
         assertEquals(2,new Dec(counter).assertReturns().assertReturnsValue());
         Execute e = Execute.exec(new Inc(counter));
-        Assertions.assertEquals(1,e.getBlockedCalls().size(),() -> { return e.getBlockedCalls().toString(); });
+        Assertions.assertEquals(1,e.getBlockedCalls().size(),() -> e.getBlockedCalls().toString());
+        Call<?> fail = new Fail();
+        Execute.exec(fail);
+        SeqAssertions.assertThrown(fail);
+        SeqAssertions.assertMustMayUnblocked(fail, List.of(fail), List.of());
+        SeqAssertions.assertMustMayUnblocked(List.of(), List.of(fail));
+        SeqAssertions.assertMustMayUnblocked(List.of(fail), List.of());
+        SeqAssertions.assertUnblocks(fail, List.of(fail));
     }
 
     @BeforeEach
@@ -37,7 +44,5 @@ public class LibraryTest {
     }
 
     @AfterEach
-    public void finish() {
-        test.finish();
-    }
+    public void finish() { test.finish(); }
 }

@@ -28,7 +28,7 @@ public class Execute {
   /**
    * Execute the calls in paralell.
    */
-  public static Execute exec(Call... calls) {
+  public static Execute exec(Call<?>... calls) {
     Execute e = new Execute(Arrays.asList(calls));
     e.exec();
     return e;
@@ -66,9 +66,11 @@ public class Execute {
     // calls have been unblocked
     long remainingTime = maxWaitTime;
     do {
-      long waitTime = Math.min(remainingTime, 10);
+      long waitTime = Math.min(remainingTime, 50);
       try { Thread.sleep(waitTime); }
-      catch (InterruptedException exc) { }
+      catch (InterruptedException exc) {
+        // best effort
+      }
       // Compute unblocked (and change blockedCalls)
       t.calculateUnblocked();
       remainingTime -= waitTime;

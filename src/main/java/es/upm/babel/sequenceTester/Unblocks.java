@@ -87,7 +87,7 @@ public class Unblocks {
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+
          Texts.getText("the_call","S") + call.printCall()+
-         Texts.getText("should_block_singular")+ "\n" +
+         Texts.getText("should_block_singular","P")+ "\n" +
          Texts.getText("but","S") + Texts.getText("raised_the_exception","S") + exc +
          "\n\nStacktrace:\n"+StackTrace+"\n");
     } else {
