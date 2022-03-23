@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
-import java.time.Duration;
 import org.junit.jupiter.api.extension.ExtendWith;
 // Please tell the Java people to permit package aliases
 import static es.upm.babel.sequenceTester.SeqAssertions.*;
