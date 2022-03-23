@@ -10,5 +10,8 @@ public abstract class VoidCall extends Call<Void> {
     execute();
   }
 
+  /**
+   * Performs the actions of the call.
+   */
   abstract public void execute() throws Throwable;
 }

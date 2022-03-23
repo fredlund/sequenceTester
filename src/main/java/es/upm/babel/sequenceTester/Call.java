@@ -32,7 +32,7 @@ public abstract class Call<V> extends Tryer {
 
   /**
    * Constructs a call. Often this constructor should be 
-   * extended in classes which extend the abstrac Call class.
+   * extended in classes which extend the abstract Call class.
    */
   public Call() {
     this.id = counter++;
@@ -46,7 +46,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the user (process) executing a call.
    * The library enforces that if a call from a user is blocked,
-   * another call from the same user cannot be made. Specifying the default nil
+   * another call from the same user cannot be made. Specifying the default null
    * user prevents this check.
    */
   public Call<V> user(Object user) {
@@ -56,7 +56,7 @@ public abstract class Call<V> extends Tryer {
   /**
    * Sets the user (process) executing a call.
    * The library fails a tests if a call is made from a user 
-   * who has another blocking call. Specifying the default nil
+   * who has another blocking call. Specifying the default null
    * user prevents this check.
    */
   public void setUser(Object user) {

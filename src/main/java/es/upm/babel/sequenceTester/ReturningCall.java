@@ -10,5 +10,8 @@ public abstract class ReturningCall<V> extends Call<V> {
     setReturnValue(execute());
   }
 
+  /**
+   * Performs the actions of the call.
+   */
   abstract public V execute() throws Throwable;
 }
