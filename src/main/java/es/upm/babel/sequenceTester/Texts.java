@@ -45,9 +45,9 @@ class Texts {
   }
 
   static String capitalizeFirstLetter(String str) {
-        return str.length() == 0 ? str
-                : str.length() == 1 ? str.toUpperCase()
-                : str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    return str.length() == 0 ? str
+            : str.length() == 1 ? str.toUpperCase()
+            : str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
   }
 
 }

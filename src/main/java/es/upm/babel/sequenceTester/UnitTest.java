@@ -24,23 +24,21 @@ public class UnitTest {
   private static Locale locale;
   
   private final int n = 1;
-  private String trace = "";
-  private Object state = null;
   private String configurationDescription;
 
-  private ArrayList<Execute> history = new ArrayList<Execute>();
+  private final ArrayList<Execute> history = new ArrayList<Execute>();
 
   // All calls created through invoking the Call constructor
-  private Set<Call<?>> allCreatedCalls = new HashSet<>();
+  private final Set<Call<?>> allCreatedCalls = new HashSet<>();
 
   // All executed calls
-  private Set<Call<?>> allCalls = new HashSet<>();
+  private final Set<Call<?>> allCalls = new HashSet<>();
 
   // All calls unblocked
-  private Set<Call<?>> allUnblockedCalls = new HashSet<>();
+  private final Set<Call<?>> allUnblockedCalls = new HashSet<>();
 
   // All calls currently blocked
-  private Set<Call<?>> blockedCalls = new HashSet<>();
+  private final Set<Call<?>> blockedCalls = new HashSet<>();
 
   // All calls that were unblocked by the execution of the last calls
   private Set<Call<?>> lastUnblockedCalls = null;
@@ -236,7 +234,7 @@ public class UnitTest {
   }
   
   static String mkTrace() {
-    StringBuffer trace = new StringBuffer();
+    StringBuilder trace = new StringBuilder();
     for (Execute e: currentTest.history) {
       List<Call<?>> calls = e.getCalls();
       Set<Call<?>> newUnblocked = e.getUnblockedCalls();
@@ -275,7 +273,7 @@ public class UnitTest {
    */
   public void finish() {
     // Check if the last call resulted in an exception
-    if (allUnblockedCalls != null && allUnblockedCalls.size() > 0)
+    if (allUnblockedCalls.size() > 0)
       Call.checkExceptions(allUnblockedCalls, true);
 
     // Check for created calls that were never executed -- a test syntax error

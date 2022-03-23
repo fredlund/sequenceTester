@@ -16,10 +16,10 @@ import java.util.Random;
 public class Execute {
   private static final Random rand = new Random();
 
-  private UnitTest t = UnitTest.getCurrentTest();
+  private final UnitTest t = UnitTest.getCurrentTest();
   private Set<Call<?>> unblockedCalls;
   private Set<Call<?>> blockedCalls;
-  private List<Call<?>> calls;
+  private final List<Call<?>> calls;
 
   private Execute(List<Call<?>> calls) {
     this.calls = calls;

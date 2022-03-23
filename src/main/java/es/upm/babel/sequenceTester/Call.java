@@ -1,13 +1,6 @@
 package es.upm.babel.sequenceTester;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
@@ -20,11 +13,11 @@ import java.io.PrintWriter;
 public abstract class Call<V> extends Tryer {
   private static int counter = 1;
 
-  private int id;
+  private final int id;
   private boolean started = false;
   private Object user;
   private int waitTime;
-  private UnitTest unitTest;
+  private final UnitTest unitTest;
   private boolean hasReturnValue = false;
   private V returnValue = null;
   private boolean checkedForException = false;
@@ -134,12 +127,12 @@ public abstract class Call<V> extends Tryer {
   }
 
   static String printCalls(Collection<Call<?>> calls) {
-    String callsString="";
+    StringBuilder callsString= new StringBuilder();
     for (Call<?> call : calls) {
-      if (callsString != "") callsString += "\n  "+call.printCall();
-      else callsString = call.printCall();
+      if (!callsString.toString().equals("")) callsString.append("\n  ").append(call.printCall());
+      else callsString = new StringBuilder(call.printCall());
     }
-    return callsString;
+    return callsString.toString();
   }
 
   String printCallWithReturn() {
@@ -176,7 +169,7 @@ public abstract class Call<V> extends Tryer {
 
   public boolean equals(Object obj) {
     if (obj instanceof Call) {
-      Call otherCall = (Call) obj;
+      Call<?> otherCall = (Call<?>) obj;
       return id == otherCall.id;
     } else return false;
   }
@@ -208,7 +201,8 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertUnblocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call call : calls) mustUnblocks.add(call);
+    for (Call call : calls)
+      mustUnblocks.add(call);
     mustUnblocks.add(this);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
@@ -223,7 +217,8 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertBlocks(Call... calls) {
     forceExecute();
     List<Call<?>> mustUnblocks = new ArrayList<>();
-    for (Call call : calls) mustUnblocks.add(call);
+    for (Call call : calls)
+      mustUnblocks.add(call);
     SeqAssertions.assertUnblocks(this.getExecute(),mustUnblocks);
     return this;
   }

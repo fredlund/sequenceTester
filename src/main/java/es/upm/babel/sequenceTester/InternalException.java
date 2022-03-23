@@ -1,8 +1,8 @@
 package es.upm.babel.sequenceTester;
 
 class InternalException extends RuntimeException {
-  private boolean hasTrace;
-  private String trace;
+  private final boolean hasTrace;
+  private final String trace;
   private UnitTest.ErrorLocation errorLocation;
 
   public InternalException(String msg, String trace) {
@@ -14,6 +14,7 @@ class InternalException extends RuntimeException {
   public InternalException(String msg, UnitTest.ErrorLocation errorLocation) {
     super(msg);
     this.hasTrace = false;
+    this.trace = null;
     this.errorLocation = errorLocation;
   }
 

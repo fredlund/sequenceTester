@@ -120,9 +120,12 @@ public class Unblocks {
          "\n\nStacktrace:\n"+StackTrace+"\n");
     } else {
       boolean justExecuted = false;
-      for (Call<?> executingCall : calls)
-        if (executingCall == call)
+      for (Call<?> executingCall : calls) {
+        if (executingCall == call) {
           justExecuted = true;
+          break;
+        }
+      }
       
       String blockStr;
       if (justExecuted)

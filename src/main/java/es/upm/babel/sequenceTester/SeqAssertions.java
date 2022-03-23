@@ -1,9 +1,6 @@
 package es.upm.babel.sequenceTester;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides conventient test assertions.
@@ -25,7 +22,7 @@ public class SeqAssertions {
       if (showFailure) {
         String msg = exc.getMessage();
         if (msg == null) msg = "";
-        msg += "\n\n"+UnitTest.getCurrentTest().errorTrace(UnitTest.ErrorLocation.LASTLINE);
+        msg += "\n\n"+UnitTest.errorTrace(UnitTest.ErrorLocation.LASTLINE);
         System.out.println(Texts.getText("as_expected_the_test_failed","C")+".\n"+Texts.getText("message","C")+": "+msg);
       }
     }
@@ -101,7 +98,7 @@ public class SeqAssertions {
    * and that other calls were unblocked.
    */
   public static void assertUnblocks(Execute e, List<Call<?>> mustCallsList) {
-    assertMustMayUnblocked(e, mustCallsList, Arrays.asList());
+    assertMustMayUnblocked(e, mustCallsList, Collections.emptyList());
   }
 
   /**
