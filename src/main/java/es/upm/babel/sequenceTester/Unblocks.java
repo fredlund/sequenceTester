@@ -47,7 +47,7 @@ public class Unblocks {
     for (Call<?> unblockedCall : unblockedCalls) {
       if (!mustUnblock.contains(unblockedCall) &&
           !mayUnblock.contains(unblockedCall)) {
-        printReasonForUnblockingIncorrectly(unblockedCall,calls,t.getConfigurationDescription());
+        printReasonForUnblockingIncorrectly(unblockedCall,calls);
       }
     }
 
@@ -62,8 +62,7 @@ public class Unblocks {
 
     if (wronglyUnblocked.size() > 0) {
       UnitTest.failTest
-        (prefixConfigurationDescription(t.getConfigurationDescription())+
-         Texts.getText("the_calls","S")+Call.printCalls(wronglyUnblocked)+
+        (Texts.getText("the_calls","S")+Call.printCalls(wronglyUnblocked)+
          Texts.getText("are_still","PS")+Texts.getText("blocked_plural","S")+
          Texts.getText("although_they_should_have_been","S")+Texts.getText("unblocked_plural")+"\n");
     }
@@ -83,7 +82,7 @@ public class Unblocks {
     else return Texts.getText("with_the_configuration","S") + configurationDescription+",\n";
   }
     
-  private void printReasonForUnblockingIncorrectly(Call<?> call, List<Call<?>> calls, String configurationDescription) {
+  private void printReasonForUnblockingIncorrectly(Call<?> call, List<Call<?>> calls) {
     if (call.raisedException()) {
       Throwable exc = call.intGetException();
       StringWriter errors = new StringWriter();
@@ -91,8 +90,7 @@ public class Unblocks {
       String StackTrace = errors.toString();
       
       UnitTest.failTest
-        (prefixConfigurationDescription(configurationDescription)+
-         Texts.getText("the_call","S") + call.printCall()+
+        (Texts.getText("the_call","S") + call.printCall()+
          Texts.getText("should_block_singular","P")+ "\n" +
          Texts.getText("but","S") + Texts.getText("raised_the_exception","S") + exc +
          "\n\nStacktrace:\n"+StackTrace+"\n");
@@ -116,8 +114,7 @@ public class Unblocks {
       if (call.returnsValue()) returnString = Texts.getText("but","S") + returned(call.intGetReturnValue());
 
       UnitTest.failTest
-        (prefixConfigurationDescription(configurationDescription)+
-         Texts.getText("the_call","S") + call.printCall()+blockStr+"\n"+returnString+"\n");
+        (Texts.getText("the_call","S") + call.printCall()+blockStr+"\n"+returnString+"\n");
     }
   }
 
