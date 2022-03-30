@@ -21,7 +21,7 @@ public class LibraryTest {
         String description = "This is a test description";
         Assertions.assertEquals(description,test.setConfigurationDescription(description).getConfigurationDescription());
 
-        Counter counter = new CreateCounter().getReturnValue();
+        Counter counter = new CreateCounter().assertGetReturnValue();
         Call<?> c1 = new Set(counter,3).user("user1").w(200).assertIsUnblocked().assertReturns();
         new Await(counter,4).assertIsBlocked().assertBlocks();
         new Fail().assertRaisedException().assertIsUnblocked();

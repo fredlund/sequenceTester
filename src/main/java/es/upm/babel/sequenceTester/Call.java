@@ -256,13 +256,11 @@ public abstract class Call<V> extends Tryer {
    * the method fails,
    * If the call has not yet started executing this method forces its execution.
    */
-  public V valueReturned() {
+  public V getReturnValue() {
     forceExecute();
     checkedForException();
-    assertIsUnblocked();
     if (!returnsValue())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+Texts.getText("return_a_value"));
-
     return returnValue;
   }
 
@@ -273,10 +271,9 @@ public abstract class Call<V> extends Tryer {
    * and moreover checks that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Throwable exceptionRaised() {
+  public Throwable getExceptionRaised() {
     forceExecute();
     checkedForException();
-    assertIsUnblocked();
     if (!raisedException())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+Texts.getText("raise_an_exception"));
     return super.getException();
@@ -362,7 +359,7 @@ public abstract class Call<V> extends Tryer {
    * and moreover checks that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public V getReturnValue(Call<?>... calls) {
+  public V assertGetReturnValue(Call<?>... calls) {
     forceExecute();
     checkedForException();
     assertReturnsValue(calls);
@@ -376,7 +373,7 @@ public abstract class Call<V> extends Tryer {
    * and moreover checks that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Throwable getException(Call<?>... calls) {
+  public Throwable assertGetException(Call<?>... calls) {
     forceExecute();
     checkedForException();
     assertRaisedException(calls);

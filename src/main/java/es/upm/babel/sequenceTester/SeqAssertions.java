@@ -37,7 +37,7 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertEquals(V expected, Call<V> call) {
-    V actual = call.valueReturned();
+    V actual = call.getReturnValue();
     if (!expected.equals(actual))
       UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have_returned","SP")+Texts.getText("the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
   }
@@ -47,16 +47,12 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
-    assertThrown(call);
-    Class<?> exceptionClass = call.exceptionRaised().getClass();
+    Class<?> exceptionClass = call.getExceptionRaised().getClass();
     if (!excClass.isAssignableFrom(exceptionClass)) {
       UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have","SP")+
-                        Texts.getText("raised_an_exception","S")+excClass+
+                        Texts.getText("raised_the_exception","S")+excClass+
                         Texts.getText("but","SP")+Texts.getText("raised_the_exception","S")+exceptionClass);
     }
-
-    // Note that we checked whether it raised an exception
-    call.checkedForException();
   }
 
   /**
@@ -64,12 +60,7 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertThrown(Call<V> call) {
-    call.forceExecute();
-    if (!call.raisedException())
-      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("did_not","SP")+
-                        Texts.getText("raise_an_exception"));
-    // Note that we checked whether it raised an exception
-    call.checkedForException();
+    Class<?> exceptionClass = call.getExceptionRaised().getClass();
   }
   
   /**

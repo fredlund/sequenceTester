@@ -15,7 +15,7 @@ class CallTests {
   @Test
   public void test_01() {
     assertFail(() -> {
-        Counter counter = new CreateCounter().getReturnValue();
+        Counter counter = new CreateCounter().assertGetReturnValue();
         new Set(counter,3).assertReturns();
         new Await(counter,4).assertBlocks();
         assertEquals(3,new Dec(counter));
@@ -24,7 +24,7 @@ class CallTests {
 
   @Test
   public void test_02() {
-    Counter counter = new CreateCounter().getReturnValue();
+    Counter counter = new CreateCounter().assertGetReturnValue();
     new Set(counter,3).assertReturns();
     Call<Integer> whenEven = new WhenEven(counter).assertBlocks();
     assertEquals(2,new Dec(counter).assertUnblocks(whenEven));
@@ -33,7 +33,7 @@ class CallTests {
 
   @Test
   public void test_03() {
-    Counter counter = new CreateCounter().getReturnValue();
+    Counter counter = new CreateCounter().assertGetReturnValue();
     new Set(counter,3).assertReturns();
     assertEquals(2,new Dec(counter).assertUnblocks());
     assertThrown(RuntimeException.class,new AssertIsEqual(counter,3).assertUnblocks());
@@ -41,34 +41,34 @@ class CallTests {
 
   @Test
   public void test_04() {
-    Integer rndInt = new Rand().getReturnValue();
+    Integer rndInt = new Rand().assertGetReturnValue();
     assertEquals((rndInt % 2) == 0, new IsEven(rndInt).assertUnblocks());
   }
 
   @Test
   public void test_05() {
     assertFail(() -> {
-        Counter counter = new CreateCounter().getReturnValue();
+        Counter counter = new CreateCounter().assertGetReturnValue();
         new Set(counter,3).assertReturns();
         new Await(counter,4).assertBlocks();
-        Assertions.assertEquals(3,new Dec(counter).getReturnValue());
+        Assertions.assertEquals(3,new Dec(counter).assertGetReturnValue());
       }, true);
   }
 
   @Test
   public void test_06() {
     assertFail(() ->  {
-      Counter counter = new CreateCounter().getReturnValue();
+      Counter counter = new CreateCounter().assertGetReturnValue();
       new Set(counter,3).assertReturns();
       new Await(counter,4).assertBlocks();
-      Assertions.assertEquals(2,new Dec(counter).getReturnValue());
+      Assertions.assertEquals(2,new Dec(counter).assertGetReturnValue());
       new Fail().assertReturns();
     }, true);
   }
 
   @Test
   public void test_par_1() {
-    Counter counter = new CreateCounter().getReturnValue();
+    Counter counter = new CreateCounter().assertGetReturnValue();
     new Set(counter,3).assertReturns();
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
@@ -79,7 +79,7 @@ class CallTests {
   @Test
   public void test_par_2() {
     assertFail(() -> {
-        Counter counter = new CreateCounter().getReturnValue();
+        Counter counter = new CreateCounter().assertGetReturnValue();
         new Set(counter,3).assertReturns();
         Call<Integer> inc1 = new Inc(counter);
         Call<Integer> inc2 = new Inc(counter);
@@ -94,7 +94,7 @@ class CallTests {
   @Test
   public void test_repeat() {
     for (int i=0; i<2; i++) {
-      Counter counter = new CreateCounter().getReturnValue();
+      Counter counter = new CreateCounter().assertGetReturnValue();
       new Set(counter,3).assertReturns();
       assertEquals(2,new Dec(counter).assertUnblocks());
     }
@@ -104,7 +104,7 @@ class CallTests {
   public void test1a() {
     CreateCounter cc = new CreateCounter();
     Execute.exec(cc); // Execute the call and wait
-    Counter counter = cc.getReturnValue(); // Inspect the result
+    Counter counter = cc.assertGetReturnValue(); // Inspect the result
     
     Set s = new Set(counter,3);
     Execute.exec(s);   // Execute the call and wait
@@ -123,7 +123,7 @@ class CallTests {
 
   @Test
   public void test1b() {
-    Counter counter = new CreateCounter().getReturnValue();
+    Counter counter = new CreateCounter().assertGetReturnValue();
     new Set(counter,3).assertReturns();
     Await await = new Await(counter,2); await.assertBlocks();
     SeqAssertions.assertEquals(2,new Dec(counter).assertUnblocks(await));

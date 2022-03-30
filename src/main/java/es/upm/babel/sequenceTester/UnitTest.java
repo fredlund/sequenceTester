@@ -78,7 +78,10 @@ public class UnitTest {
     LASTLINE, INSIDE, AFTER
   }
 
-  static UnitTest getCurrentTest() {
+  /**
+   * Returns the currently executing test.
+   */
+  public static UnitTest getCurrentTest() {
     if (currentTest == null)
       failTestSyntax
         ("There is no current test -- has an UnitTest instance been created?", ErrorLocation.INSIDE, true);
