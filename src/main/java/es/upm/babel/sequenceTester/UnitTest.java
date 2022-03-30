@@ -35,7 +35,7 @@ public class UnitTest {
   // The last Execute
   private Execute lastExecute = null;
 
-  private boolean negatedTest = false;
+  private boolean failedTest = false;
 
   
   /**
@@ -260,8 +260,8 @@ public class UnitTest {
     return trace.toString();
   }
   
-  void flipNegatedTest() {
-    negatedTest = !negatedTest;
+  void setFailedTest() {
+    failedTest = true;
   }
   
   /**
@@ -273,14 +273,14 @@ public class UnitTest {
     if (allUnblockedCalls.size() > 0)
       Call.checkExceptions(allUnblockedCalls, true);
 
-    // Check for created calls that were never executed -- a test syntax error
-    for (Call<?> call : allCreatedCalls) {
-      if (!call.hasStarted()) {
-        failTestSyntax("call "+call+" was created but never executed", ErrorLocation.INSIDE, true);
+    if (!failedTest) {
+      // Check for created calls that were never executed -- a test syntax error
+      for (Call<?> call : allCreatedCalls) {
+        if (!call.hasStarted()) {
+          failTestSyntax("call "+call+" was created but never executed", ErrorLocation.INSIDE, true);
+        }
       }
-    }
 
-    if (!negatedTest) {
       // Check for all calls that they checked unblocks
       for (Call<?> call : allCreatedCalls) {
         if (!call.didCheckForUnblocks()) {

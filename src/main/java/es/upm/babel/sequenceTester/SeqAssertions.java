@@ -26,7 +26,7 @@ public class SeqAssertions {
         System.out.println(Texts.getText("as_expected_the_test_failed","C")+".\n"+Texts.getText("message","C")+": "+msg);
       }
     }
-    UnitTest.getCurrentTest().flipNegatedTest();
+    UnitTest.getCurrentTest().setFailedTest();
     if (!failed) UnitTest.failTest("the_test_did_not_fail");
   }
 

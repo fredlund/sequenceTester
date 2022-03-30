@@ -223,6 +223,7 @@ public abstract class Call<V> extends Tryer {
    * in parallel with other calls), 
    * and moreover that the calls mentioned in calls were unblocked too,
    * and moreover that no other calls were unblocked.
+   * If the call has not yet started executing this method forces its execution.
    */
   public Call<V> assertUnblocks(Call<?>... calls) {
     forceExecute();
@@ -238,6 +239,7 @@ public abstract class Call<V> extends Tryer {
    * running in parallel with other calls), 
    * and moreover that the calls mentioned in calls were unblocked,
    * and moreover that no other calls were unblocked.
+   * If the call has not yet started executing this method forces its execution.
    */
   public Call<V> assertBlocks(Call<?>... calls) {
     forceExecute();
