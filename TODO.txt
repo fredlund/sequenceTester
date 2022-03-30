@@ -1,0 +1,6 @@
+- Implement (optional) syntax check that unblockings have been checked.
+- Implement user configurable syntax check.
+
+
+
+

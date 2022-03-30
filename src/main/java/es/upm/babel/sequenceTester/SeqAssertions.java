@@ -26,6 +26,7 @@ public class SeqAssertions {
         System.out.println(Texts.getText("as_expected_the_test_failed","C")+".\n"+Texts.getText("message","C")+": "+msg);
       }
     }
+    UnitTest.getCurrentTest().flipNegatedTest();
     if (!failed) UnitTest.failTest("the_test_did_not_fail");
   }
 
@@ -36,7 +37,7 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertEquals(V expected, Call<V> call) {
-    V actual = call.getReturnValue();
+    V actual = call.valueReturned();
     if (!expected.equals(actual))
       UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have_returned","SP")+Texts.getText("the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
   }
@@ -46,8 +47,8 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertThrown(Class<?> excClass, Call<V> call) {
-    call.assertRaisedException();
-    Class<?> exceptionClass = call.getException().getClass();
+    assertThrown(call);
+    Class<?> exceptionClass = call.exceptionRaised().getClass();
     if (!excClass.isAssignableFrom(exceptionClass)) {
       UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have","SP")+
                         Texts.getText("raised_an_exception","S")+excClass+
@@ -63,7 +64,10 @@ public class SeqAssertions {
    * If call has not been executed, it will be executed by this assertion.
    */
   public static <V> void assertThrown(Call<V> call) {
-    call.assertRaisedException();
+    call.forceExecute();
+    if (!call.raisedException())
+      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("did_not","SP")+
+                        Texts.getText("raise_an_exception"));
     // Note that we checked whether it raised an exception
     call.checkedForException();
   }
@@ -95,7 +99,7 @@ public class SeqAssertions {
   
   /**
    * Asserts that the calls executed by the parameter e unblocked the calls in mustCallsList,
-   * and that other calls were unblocked.
+   * and that no other calls were unblocked.
    */
   public static void assertUnblocks(Execute e, List<Call<?>> mustCallsList) {
     assertMustMayUnblocked(e, mustCallsList, Collections.emptyList());

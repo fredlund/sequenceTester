@@ -28,6 +28,7 @@ public class LibraryTest {
         Assertions.assertTrue(test.getAllCalls().contains(c1));
         assertEquals(2,new Dec(counter).assertReturns().assertReturnsValue());
         Execute e = Execute.exec(new Inc(counter));
+        SeqAssertions.assertUnblocks(e, e.getCalls());
         Assertions.assertEquals(1,e.getBlockedCalls().size(),() -> e.getBlockedCalls().toString());
         Call<?> fail = new Fail();
         Execute.exec(fail);

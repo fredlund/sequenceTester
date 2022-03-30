@@ -35,6 +35,8 @@ public class UnitTest {
   // The last Execute
   private Execute lastExecute = null;
 
+  private boolean negatedTest = false;
+
   
   /**
    * Constructs a unit test.
@@ -258,6 +260,10 @@ public class UnitTest {
     return trace.toString();
   }
   
+  void flipNegatedTest() {
+    negatedTest = !negatedTest;
+  }
+  
   /**
    * Method obligatory to call in an @AfterEach clause or as the last statement in
    * a test.
@@ -271,6 +277,15 @@ public class UnitTest {
     for (Call<?> call : allCreatedCalls) {
       if (!call.hasStarted()) {
         failTestSyntax("call "+call+" was created but never executed", ErrorLocation.INSIDE, true);
+      }
+    }
+
+    if (!negatedTest) {
+      // Check for all calls that they checked unblocks
+      for (Call<?> call : allCreatedCalls) {
+        if (!call.didCheckForUnblocks()) {
+          failTestSyntax("call "+call+" did not check unblocks status", ErrorLocation.INSIDE, true);
+        }
       }
     }
   }

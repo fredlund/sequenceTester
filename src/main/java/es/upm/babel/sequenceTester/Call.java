@@ -21,6 +21,7 @@ public abstract class Call<V> extends Tryer {
   private boolean hasReturnValue = false;
   private V returnValue = null;
   private boolean checkedForException = false;
+  private boolean checkedForUnblocks = false;
   private Execute execute;
 
   /**
@@ -90,6 +91,14 @@ public abstract class Call<V> extends Tryer {
     checkedForException = true;
   }
 
+  void checkedForUnblocks() {
+    checkedForUnblocks = true;
+  }
+
+  boolean didCheckForUnblocks() {
+    return checkedForUnblocks;
+  }
+
   static void checkExceptions(Set<Call<?>> calls, boolean calledFromAfter) {
     for (Call<?> call : calls) {
       if (call.raisedException() && !call.checkedForException) {
@@ -118,7 +127,7 @@ public abstract class Call<V> extends Tryer {
   }
 
   // If a call is not executing force it to execute
-  private void forceExecute() {
+  void forceExecute() {
     if (!hasStarted())
       Execute.exec(this);
   }
@@ -139,10 +148,10 @@ public abstract class Call<V> extends Tryer {
   String printCallWithReturn() {
     String callString = printCall();
     if (raisedException())
-      return callString + Texts.getText("raised","SP") + getException();
+      return callString + Texts.getText("raised","SP") + intGetException();
     else {
       if (returnsValue())
-        return callString + Texts.getText("returned","SP") + getReturnValue();
+        return callString + Texts.getText("returned","SP") + intGetReturnValue();
       else
         return callString;
     }
@@ -172,6 +181,14 @@ public abstract class Call<V> extends Tryer {
   void setReturnValue(V returnValue) {
     this.hasReturnValue = true;
     this.returnValue = returnValue;
+  }
+
+  V intGetReturnValue() {
+    return returnValue;
+  }
+
+  Throwable intGetException() {
+    return super.getException();
   }
 
   public int hashCode() {
@@ -231,6 +248,39 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
+  /**
+   * Returns the return value of the call (if any). If the call is still blocked,
+   * or if the call raised an exception, or if the call did not return any value,
+   * the method fails,
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public V valueReturned() {
+    forceExecute();
+    checkedForException();
+    assertIsUnblocked();
+    if (!returnsValue())
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+Texts.getText("return_a_value"));
+
+    return returnValue;
+  }
+
+  /**
+   * Returns the exception raised during the execution of the call. If the call is still blocked,
+   * or if the call returned normally, the method fails.
+   * Moreover the method checks that the calls mentioned in calls were unblocked,
+   * and moreover checks that no other calls were unblocked.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Throwable exceptionRaised() {
+    forceExecute();
+    checkedForException();
+    assertIsUnblocked();
+    if (!raisedException())
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+Texts.getText("raise_an_exception"));
+    return super.getException();
+  }
+
+  /**
    * Asserts that the call is blocked.
    * If the call has not yet started executing this method forces its execution.
    */
@@ -250,72 +300,87 @@ public abstract class Call<V> extends Tryer {
     forceExecute();
     if (isBlocked())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_still_blocked","P"));
+    List<Call<?>> mustUnblocks = new ArrayList<>();
     return this;
   }
 
   /**
-   * Asserts that the call raised an exception.
+   * Asserts that the call raised an exception,
+   * and moreover that the calls mentioned in calls were unblocked too,
+   * and moreover that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Call<V> assertRaisedException() {
+  public Call<V> assertRaisedException(Call<?>... calls) {
     forceExecute();
     checkedForException();
     if (!super.raisedException())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("raise_an_exception"));
+    assertUnblocks(calls);
     return this;
   }
 
   /**
-   * Asserts that the call returned normally, i.e., did not raise an exception.
+   * Asserts that the call returned normally, i.e., did not raise an exception,
+   * and moreover that the calls mentioned in calls were unblocked,
+   * and moreover that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Call<V> assertReturns() {
+  public Call<V> assertReturns(Call<?>... calls) {
     forceExecute();
     checkedForException();
     if (!(hasStarted() && !isBlocked() && !raisedException()))
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("return"));
+    assertUnblocks(calls);
     return this;
   }
 
   /**
    * Asserts that the call returned a value.
+   * and moreover that the calls mentioned in calls were unblocked,
+   * and moreover that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Call<V> assertReturnsValue() {
+  public Call<V> assertReturnsValue(Call<?>... calls) {
     forceExecute();
     checkedForException();
     if (!returnsValue())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
                         Texts.getText("return_a_value"));
+    assertUnblocks(calls);
     return this;
   }
 
   /**
    * Returns the return value of the call (if any). If the call is still blocked,
    * or if the call raised an exception, or if the call did not return any value,
-   * the method fails.
+   * the method fails,
+   * Moreover the method checks that the calls mentioned in calls were unblocked,
+   * and moreover checks that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public V getReturnValue() {
+  public V getReturnValue(Call<?>... calls) {
     forceExecute();
     checkedForException();
-    assertReturnsValue();
+    assertReturnsValue(calls);
     return returnValue;
   }
 
   /**
    * Returns the exception raised during the execution of the call. If the call is still blocked,
    * or if the call returned normally, the method fails.
+   * Moreover the method checks that the calls mentioned in calls were unblocked,
+   * and moreover checks that no other calls were unblocked.
    * If the call has not yet started executing this method forces its execution.
    */
-  public Throwable getException() {
+  public Throwable getException(Call<?>... calls) {
     forceExecute();
     checkedForException();
-    assertRaisedException();
+    assertRaisedException(calls);
     return super.getException();
   }
+
 
   //////////////////////////////////////////////////////////////////////
 

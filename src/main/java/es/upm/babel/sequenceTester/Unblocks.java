@@ -40,6 +40,8 @@ public class Unblocks {
     List<Call<?>> calls = e.getCalls();
     Set<Call<?>> unblockedCalls = e.getUnblockedCalls();
     
+    // System.out.println("checkCalls: unblocked="+unblockedCalls+" spec: "+this);
+
     // Check that each unblocked call is either
     // listed in the may or must unblocked enumeration.
     for (Call<?> unblockedCall : unblockedCalls) {
@@ -62,8 +64,12 @@ public class Unblocks {
       UnitTest.failTest
         (prefixConfigurationDescription(t.getConfigurationDescription())+
          Texts.getText("the_calls","S")+Call.printCalls(wronglyUnblocked)+
-         Texts.getText("are_still","S")+Texts.getText("blocked_plural","S")+
+         Texts.getText("are_still","PS")+Texts.getText("blocked_plural","S")+
          Texts.getText("although_they_should_have_been","S")+Texts.getText("unblocked_plural")+"\n");
+    }
+
+    for (Call<?> call : calls) {
+      call.checkedForUnblocks();
     }
   }
     
@@ -79,7 +85,7 @@ public class Unblocks {
     
   private void printReasonForUnblockingIncorrectly(Call<?> call, List<Call<?>> calls, String configurationDescription) {
     if (call.raisedException()) {
-      Throwable exc = call.getException();
+      Throwable exc = call.intGetException();
       StringWriter errors = new StringWriter();
       exc.printStackTrace(new PrintWriter(errors));
       String StackTrace = errors.toString();
@@ -107,7 +113,7 @@ public class Unblocks {
           Texts.getText("after","S") + Texts.getText("the_calls","S") + Call.printCalls(calls);
       
       String returnString = "";
-      if (call.returnsValue()) returnString = Texts.getText("but","S") + returned(call.getReturnValue());
+      if (call.returnsValue()) returnString = Texts.getText("but","S") + returned(call.intGetReturnValue());
 
       UnitTest.failTest
         (prefixConfigurationDescription(configurationDescription)+

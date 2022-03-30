@@ -35,14 +35,14 @@ class CallTests {
   public void test_03() {
     Counter counter = new CreateCounter().getReturnValue();
     new Set(counter,3).assertReturns();
-    assertEquals(2,new Dec(counter));
-    assertThrown(RuntimeException.class,new AssertIsEqual(counter,3));
+    assertEquals(2,new Dec(counter).assertUnblocks());
+    assertThrown(RuntimeException.class,new AssertIsEqual(counter,3).assertUnblocks());
   }
 
   @Test
   public void test_04() {
     Integer rndInt = new Rand().getReturnValue();
-    assertEquals((rndInt % 2) == 0, new IsEven(rndInt));
+    assertEquals((rndInt % 2) == 0, new IsEven(rndInt).assertUnblocks());
   }
 
   @Test
@@ -73,7 +73,7 @@ class CallTests {
     Call<Integer> inc = new Inc(counter);
     Call<Integer> dec = new Dec(counter);
     Execute.exec(inc,dec); assertUnblocks(Arrays.asList(inc,dec));
-    assertEquals(4,new Inc(counter));
+    assertEquals(4,new Inc(counter).assertUnblocks());
   }
 
   @Test
