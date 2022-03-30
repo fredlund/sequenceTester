@@ -16,9 +16,9 @@ public class HandleExceptions implements TestExecutionExceptionHandler {
       if (msg == null) msg = "";
       String configDescription = UnitTest.getCurrentTest().getConfigurationDescription();
       if (configDescription != null && configDescription.length() > 0)
-        msg = "\n"+Texts.getText("with_the_configuration","SC")+configDescription+"\n"+msg;
+        msg = "\n\n"+Texts.getText("with_the_configuration","SC")+configDescription+"\n"+msg;
       else
-        msg = "\n"+msg;
+        msg = "\n\n"+msg;
       msg += "\n" + UnitTest.errorTrace(UnitTest.ErrorLocation.LASTLINE);
       // System.out.println(msg);
       org.opentest4j.AssertionFailedError newThrowable = new org.opentest4j.AssertionFailedError(msg);
