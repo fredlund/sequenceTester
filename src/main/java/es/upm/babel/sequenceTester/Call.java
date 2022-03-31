@@ -285,6 +285,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertIsBlocked() {
     forceExecute();
+    checkedForUnblocks();
     checkedForException();
     if (!isBlocked())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_not_blocked","P"));
@@ -297,6 +298,7 @@ public abstract class Call<V> extends Tryer {
    */
   public Call<V> assertIsUnblocked() {
     forceExecute();
+    checkedForUnblocks();
     if (isBlocked())
       UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("is_still_blocked","P"));
     List<Call<?>> mustUnblocks = new ArrayList<>();
