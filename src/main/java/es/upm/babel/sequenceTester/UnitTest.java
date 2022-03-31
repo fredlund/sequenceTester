@@ -108,7 +108,15 @@ public class UnitTest {
    * Indicates a syntactic error in a particular test (i.e., not an error
    * in the tested program but rather in the test suite).
    */
-  static void failTestSyntax(String msg, ErrorLocation loc) {
+  public static void failTestSyntax(String msg) {
+    failTestSyntax(msg, ErrorLocation.INSIDE, false);
+  }
+
+  /**
+   * Indicates a syntactic error in a particular test (i.e., not an error
+   * in the tested program but rather in the test suite).
+   */
+  public static void failTestSyntax(String msg, ErrorLocation loc) {
     failTestSyntax(msg, loc, false);
   }
   
@@ -302,6 +310,13 @@ public class UnitTest {
     else if (loc == ErrorLocation.AFTER)
       locString = Texts.getText("after","S")+Texts.getText("the_call_trace");
     return Texts.getText("call_trace","SC")+"("+Texts.getText("error","S")+locString+"):\n\n"+mkTrace()+"\n";
+  }
+
+  /**
+   * Returns the execution history.
+   */
+  public List<Execute> getHistory() {
+    return history;
   }
 
 }

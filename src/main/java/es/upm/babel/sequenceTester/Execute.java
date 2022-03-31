@@ -52,6 +52,17 @@ public class Execute {
       }
     }
 
+    // Check that no two calls have the same user
+    Set<Object> users = new HashSet<>();
+    for (Call<?> call : calls) {
+      Object user = call.getUser();
+      if (user != null) {
+        if (users.contains(user)) {
+          UnitTest.failTest("user "+user+" occur multiple times in calls "+Call.printCalls(calls), true, UnitTest.ErrorLocation.AFTER);
+        } else users.add(user);
+      }
+    }
+
     int maxWaitTime = 0;
 
     for (Call<?> call : calls) {

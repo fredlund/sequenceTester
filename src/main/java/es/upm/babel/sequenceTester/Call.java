@@ -136,7 +136,10 @@ public abstract class Call<V> extends Tryer {
     return id+": "+ this;
   }
 
-  static String printCalls(Collection<Call<?>> calls) {
+  /**
+   * Prints the list of calls.
+   */
+  public static String printCalls(Collection<Call<?>> calls) {
     StringBuilder callsString= new StringBuilder();
     for (Call<?> call : calls) {
       if (!callsString.toString().equals("")) callsString.append("\n  ").append(call.printCall());
