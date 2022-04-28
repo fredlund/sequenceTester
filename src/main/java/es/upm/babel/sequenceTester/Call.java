@@ -333,9 +333,16 @@ public abstract class Call<V> extends Tryer {
   public Call<V> assertReturns(Call<?>... calls) {
     forceExecute();
     checkedForException();
-    if (!(hasStarted() && !isBlocked() && !raisedException()))
-      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("did_not","SP")+
-                        Texts.getText("return"));
+    if (hasStarted() && isBlocked()) {
+      UnitTest.failTest(Texts.getText("the_call","S")+this+
+                        Texts.getText("should_have_returned","SP")+
+                        Texts.getText("but","S")+Texts.getText("is_still_blocked"));
+    } else if (hasStarted() && raisedException()) {
+      if (!(hasStarted() && !isBlocked() && !raisedException()))
+        UnitTest.failTest(Texts.getText("the_call", "S")+this+
+                        Texts.getText("should_have_returned","SP")+
+                          Texts.getText("but","S")+Texts.getText("raised_an_exception","S")+this.getException());
+    }
     assertUnblocks(calls);
     return this;
   }
