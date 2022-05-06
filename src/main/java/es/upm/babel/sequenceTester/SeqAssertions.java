@@ -119,7 +119,9 @@ public class SeqAssertions {
     ArrayList<String> alternatives = new ArrayList<>();
     int alternative = 0;
     boolean hasWinningAlternative = false;
-  
+    List<Execute> history = new ArrayList<>(UnitTest.getCurrentTest().getHistory());
+    int startSize = history.size();
+
     for (Runnable assertion : assertions) {
       try {
         assertion.run();
@@ -127,13 +129,20 @@ public class SeqAssertions {
         break;
       } catch (org.opentest4j.AssertionFailedError exc) {
         String msg = exc.getMessage();
-        alternatives.add(msg);
+        if (startSize < UnitTest.getCurrentTest().getHistory().size())
+          alternatives.add
+            (Texts.getText("alternative_trace","C") + ":\n" + UnitTest.mkTrace(startSize) + "\n" + msg);
+        else
+          alternatives.add(msg);
         ++alternative;
       }
     }
-  
+    UnitTest.getCurrentTest().setHistory(history);
+
     if (!hasWinningAlternative) {
-      StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_failed", "C") + ":\n");
+      StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_to_explain_the_execution_of","C")+
+                                            "\n"+UnitTest.mkTrace(startSize-1,startSize-1)+
+                                            Texts.getText("failed") + ":\n\n");
       for (int i=0; i<alternatives.size(); i++) {
         if (alternatives.get(i) != null) {
           msg.append(Texts.getText("alternative", "SC")).append(i + 1).append(":\n  ").append(alternatives.get(i)).append("\n");

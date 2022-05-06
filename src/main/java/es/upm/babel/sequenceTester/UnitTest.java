@@ -12,10 +12,8 @@ public class UnitTest {
   static Map<String,Boolean> testResults;
   private static UnitTest currentTest = null;
   private static Locale locale;
-
   private String configurationDescription;
-
-  private final ArrayList<Execute> history = new ArrayList<>();
+  private List<Execute> history = new ArrayList<>();
 
   // All calls created through invoking the Call constructor
   private final Set<Call<?>> allCreatedCalls = new HashSet<>();
@@ -237,9 +235,11 @@ public class UnitTest {
     System.out.println("\n\n========================================");
   }
   
-  static String mkTrace() {
+  static String mkTrace(int startingFrom, int endsWith) {
     StringBuilder trace = new StringBuilder();
-    for (Execute e: currentTest.history) {
+    List<Execute> history = getCurrentTest().getHistory();
+    for (int i = startingFrom; i < Math.min(history.size(),endsWith+1); i++) {
+      Execute e = history.get(i);
       List<Call<?>> calls = e.getCalls();
       Set<Call<?>> newUnblocked = e.getUnblockedCalls();
       
@@ -270,7 +270,15 @@ public class UnitTest {
     }
     return trace.toString();
   }
+
+  static String mkTrace() {
+    return mkTrace(0);
+  }
   
+  static String mkTrace(int startingFrom) {
+    return mkTrace(startingFrom,UnitTest.getCurrentTest().getHistory().size()-1);
+  }
+
   void setFailedTest() {
     failedTest = true;
   }
@@ -312,6 +320,13 @@ public class UnitTest {
     return Texts.getText("call_trace","SC")+"("+Texts.getText("error","S")+locString+"):\n\n"+mkTrace()+"\n";
   }
 
+  /**
+   * Sets the execution history.
+   */
+  public void setHistory(List<Execute> history) {
+    this.history = history;
+  }
+  
   /**
    * Returns the execution history.
    */
