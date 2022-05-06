@@ -83,11 +83,8 @@ class CallTests {
         new Set(counter,3).assertReturns();
         Call<Integer> inc1 = new Inc(counter);
         Call<Integer> inc2 = new Inc(counter);
-        Execute.exec(inc1,inc2); 
-        checkAlternatives();
-        if (!checkAlternative(inc1::assertUnblocks))
-          checkAlternative(inc2::assertUnblocks);
-        endAlternatives();
+        Execute.exec(inc1,inc2);
+        checkAlternatives(inc1::assertUnblocks,inc2::assertUnblocks);
       }, true);
   }
 

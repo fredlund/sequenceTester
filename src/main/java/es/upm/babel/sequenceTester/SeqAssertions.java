@@ -6,7 +6,6 @@ import java.util.*;
  * Provides convenient test assertions.
  */
 public class SeqAssertions {
-  private static ArrayList<String> alternatives;
 
   /**
    * Asserts that the assertion argument fails, and succeeds if it does. Optionally shows the
@@ -114,39 +113,37 @@ public class SeqAssertions {
   }
 
   /**
-   * Marks the beginning of a "branching" assertion.
-   */
-  public static void checkAlternatives() {
-    alternatives = new ArrayList<>();
-  }
-
-  /**
-   * Asserts an alternative assertion. If the assertion fails, the 
-   * next alternative assertion is executed.
-   */
-  public static boolean checkAlternative(Runnable assertions) {
-    try {
-      assertions.run();
-      return true;
-    } catch (org.opentest4j.AssertionFailedError exc) {
-      String msg = exc.getMessage();
-      alternatives.add(msg);
-      return false;
-    }
-  }
-
-  /**
-   * Signals that the last alternative assertion has been checked,
-   * and that if no alternative succeeded, the branching assertion failed.
-   */
-  public static void endAlternatives() {
-    StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_failed", "C") + ":\n");
-    for (int i=0; i<alternatives.size(); i++) {
-      if (alternatives.get(i) != null) {
-        msg.append(Texts.getText("alternative", "SC")).append(i + 1).append(":\n  ").append(alternatives.get(i)).append("\n");
+   * Asserts that one of the assertion alternatives in assertions is true.
+   */  
+  public static int checkAlternatives(Runnable... assertions) {
+    ArrayList<String> alternatives = new ArrayList<>();
+    int alternative = 0;
+    boolean hasWinningAlternative = false;
+  
+    for (Runnable assertion : assertions) {
+      try {
+        assertion.run();
+        hasWinningAlternative = true;
+        break;
+      } catch (org.opentest4j.AssertionFailedError exc) {
+        String msg = exc.getMessage();
+        alternatives.add(msg);
+        ++alternative;
       }
     }
-    UnitTest.failTest(msg+"\n");
+  
+    if (!hasWinningAlternative) {
+      StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_failed", "C") + ":\n");
+      for (int i=0; i<alternatives.size(); i++) {
+        if (alternatives.get(i) != null) {
+          msg.append(Texts.getText("alternative", "SC")).append(i + 1).append(":\n  ").append(alternatives.get(i)).append("\n");
+        }
+      }
+      UnitTest.failTest(msg+"\n");
+      return -1;
+    } else {
+      return alternative;
+    }
   }
-
+    
 }
