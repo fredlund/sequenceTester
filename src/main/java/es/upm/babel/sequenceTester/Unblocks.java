@@ -114,7 +114,7 @@ public class Unblocks {
       if (call.returnsValue()) returnString = Texts.getText("but","S") + returned(call.intGetReturnValue());
 
       UnitTest.failTest
-        (Texts.getText("the_call","S") + call.printCall()+blockStr+"\n"+returnString+"\n");
+        (Texts.getText("the_call","S") + call.printCall() + blockStr + " " + returnString+"\n");
     }
   }
 

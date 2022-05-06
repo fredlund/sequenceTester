@@ -131,7 +131,7 @@ public class SeqAssertions {
         String msg = exc.getMessage();
         if (startSize < UnitTest.getCurrentTest().getHistory().size())
           alternatives.add
-            (Texts.getText("alternative_trace","C") + ":\n" + UnitTest.mkTrace(startSize) + "\n" + msg);
+            (Texts.getText("alternative_trace","C") + ":\n" + indent(4,UnitTest.mkTrace(startSize)) + "\n  " + msg);
         else
           alternatives.add(msg);
         ++alternative;
@@ -141,7 +141,7 @@ public class SeqAssertions {
 
     if (!hasWinningAlternative) {
       StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_to_explain_the_execution_of","C")+
-                                            "\n"+UnitTest.mkTrace(startSize-1,startSize-1)+
+                                            "\n"+indent(2,UnitTest.mkTrace(startSize-1,startSize-1))+
                                             Texts.getText("failed") + ":\n\n");
       for (int i=0; i<alternatives.size(); i++) {
         if (alternatives.get(i) != null) {
@@ -153,6 +153,26 @@ public class SeqAssertions {
     } else {
       return alternative;
     }
+  }
+
+  static String indent(int n, String src) {
+    StringBuilder indentStringBuilder = new StringBuilder();
+    for (int i=0; i<n; i++) indentStringBuilder.append(" ");
+    String indentString = indentStringBuilder.toString();
+    StringBuilder result = new StringBuilder();
+    int srcLength = src.length();
+    if (srcLength > 0)
+      result.append(indentString);
+    int i = 0;
+    while (i < srcLength) {
+      char ch = src.charAt(i);
+      result.append(ch);
+      if (ch == '\n' && i < srcLength-1) {
+        result.append(indentString);
+      }
+      i++;
+    }
+    return result.toString();
   }
     
 }
