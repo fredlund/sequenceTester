@@ -14,12 +14,12 @@ public abstract class Call<V> extends Tryer {
   private static int counter = 1;
 
   private final int id;
-  private boolean started = false;
+  private volatile boolean started = false;
   private Object user;
   private int waitTime;
   private final UnitTest unitTest;
-  private boolean hasReturnValue = false;
-  private V returnValue = null;
+  private volatile boolean hasReturnValue = false;
+  private volatile V returnValue = null;
   private boolean checkedForException = false;
   private boolean checkedForUnblocks = false;
   private Execute execute;

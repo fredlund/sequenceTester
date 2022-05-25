@@ -292,6 +292,8 @@ public class UnitTest {
     if (allUnblockedCalls.size() > 0)
       Call.checkExceptions(allUnblockedCalls, true);
 
+    testResults.put(testName, !failedTest);
+
     if (!failedTest) {
       // Check for created calls that were never executed -- a test syntax error
       for (Call<?> call : allCreatedCalls) {
