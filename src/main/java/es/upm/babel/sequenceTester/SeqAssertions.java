@@ -38,7 +38,7 @@ public class SeqAssertions {
   public static <V> void assertEquals(V expected, Call<V> call) {
     V actual = call.getReturnValue();
     if (!expected.equals(actual))
-      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have_returned","SP")+Texts.getText("the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
+      UnitTest.failTest(Texts.getText("the_call","S")+call+Texts.getText("should_have_returned_the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
   }
 
   /**
