@@ -40,7 +40,7 @@ public class Unblocks {
     List<Call<?>> calls = e.getCalls();
     Set<Call<?>> unblockedCalls = e.getUnblockedCalls();
     
-    // System.out.println("checkCalls: unblocked="+unblockedCalls+" spec: "+this);
+    //System.out.println("checkCalls: unblocked="+unblockedCalls+" spec: "+this);
 
     // Check that each unblocked call is either
     // listed in the may or must unblocked enumeration.
@@ -55,7 +55,8 @@ public class Unblocks {
     // Check that each call that must have been unblocked,
     // is no longer blocked
     for (Call<?> shouldBeUnblockedCall : mustUnblock) {
-      if (e.getBlockedCalls().contains(shouldBeUnblockedCall)) {
+      //if (e.getBlockedCalls().contains(shouldBeUnblockedCall)) {
+      if (!unblockedCalls.contains(shouldBeUnblockedCall)) {
         wronglyUnblocked.add(shouldBeUnblockedCall);
       }
     }
@@ -63,8 +64,8 @@ public class Unblocks {
     if (wronglyUnblocked.size() > 0) {
       UnitTest.failTest
         (Texts.getText("the_calls","S")+Call.printCalls(wronglyUnblocked)+
-         Texts.getText("are_still","PS")+Texts.getText("blocked_plural","S")+
-         Texts.getText("although_they_should_have_been","S")+Texts.getText("unblocked_plural")+"\n");
+         Texts.getText("were_not","PS")+Texts.getText("unblocked_plural","S")+
+         Texts.getText("although_they_should_have_been","S")+"\n");
     }
 
     for (Call<?> call : calls) {

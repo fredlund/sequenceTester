@@ -163,7 +163,7 @@ public class UnitTest {
   /**
    * Returns the set of all calls that were unblocked by the latest command.
    */
-  Set<Call<?>> getLastUnblockedCalls() {
+  public Set<Call<?>> getLastUnblockedCalls() {
     return lastUnblockedCalls;
   }
 
