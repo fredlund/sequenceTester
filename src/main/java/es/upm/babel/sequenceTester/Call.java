@@ -348,6 +348,37 @@ public abstract class Call<V> extends Tryer {
   }
 
   /**
+   * Asserts that the call returned concrete value,
+   * and moreover that the calls mentioned in calls were unblocked,
+   * and moreover that no other calls were unblocked.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertReturnsValue(V expected, Call<?>... calls) {
+    assertReturns();
+    V actual = getReturnValue();
+    if (!expected.equals(actual))
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("should_have_returned","SP")+Texts.getText("the_value","S")+expected+Texts.getText("but","SP")+Texts.getText("returned","S")+actual); 
+    return this;
+  }
+
+  /**
+   * Asserts that the call raised an exception of class excClass,
+   * and moreover that the calls mentioned in calls were unblocked,
+   * and moreover that no other calls were unblocked.
+   * If the call has not yet started executing this method forces its execution.
+   */
+  public Call<V> assertRaisedException(Class<?> excClass, Call<?>... calls) {
+    assertRaisedException(calls);
+    Class<?> exceptionClass = getExceptionRaised().getClass();
+    if (!excClass.isAssignableFrom(exceptionClass)) {
+      UnitTest.failTest(Texts.getText("the_call","S")+this+Texts.getText("should_have","SP")+
+                        Texts.getText("raised_the_exception","S")+excClass+
+                        Texts.getText("but","SP")+Texts.getText("raised_the_exception","S")+exceptionClass);
+    }
+    return this;
+  }
+
+  /**
    * Asserts that the call returned a value.
    * and moreover that the calls mentioned in calls were unblocked,
    * and moreover that no other calls were unblocked.
