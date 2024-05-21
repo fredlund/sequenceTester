@@ -18,7 +18,6 @@ class Texts {
         throw new RuntimeException("Locale "+locale+" is not available");
       }
       try {
-        System.out.println("loading bundle texts using locale "+locale);
         bundle = ResourceBundle.getBundle("texts", locale, new ResourceBundleUTF8Control());
       } catch (MissingResourceException exc) {
         throw new RuntimeException("Texts for locale "+locale+" are not available");
