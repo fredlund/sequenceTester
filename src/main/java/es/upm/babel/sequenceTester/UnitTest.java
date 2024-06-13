@@ -336,4 +336,11 @@ public class UnitTest {
     return history;
   }
 
+  /**
+   * Returns the name of the test.
+   */
+  public String getTestName() {
+    return testName;
+  }
+
 }
