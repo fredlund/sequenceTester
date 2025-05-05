@@ -262,7 +262,8 @@ public class UnitTest {
       
       String callPlusUnblock;
       if (calls.size() > 1)
-        callPlusUnblock = "===  "+Texts.getText("calls_executed_in_parallel")+": \n"+callsString+unblocksString;
+        callPlusUnblock = "===  "+Texts.getText("calls_executed_in_parallel")+": \n"+callsString+
+          "\n "+unblocksString;
       else
         callPlusUnblock = callsString+unblocksString;
       
