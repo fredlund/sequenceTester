@@ -29,6 +29,12 @@ public class Execute {
    * Execute the calls in paralell.
    */
   public static Execute exec(Call<?>... calls) {
+    for (Call<?> call : calls) {
+      if (call.hasStarted())
+        UnitTest.failTestSyntax
+          ("Call "+call+" has already run; it cannot be re-run",
+           UnitTest.ErrorLocation.AFTER);
+    }
     Execute e = new Execute(Arrays.asList(calls));
     e.exec();
     return e;
