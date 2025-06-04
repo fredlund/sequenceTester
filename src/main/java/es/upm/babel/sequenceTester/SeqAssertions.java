@@ -119,11 +119,13 @@ public class SeqAssertions {
     ArrayList<String> alternatives = new ArrayList<>();
     int alternative = 0;
     boolean hasWinningAlternative = false;
-    List<Execute> history = new ArrayList<>(UnitTest.getCurrentTest().getHistory());
-    int startSize = history.size();
+    List<Execute> historyBackup = new ArrayList<>(UnitTest.getCurrentTest().getHistory());
+    int startSize = historyBackup.size();
 
     for (Runnable assertion : assertions) {
       try {
+        List<Execute> history = new ArrayList<>(historyBackup);
+        UnitTest.getCurrentTest().setHistory(history);
         assertion.run();
         hasWinningAlternative = true;
         break;
@@ -134,21 +136,21 @@ public class SeqAssertions {
             (Texts.getText("alternative_trace","C") + ":\n" + indent(4,UnitTest.mkTrace(startSize)) + "\n  " + msg);
         else
           alternatives.add(msg);
-        ++alternative;
       }
     }
-    UnitTest.getCurrentTest().setHistory(history);
+
+    UnitTest.getCurrentTest().setHistory(historyBackup);
 
     if (!hasWinningAlternative) {
       StringBuilder msg = new StringBuilder(Texts.getText("all_possible_alternatives_to_explain_the_execution_of","C")+
-                                            "\n"+indent(2,UnitTest.mkTrace(startSize-1,startSize-1))+
+                                            "\n"+indent(2,UnitTest.mkTrace(0,startSize-1))+
                                             Texts.getText("failed") + ":\n\n");
       for (int i=0; i<alternatives.size(); i++) {
         if (alternatives.get(i) != null) {
           msg.append(Texts.getText("alternative", "SC")).append(i + 1).append(":\n  ").append(alternatives.get(i)).append("\n");
         }
       }
-      UnitTest.failTest(msg+"\n");
+      UnitTest.failTest(msg+"\n", true, UnitTest.ErrorLocation.AFTER);
       return -1;
     } else {
       return alternative;
